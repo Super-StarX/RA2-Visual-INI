@@ -1,0 +1,11 @@
+bin/*
+build/*
+debug/*
+release/*
+x64/*
+RA2-Visual-INI/*
+.vs/*
+*.user
+*.filters
+
+*.aps
