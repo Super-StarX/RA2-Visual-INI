@@ -45,6 +45,10 @@ private:
 	void DrawPinIcon(const Pin& pin, bool connected, int alpha);
 	void ShowStyleEditor(bool* show = nullptr);
 	void ShowLeftPane(float paneWidth);
+	void BlueprintNode(Pin* newLinkPin);
+	void CommentNode();
+	void HoudiniNode(Pin* newLinkPin);
+	void TreeNode(Pin* newLinkPin);
 
 public:
 	void OnStart() override;

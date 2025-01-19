@@ -162,6 +162,7 @@
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
+    <ClCompile Include="UpdateNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui-node-editor\crude_json.h" />
