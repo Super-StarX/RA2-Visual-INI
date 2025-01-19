@@ -71,10 +71,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,10 +116,13 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <AdditionalModuleDependencies>
+      </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,24 +135,73 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <AdditionalModuleDependencies>
+      </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="application\source\application.cpp" />
+    <ClCompile Include="application\source\entry_point.cpp" />
+    <ClCompile Include="application\source\imgui_impl_dx11.cpp" />
+    <ClCompile Include="application\source\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="application\source\imgui_impl_win32.cpp" />
+    <ClCompile Include="application\source\platform_win32.cpp" />
+    <ClCompile Include="application\source\renderer_dx11.cpp" />
+    <ClCompile Include="application\source\renderer_ogl3.cpp" />
+    <ClCompile Include="imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="imgui-node-editor\external\imgui\imgui.cpp" />
+    <ClCompile Include="imgui-node-editor\external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui-node-editor\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui-node-editor\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui-node-editor\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="imgui-node-editor\imgui_node_editor_api.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application\include\application.h" />
+    <ClInclude Include="application\source\imgui_extra_keys.h" />
+    <ClInclude Include="application\source\imgui_impl_dx11.h" />
+    <ClInclude Include="application\source\imgui_impl_opengl3.h" />
+    <ClInclude Include="application\source\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="application\source\imgui_impl_win32.h" />
+    <ClInclude Include="application\source\platform.h" />
+    <ClInclude Include="application\source\renderer.h" />
+    <ClInclude Include="application\source\setup.h" />
+    <ClInclude Include="imgui-node-editor\crude_json.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imconfig.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imgui.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imgui_internal.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui-node-editor\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h" />
+    <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />
+    <ClInclude Include="imgui-node-editor\imgui_bezier_math.h" />
+    <ClInclude Include="imgui-node-editor\imgui_canvas.h" />
+    <ClInclude Include="imgui-node-editor\imgui_extra_math.h" />
+    <ClInclude Include="imgui-node-editor\imgui_node_editor.h" />
+    <ClInclude Include="imgui-node-editor\imgui_node_editor_internal.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="application\source\config.h.in" />
+    <None Include="imgui-node-editor\imgui_bezier_math.inl" />
+    <None Include="imgui-node-editor\imgui_extra_math.inl" />
+    <None Include="imgui-node-editor\imgui_node_editor_internal.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
