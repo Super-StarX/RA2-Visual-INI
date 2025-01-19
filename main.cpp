@@ -1824,7 +1824,7 @@ struct Example:
     bool                 m_ShowOrdinals = false;
 };
 
-int Main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
     Example exampe("Blueprints", argc, argv);
 

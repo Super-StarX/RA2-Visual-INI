@@ -71,14 +71,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(ProjectDir)application\include;$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,7 +122,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,22 +139,14 @@
       </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application\source\application.cpp" />
-    <ClCompile Include="application\source\entry_point.cpp" />
-    <ClCompile Include="application\source\imgui_impl_dx11.cpp" />
-    <ClCompile Include="application\source\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="application\source\imgui_impl_win32.cpp" />
-    <ClCompile Include="application\source\platform_win32.cpp" />
-    <ClCompile Include="application\source\renderer_dx11.cpp" />
-    <ClCompile Include="application\source\renderer_ogl3.cpp" />
     <ClCompile Include="imgui-node-editor\crude_json.cpp" />
     <ClCompile Include="imgui-node-editor\external\imgui\imgui.cpp" />
     <ClCompile Include="imgui-node-editor\external\imgui\imgui_demo.cpp" />
@@ -170,15 +162,6 @@
     <ClCompile Include="utilities\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application\include\application.h" />
-    <ClInclude Include="application\source\imgui_extra_keys.h" />
-    <ClInclude Include="application\source\imgui_impl_dx11.h" />
-    <ClInclude Include="application\source\imgui_impl_opengl3.h" />
-    <ClInclude Include="application\source\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="application\source\imgui_impl_win32.h" />
-    <ClInclude Include="application\source\platform.h" />
-    <ClInclude Include="application\source\renderer.h" />
-    <ClInclude Include="application\source\setup.h" />
     <ClInclude Include="imgui-node-editor\crude_json.h" />
     <ClInclude Include="imgui-node-editor\external\imgui\imconfig.h" />
     <ClInclude Include="imgui-node-editor\external\imgui\imgui.h" />
@@ -198,7 +181,6 @@
     <ClInclude Include="utilities\widgets.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="application\source\config.h.in" />
     <None Include="imgui-node-editor\imgui_bezier_math.inl" />
     <None Include="imgui-node-editor\imgui_extra_math.inl" />
     <None Include="imgui-node-editor\imgui_node_editor_internal.inl" />
