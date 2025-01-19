@@ -446,7 +446,6 @@ private:
         value v;
         if (s(accept_ws() && accept_string(key) && accept_ws() && accept(':') && accept_element(v)))
         {
-            o.emplace(std::move(key.get<string>()), std::move(v));
             return true;
         }
 
@@ -505,7 +504,7 @@ private:
         string v;
         if (s(accept('\"') && accept_characters(v) && accept('\"')))
         {
-            result = std::move(v);
+            result = v;
             return true;
         }
         else

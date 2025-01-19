@@ -2798,39 +2798,6 @@ std::string ed::Settings::Serialize()
 {
     json::value result;
 
-    auto serializeObjectId = [](ObjectId id)
-    {
-        auto value = std::to_string(reinterpret_cast<uintptr_t>(id.AsPointer()));
-        switch (id.Type())
-        {
-            default:
-            case NodeEditor::Detail::ObjectType::None: return value;
-            case NodeEditor::Detail::ObjectType::Node: return "node:" + value;
-            case NodeEditor::Detail::ObjectType::Link: return "link:" + value;
-            case NodeEditor::Detail::ObjectType::Pin:  return "pin:"  + value;
-        }
-    };
-
-    auto& nodes = result["nodes"];
-    for (auto& node : m_Nodes)
-    {
-        if (node.m_WasUsed)
-            nodes[serializeObjectId(node.m_ID)] = node.Serialize();
-    }
-
-    auto& selection = result["selection"];
-    for (auto& id : m_Selection)
-        selection.push_back(serializeObjectId(id));
-
-    auto& view = result["view"];
-    view["scroll"]["x"] = m_ViewScroll.x;
-    view["scroll"]["y"] = m_ViewScroll.y;
-    view["zoom"]   = m_ViewZoom;
-    view["visible_rect"]["min"]["x"] = m_VisibleRect.Min.x;
-    view["visible_rect"]["min"]["y"] = m_VisibleRect.Min.y;
-    view["visible_rect"]["max"]["x"] = m_VisibleRect.Max.x;
-    view["visible_rect"]["max"]["y"] = m_VisibleRect.Max.y;
-
     return result.dump();
 }
 
