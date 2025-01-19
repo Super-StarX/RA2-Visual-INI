@@ -157,6 +157,8 @@
     <ClCompile Include="imgui-node-editor\imgui_node_editor.cpp" />
     <ClCompile Include="imgui-node-editor\imgui_node_editor_api.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="imgui-node-editor\imgui_extra_math.h" />
     <ClInclude Include="imgui-node-editor\imgui_node_editor.h" />
     <ClInclude Include="imgui-node-editor\imgui_node_editor_internal.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />
