@@ -115,14 +115,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalModuleDependencies>
       </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,7 +134,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalModuleDependencies>
       </AdditionalModuleDependencies>
     </ClCompile>
@@ -143,19 +143,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="imgui-node-editor\crude_json.cpp" />
-    <ClCompile Include="imgui-node-editor\external\imgui\imgui.cpp" />
-    <ClCompile Include="imgui-node-editor\external\imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui-node-editor\external\imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui-node-editor\external\imgui\imgui_tables.cpp" />
-    <ClCompile Include="imgui-node-editor\external\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="imgui-node-editor\imgui_canvas.cpp" />
-    <ClCompile Include="imgui-node-editor\imgui_node_editor.cpp" />
-    <ClCompile Include="imgui-node-editor\imgui_node_editor_api.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
@@ -165,30 +156,13 @@
     <ClCompile Include="UpdateNode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="imgui-node-editor\crude_json.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imconfig.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imgui.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imgui_internal.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui-node-editor\external\imgui\imstb_truetype.h" />
     <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h" />
     <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />
-    <ClInclude Include="imgui-node-editor\imgui_bezier_math.h" />
-    <ClInclude Include="imgui-node-editor\imgui_canvas.h" />
-    <ClInclude Include="imgui-node-editor\imgui_extra_math.h" />
-    <ClInclude Include="imgui-node-editor\imgui_node_editor.h" />
-    <ClInclude Include="imgui-node-editor\imgui_node_editor_internal.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="imgui-node-editor\imgui_bezier_math.inl" />
-    <None Include="imgui-node-editor\imgui_extra_math.inl" />
-    <None Include="imgui-node-editor\imgui_node_editor_internal.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
