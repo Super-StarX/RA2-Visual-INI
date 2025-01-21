@@ -147,22 +147,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BlueprintNode.cpp" />
+    <ClCompile Include="CommentNode.cpp" />
+    <ClCompile Include="HoudiniNode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
+    <ClCompile Include="TreeNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
     <ClCompile Include="UpdateNode.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlueprintNode.h" />
+    <ClInclude Include="CommentNode.h" />
+    <ClInclude Include="HoudiniNode.h" />
     <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h" />
     <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="TreeNode.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

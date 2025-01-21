@@ -1,10 +1,20 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
+#include "BlueprintNode.h"
 #include "utilities/widgets.h"
 
 #include <imgui_internal.h>
 
 static ed::EditorContext* m_Editor = nullptr;
+ed::NodeId MainWindow::contextNodeId = 0;
+ed::LinkId MainWindow::contextLinkId = 0;
+ed::PinId  MainWindow::contextPinId = 0;
+bool MainWindow::createNewNode = false;
+Pin* MainWindow::newNodeLinkPin = nullptr;
+Pin* MainWindow::newLinkPin = nullptr;
+
+float MainWindow::leftPaneWidth = 400.0f;
+float MainWindow::rightPaneWidth = 800.0f;
 
 static bool Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f) {
 	using namespace ImGui;
@@ -46,9 +56,9 @@ void MainWindow::UpdateTouch() {
 }
 
 Node* MainWindow::FindNode(ed::NodeId id) {
-	for (auto& node : m_Nodes)
-		if (node.ID == id)
-			return &node;
+	for (const auto& node : m_Nodes)
+		if (node->ID == id)
+			return node.get();
 
 	return nullptr;
 }
@@ -66,11 +76,11 @@ Pin* MainWindow::FindPin(ed::PinId id) {
 		return nullptr;
 
 	for (auto& node : m_Nodes) {
-		for (auto& pin : node.Inputs)
+		for (auto& pin : node->Inputs)
 			if (pin.ID == id)
 				return &pin;
 
-		for (auto& pin : node.Outputs)
+		for (auto& pin : node->Outputs)
 			if (pin.ID == id)
 				return &pin;
 	}
@@ -125,8 +135,8 @@ void MainWindow::BuildNode(Node* node) {
 }
 
 void MainWindow::BuildNodes() {
-	for (auto& node : m_Nodes)
-		BuildNode(&node);
+	for (const auto& node : m_Nodes)
+		BuildNode(node.get());
 }
 
 void MainWindow::OnStart() {
@@ -191,10 +201,10 @@ void MainWindow::OnStart() {
 
 	BuildNodes();
 
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5].Outputs[0].ID, m_Nodes[6].Inputs[0].ID));
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5].Outputs[0].ID, m_Nodes[7].Inputs[0].ID));
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[6]->Inputs[0].ID));
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[7]->Inputs[0].ID));
 
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14].Outputs[0].ID, m_Nodes[15].Inputs[0].ID));
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14]->Outputs[0].ID, m_Nodes[15]->Inputs[0].ID));
 
 	m_HeaderBackground = LoadTexture("data/BlueprintBackground.png");
 	m_SaveIcon = LoadTexture("data/ic_save_white_24dp.png");
@@ -380,36 +390,36 @@ void MainWindow::ShowLeftPane(float paneWidth) {
 	ImGui::TextUnformatted("Nodes");
 	ImGui::Indent();
 	for (auto& node : m_Nodes) {
-		ImGui::PushID(node.ID.AsPointer());
+		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
 
-		if (const auto progress = GetTouchProgress(node.ID)) {
+		if (const auto progress = GetTouchProgress(node->ID)) {
 			ImGui::GetWindowDrawList()->AddLine(
 				start + ImVec2(-8, 0),
 				start + ImVec2(-8, ImGui::GetTextLineHeight()),
 				IM_COL32(255, 0, 0, 255 - (int)(255 * progress)), 4.0f);
 		}
 
-		bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node.ID) != selectedNodes.end();
+		bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node->ID) != selectedNodes.end();
 # if IMGUI_VERSION_NUM >= 18967
 		ImGui::SetNextItemAllowOverlap();
 # endif
-		if (ImGui::Selectable((node.Name + "##" + std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer()))).c_str(), &isSelected)) {
+		if (ImGui::Selectable((node->Name + "##" + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer()))).c_str(), &isSelected)) {
 			if (io.KeyCtrl) {
 				if (isSelected)
-					ed::SelectNode(node.ID, true);
+					ed::SelectNode(node->ID, true);
 				else
-					ed::DeselectNode(node.ID);
+					ed::DeselectNode(node->ID);
 			}
 			else
-				ed::SelectNode(node.ID, false);
+				ed::SelectNode(node->ID, false);
 
 			ed::NavigateToSelection();
 		}
-		if (ImGui::IsItemHovered() && !node.State.empty())
-			ImGui::SetTooltip("State: %s", node.State.c_str());
+		if (ImGui::IsItemHovered() && !node->State.empty())
+			ImGui::SetTooltip("State: %s", node->State.c_str());
 
-		auto id = std::string("(") + std::to_string(reinterpret_cast<uintptr_t>(node.ID.AsPointer())) + ")";
+		auto id = std::string("(") + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer())) + ")";
 		auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
 		auto iconPanelPos = start + ImVec2(
 			paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1,
@@ -425,9 +435,9 @@ void MainWindow::ShowLeftPane(float paneWidth) {
 # else
 		ImGui::SetNextItemAllowOverlap();
 # endif
-		if (node.SavedState.empty()) {
+		if (node->SavedState.empty()) {
 			if (ImGui::InvisibleButton("save", ImVec2((float)saveIconWidth, (float)saveIconHeight)))
-				node.SavedState = node.State;
+				node->SavedState = node->State;
 
 			if (ImGui::IsItemActive())
 				drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
@@ -447,11 +457,11 @@ void MainWindow::ShowLeftPane(float paneWidth) {
 # else
 		ImGui::SetNextItemAllowOverlap();
 # endif
-		if (!node.SavedState.empty()) {
+		if (!node->SavedState.empty()) {
 			if (ImGui::InvisibleButton("restore", ImVec2((float)restoreIconWidth, (float)restoreIconHeight))) {
-				node.State = node.SavedState;
-				ed::RestoreNodeState(node.ID);
-				node.SavedState.clear();
+				node->State = node->SavedState;
+				ed::RestoreNodeState(node->ID);
+				node->SavedState.clear();
 			}
 
 			if (ImGui::IsItemActive())
@@ -526,15 +536,6 @@ void MainWindow::OnFrame(float deltaTime) {
 	}
 # endif
 
-	static ed::NodeId contextNodeId = 0;
-	static ed::LinkId contextLinkId = 0;
-	static ed::PinId  contextPinId = 0;
-	static bool createNewNode = false;
-	static Pin* newNodeLinkPin = nullptr;
-	static Pin* newLinkPin = nullptr;
-
-	static float leftPaneWidth = 400.0f;
-	static float rightPaneWidth = 800.0f;
 	Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
 	ShowLeftPane(leftPaneWidth - 4.0f);
@@ -544,11 +545,10 @@ void MainWindow::OnFrame(float deltaTime) {
 	ed::Begin("Node editor");
 	{
 		auto cursorTopLeft = ImGui::GetCursorScreenPos();
+		BlueprintNode::builder = ax::NodeEditor::Utilities::BlueprintNodeBuilder(m_HeaderBackground, GetTextureWidth(m_HeaderBackground), GetTextureHeight(m_HeaderBackground));
 
-		BlueprintNode(newLinkPin);
-		TreeNode(newLinkPin);
-		HoudiniNode(newLinkPin);
-		CommentNode();
+		for (auto& node : m_Nodes)
+			node->Update();
 
 		for (auto& link : m_Links)
 			ed::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
@@ -636,7 +636,7 @@ void MainWindow::OnFrame(float deltaTime) {
 				ed::NodeId nodeId = 0;
 				while (ed::QueryDeletedNode(&nodeId)) {
 					if (ed::AcceptDeletedItem()) {
-						auto id = std::find_if(m_Nodes.begin(), m_Nodes.end(), [nodeId](auto& node) { return node.ID == nodeId; });
+						auto id = std::find_if(m_Nodes.begin(), m_Nodes.end(), [nodeId](auto& node) { return node->ID == nodeId; });
 						if (id != m_Nodes.end())
 							m_Nodes.erase(id);
 					}

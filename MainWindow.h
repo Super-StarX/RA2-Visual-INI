@@ -8,9 +8,19 @@
 
 #include "Node.h"
 
-struct MainWindow : public Application {
+class MainWindow : public Application {
+public:
 	using Application::Application;
 
+	static ed::NodeId contextNodeId;
+	static ed::LinkId contextLinkId;
+	static ed::PinId  contextPinId;
+	static bool createNewNode;
+	static Pin* newNodeLinkPin;
+	static Pin* newLinkPin;
+
+	static float leftPaneWidth;
+	static float rightPaneWidth;
 private:
 	int GetNextId();
 	ed::LinkId GetNextLinkId();
@@ -20,7 +30,6 @@ private:
 	Node* FindNode(ed::NodeId id);
 	Link* FindLink(ed::LinkId id);
 	Pin* FindPin(ed::PinId id);
-	bool IsPinLinked(ed::PinId id);
 	bool CanCreateLink(Pin* a, Pin* b);
 	void BuildNode(Node* node);
 	Node* SpawnInputActionNode();
@@ -42,23 +51,20 @@ private:
 	void BuildNodes();
 
 	ImColor GetIconColor(PinType type);
-	void DrawPinIcon(const Pin& pin, bool connected, int alpha);
 	void ShowStyleEditor(bool* show = nullptr);
 	void ShowLeftPane(float paneWidth);
-	void BlueprintNode(Pin* newLinkPin);
-	void CommentNode();
-	void HoudiniNode(Pin* newLinkPin);
-	void TreeNode(Pin* newLinkPin);
 
 public:
-	void OnStart() override;
-	void OnStop() override;
-	void OnFrame(float deltaTime) override;
+	virtual void OnStart() override;
+	virtual void OnStop() override;
+	virtual void OnFrame(float deltaTime) override;
 
+	bool IsPinLinked(ed::PinId id);
+	void DrawPinIcon(const Pin& pin, bool connected, int alpha);
 private:
 	int                  m_NextId = 1;
 	const int            m_PinIconSize = 24;
-	std::vector<Node>    m_Nodes;
+	std::vector<std::unique_ptr<Node>>   m_Nodes;
 	std::vector<Link>    m_Links;
 	ImTextureID          m_HeaderBackground = nullptr;
 	ImTextureID          m_SaveIcon = nullptr;

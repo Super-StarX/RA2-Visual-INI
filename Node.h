@@ -1,4 +1,8 @@
 ﻿#pragma once
+#include "utilities/builders.h"
+#include "utilities/widgets.h"
+
+#include <imgui_internal.h>
 #include <string>
 #include <vector>
 
@@ -28,21 +32,39 @@ enum class NodeType {
 
 };
 
-struct Node;
+class Node;
 
-struct Pin {
+class Pin {
+public:
+	Pin(int id, const char* name, PinType type) :
+		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input) {
+	}
+
+	static bool CanCreateLink(Pin* a, Pin* b) {
+		if (!a || !b || a == b || a->Kind == b->Kind || a->Type != b->Type || a->Node == b->Node)
+			return false;
+
+		return true;
+	}
+
 	ed::PinId   ID;
 	::Node* Node;
 	std::string Name;
 	PinType     Type;
 	PinKind     Kind;
-
-	Pin(int id, const char* name, PinType type) :
-		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input) {
-	}
 };
 
-struct Node {
+class MainWindow;
+class Node {
+public:
+	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
+		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {
+	}
+
+	virtual void Update() = 0;
+
+	MainWindow* Owner = nullptr;
+
 	ed::NodeId ID;
 	std::string Name;
 	std::vector<Pin> Inputs;
@@ -53,23 +75,20 @@ struct Node {
 
 	std::string State;
 	std::string SavedState;
-
-	Node(int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
-		ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {
-	}
 };
 
-struct Link {
+class Link {
+public:
+	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
+		ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255) {
+	}
+
 	ed::LinkId ID;
 
 	ed::PinId StartPinID;
 	ed::PinId EndPinID;
 
 	ImColor Color;
-
-	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-		ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255) {
-	}
 };
 
 struct NodeIdLess {
