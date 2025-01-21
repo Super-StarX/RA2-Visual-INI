@@ -71,14 +71,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,7 +122,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;SOSCINI.lib;d3dx11d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,7 +143,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>application.lib;dxerr.lib;imgui.lib;d3d11.lib;imgui_node_editor.lib;SOSCINI.lib;d3dx11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -157,7 +157,6 @@
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
-    <ClCompile Include="UpdateNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlueprintNode.h" />
@@ -167,6 +166,7 @@
     <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="TreeNode.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
