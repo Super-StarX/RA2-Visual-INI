@@ -74,11 +74,13 @@
     <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,28 +149,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LeftPanelClass.cpp" />
     <ClCompile Include="nodes\BlueprintNode.cpp" />
     <ClCompile Include="nodes\CommentNode.cpp" />
     <ClCompile Include="nodes\HoudiniNode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="LeftPanelClass.cpp" />
-    <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="nodes\TreeNode.cpp" />
+    <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="nodes\BlueprintNode.h" />
     <ClInclude Include="nodes\CommentNode.h" />
     <ClInclude Include="nodes\HoudiniNode.h" />
     <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h" />
     <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />
     <ClInclude Include="MainWindow.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="nodes\Node.h" />
     <ClInclude Include="nodes\TreeNode.h" />
-    <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />

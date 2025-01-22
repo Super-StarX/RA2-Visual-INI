@@ -1,5 +1,5 @@
 ﻿#include "MainWindow.h"
-#include "Node.h"
+#include "nodes/Node.h"
 #include "nodes/BlueprintNode.h"
 #include "nodes/TreeNode.h"
 #include "nodes/CommentNode.h"

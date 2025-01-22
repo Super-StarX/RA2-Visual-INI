@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-#include "Node.h"
+#include "nodes/Node.h"
 
 class LeftPanelClass;
 class MainWindow : public Application {
@@ -60,17 +60,17 @@ public:
 	virtual void OnFrame(float deltaTime) override;
 
 	bool IsPinLinked(ed::PinId id);
-	std::vector<std::unique_ptr<Node>> GetNodes() { return m_Nodes; };
-	std::vector<Link> GetLinks() { return m_Links; };
+	std::vector<std::unique_ptr<Node>>& GetNodes() { return m_Nodes; };
+	std::vector<Link>& GetLinks() { return m_Links; };
 	float GetTouchProgress(ed::NodeId id);
 	void DrawPinIcon(const Pin& pin, bool connected, int alpha);
 private:
-	LeftPanelClass* m_LeftPanel;
-	int                  m_NextId = 1;
-	const int            m_PinIconSize = 24;
-	std::vector<std::unique_ptr<Node>>   m_Nodes;
-	std::vector<Link>    m_Links;
-	ImTextureID          m_HeaderBackground = nullptr;
-	const float          m_TouchTime = 1.0f;
+	LeftPanelClass*						m_LeftPanel;
+	int									m_NextId = 1;
+	const int							m_PinIconSize = 24;
+	std::vector<std::unique_ptr<Node>>	m_Nodes;
+	std::vector<Link>					m_Links;
+	ImTextureID							m_HeaderBackground = nullptr;
+	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
 };

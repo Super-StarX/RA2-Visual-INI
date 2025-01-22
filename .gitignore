@@ -7,5 +7,6 @@ RA2-Visual-INI/*
 .vs/*
 *.user
 *.filters
-
 *.aps
+*.ini
+*.json

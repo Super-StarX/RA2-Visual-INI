@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "nodes/BlueprintNode.h"
@@ -131,7 +131,7 @@ void MainWindow::BuildNodes() {
 void MainWindow::OnStart() {
 	ed::Config config;
 
-	config.SettingsFile = "Blueprints.json";
+	config.SettingsFile = "RA2VI.json";
 
 	config.UserPointer = this;
 
