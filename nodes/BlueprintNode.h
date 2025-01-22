@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Node.h"
+
 class BlueprintNode : public Node {
 public:
 	static ax::NodeEditor::Utilities::BlueprintNodeBuilder builder;

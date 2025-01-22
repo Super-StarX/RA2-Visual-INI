@@ -1,16 +1,28 @@
 ﻿#include "MainWindow.h"
 #include "Node.h"
-#include "BlueprintNode.h"
-#include "TreeNode.h"
-#include "CommentNode.h"
-#include "HoudiniNode.h"
+#include "nodes/BlueprintNode.h"
+#include "nodes/TreeNode.h"
+#include "nodes/CommentNode.h"
+#include "nodes/HoudiniNode.h"
+
+void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
+	for (auto& input : node->Inputs) {
+		input.Node = node.get();
+		input.Kind = PinKind::Input;
+	}
+
+	for (auto& output : node->Outputs) {
+		output.Node = node.get();
+		output.Kind = PinKind::Output;
+	}
+}
 
 Node* MainWindow::SpawnInputActionNode() {
 	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), "InputAction Fire", ImColor(255, 128, 128)));	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Delegate);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Pressed", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Released", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -22,7 +34,7 @@ Node* MainWindow::SpawnBranchNode() {
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "True", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "False", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -35,7 +47,7 @@ Node* MainWindow::SpawnDoNNode() {
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Exit", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Counter", PinType::Int);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -46,7 +58,7 @@ Node* MainWindow::SpawnOutputActionNode() {
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Condition", PinType::Bool);
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "Event", PinType::Delegate);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -57,7 +69,7 @@ Node* MainWindow::SpawnPrintStringNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "In String", PinType::String);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -67,7 +79,7 @@ Node* MainWindow::SpawnMessageNode() {
 	m_Nodes.back()->Type = NodeType::Simple;
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Message", PinType::String);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -81,7 +93,7 @@ Node* MainWindow::SpawnSetTimerNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "Looping", PinType::Bool);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -93,7 +105,7 @@ Node* MainWindow::SpawnLessNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -105,7 +117,7 @@ Node* MainWindow::SpawnWeirdNode() {
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -124,7 +136,7 @@ Node* MainWindow::SpawnTraceByChannelNode() {
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Out Hit", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Return Value", PinType::Bool);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -134,7 +146,7 @@ Node* MainWindow::SpawnTreeSequenceNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -143,7 +155,7 @@ Node* MainWindow::SpawnTreeTaskNode() {
 	m_Nodes.emplace_back(std::make_unique<TreeNode>(this, GetNextId(), "Move To"));
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -152,7 +164,7 @@ Node* MainWindow::SpawnTreeTask2Node() {
 	m_Nodes.emplace_back(std::make_unique<TreeNode>(this, GetNextId(), "Random Wait"));
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -169,7 +181,7 @@ Node* MainWindow::SpawnHoudiniTransformNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
@@ -180,7 +192,7 @@ Node* MainWindow::SpawnHoudiniGroupNode() {
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Flow);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Flow);
 
-	BuildNode(m_Nodes.back().get());
+	BuildNode(m_Nodes.back());
 
 	return m_Nodes.back().get();
 }
