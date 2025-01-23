@@ -38,7 +38,7 @@ void BlueprintNode::Update() {
 					ImGui::TextUnformatted(output.Name.c_str());
 					ImGui::Spring(0);
 				}
-				Owner->DrawPinIcon(output, Owner->IsPinLinked(output.ID), (int)(alpha * 255));
+				output.DrawPinIcon(Owner->IsPinLinked(output.ID), (int)(alpha * 255));
 				ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.x / 2);
 				ImGui::EndHorizontal();
 				ImGui::PopStyleVar();
@@ -62,7 +62,7 @@ void BlueprintNode::Update() {
 
 		builder.Input(input.ID);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-		Owner->DrawPinIcon(input, Owner->IsPinLinked(input.ID), (int)(alpha * 255));
+		input.DrawPinIcon(Owner->IsPinLinked(input.ID), (int)(alpha * 255));
 		ImGui::Spring(0);
 		if (!input.Name.empty()) {
 			ImGui::TextUnformatted(input.Name.c_str());
@@ -116,7 +116,7 @@ void BlueprintNode::Update() {
 			ImGui::TextUnformatted(output.Name.c_str());
 		}
 		ImGui::Spring(0);
-		Owner->DrawPinIcon(output, Owner->IsPinLinked(output.ID), (int)(alpha * 255));
+		output.DrawPinIcon(Owner->IsPinLinked(output.ID), (int)(alpha * 255));
 		ImGui::PopStyleVar();
 		builder.EndOutput();
 	}

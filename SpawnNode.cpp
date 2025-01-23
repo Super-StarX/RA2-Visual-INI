@@ -196,3 +196,104 @@ Node* MainWindow::SpawnHoudiniGroupNode() {
 
 	return m_Nodes.back().get();
 }
+
+void MainWindow::CreateInitNodes() {
+	Node* node;
+	node = SpawnInputActionNode();      ed::SetNodePosition(node->ID, ImVec2(-252, 220));
+	node = SpawnBranchNode();           ed::SetNodePosition(node->ID, ImVec2(-300, 351));
+	node = SpawnDoNNode();              ed::SetNodePosition(node->ID, ImVec2(-238, 504));
+	node = SpawnOutputActionNode();     ed::SetNodePosition(node->ID, ImVec2(71, 80));
+	node = SpawnSetTimerNode();         ed::SetNodePosition(node->ID, ImVec2(168, 316));
+
+	node = SpawnTreeSequenceNode();     ed::SetNodePosition(node->ID, ImVec2(1028, 329));
+	node = SpawnTreeTaskNode();         ed::SetNodePosition(node->ID, ImVec2(1204, 458));
+	node = SpawnTreeTask2Node();        ed::SetNodePosition(node->ID, ImVec2(868, 538));
+
+	node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(112, 576)); ed::SetGroupSize(node->ID, ImVec2(384, 154));
+	node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(800, 224)); ed::SetGroupSize(node->ID, ImVec2(640, 400));
+
+	node = SpawnLessNode();             ed::SetNodePosition(node->ID, ImVec2(366, 652));
+	node = SpawnWeirdNode();            ed::SetNodePosition(node->ID, ImVec2(144, 652));
+	node = SpawnMessageNode();          ed::SetNodePosition(node->ID, ImVec2(-348, 698));
+	node = SpawnPrintStringNode();      ed::SetNodePosition(node->ID, ImVec2(-69, 652));
+
+	node = SpawnHoudiniTransformNode(); ed::SetNodePosition(node->ID, ImVec2(500, -70));
+	node = SpawnHoudiniGroupNode();     ed::SetNodePosition(node->ID, ImVec2(500, 42));
+
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[6]->Inputs[0].ID));
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[7]->Inputs[0].ID));
+
+	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14]->Outputs[0].ID, m_Nodes[15]->Inputs[0].ID));
+}
+
+void MainWindow::CreateNewNode(ImVec2 openPopupPosition) {
+	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
+
+	//auto drawList = ImGui::GetWindowDrawList();
+	//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
+
+	Node* node = nullptr;
+	if (ImGui::MenuItem("Input Action"))
+		node = SpawnInputActionNode();
+	if (ImGui::MenuItem("Output Action"))
+		node = SpawnOutputActionNode();
+	if (ImGui::MenuItem("Branch"))
+		node = SpawnBranchNode();
+	if (ImGui::MenuItem("Do N"))
+		node = SpawnDoNNode();
+	if (ImGui::MenuItem("Set Timer"))
+		node = SpawnSetTimerNode();
+	if (ImGui::MenuItem("Less"))
+		node = SpawnLessNode();
+	if (ImGui::MenuItem("Weird"))
+		node = SpawnWeirdNode();
+	if (ImGui::MenuItem("Trace by Channel"))
+		node = SpawnTraceByChannelNode();
+	if (ImGui::MenuItem("Print String"))
+		node = SpawnPrintStringNode();
+	ImGui::Separator();
+	if (ImGui::MenuItem("Comment"))
+		node = SpawnComment();
+	ImGui::Separator();
+	if (ImGui::MenuItem("Sequence"))
+		node = SpawnTreeSequenceNode();
+	if (ImGui::MenuItem("Move To"))
+		node = SpawnTreeTaskNode();
+	if (ImGui::MenuItem("Random Wait"))
+		node = SpawnTreeTask2Node();
+	ImGui::Separator();
+	if (ImGui::MenuItem("Message"))
+		node = SpawnMessageNode();
+	ImGui::Separator();
+	if (ImGui::MenuItem("Transform"))
+		node = SpawnHoudiniTransformNode();
+	if (ImGui::MenuItem("Group"))
+		node = SpawnHoudiniGroupNode();
+
+	if (node) {
+		BuildNodes();
+
+		createNewNode = false;
+
+		ed::SetNodePosition(node->ID, openPopupPosition);
+
+		if (auto startPin = newNodeLinkPin) {
+			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
+
+			for (auto& pin : pins) {
+				if (CanCreateLink(startPin, &pin)) {
+					auto endPin = &pin;
+					if (startPin->Kind == PinKind::Input)
+						std::swap(startPin, endPin);
+
+					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
+					m_Links.back().Color = Pin::GetIconColor(startPin->Type);
+
+					break;
+				}
+			}
+		}
+	}
+
+	ImGui::EndPopup();
+}

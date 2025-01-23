@@ -23,6 +23,8 @@ enum class PinKind {
 class Node;
 class Pin {
 public:
+	constexpr static float IconSize = 24.f;
+
 	Pin(int id, const char* name, PinType type) :
 		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input) {
 	}
@@ -33,7 +35,9 @@ public:
 
 		return true;
 	}
+	static ImColor GetIconColor(PinType type);
 
+	void DrawPinIcon(bool connected, int alpha) const;
 	void Menu() const;
 
 	ed::PinId   ID;

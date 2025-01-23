@@ -1,8 +1,8 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
+#include "Utils.h"
 #include "nodes/BlueprintNode.h"
-#include "utilities/widgets.h"
 
 #include <imgui_internal.h>
 
@@ -164,36 +164,10 @@ void MainWindow::OnStart() {
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 
-	Node* node;
-	node = SpawnInputActionNode();      ed::SetNodePosition(node->ID, ImVec2(-252, 220));
-	node = SpawnBranchNode();           ed::SetNodePosition(node->ID, ImVec2(-300, 351));
-	node = SpawnDoNNode();              ed::SetNodePosition(node->ID, ImVec2(-238, 504));
-	node = SpawnOutputActionNode();     ed::SetNodePosition(node->ID, ImVec2(71, 80));
-	node = SpawnSetTimerNode();         ed::SetNodePosition(node->ID, ImVec2(168, 316));
-
-	node = SpawnTreeSequenceNode();     ed::SetNodePosition(node->ID, ImVec2(1028, 329));
-	node = SpawnTreeTaskNode();         ed::SetNodePosition(node->ID, ImVec2(1204, 458));
-	node = SpawnTreeTask2Node();        ed::SetNodePosition(node->ID, ImVec2(868, 538));
-
-	node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(112, 576)); ed::SetGroupSize(node->ID, ImVec2(384, 154));
-	node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(800, 224)); ed::SetGroupSize(node->ID, ImVec2(640, 400));
-
-	node = SpawnLessNode();             ed::SetNodePosition(node->ID, ImVec2(366, 652));
-	node = SpawnWeirdNode();            ed::SetNodePosition(node->ID, ImVec2(144, 652));
-	node = SpawnMessageNode();          ed::SetNodePosition(node->ID, ImVec2(-348, 698));
-	node = SpawnPrintStringNode();      ed::SetNodePosition(node->ID, ImVec2(-69, 652));
-
-	node = SpawnHoudiniTransformNode(); ed::SetNodePosition(node->ID, ImVec2(500, -70));
-	node = SpawnHoudiniGroupNode();     ed::SetNodePosition(node->ID, ImVec2(500, 42));
-
+	CreateInitNodes();
 	ed::NavigateToContent();
 
 	BuildNodes();
-
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[6]->Inputs[0].ID));
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[5]->Outputs[0].ID, m_Nodes[7]->Inputs[0].ID));
-
-	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14]->Outputs[0].ID, m_Nodes[15]->Inputs[0].ID));
 
 	m_HeaderBackground = LoadTexture("data/BlueprintBackground.png");
 
@@ -216,41 +190,6 @@ void MainWindow::OnStop() {
 		m_Editor = nullptr;
 	}
 }
-
-ImColor MainWindow::GetIconColor(PinType type) {
-	switch (type) {
-	default:
-	case PinType::Flow:     return ImColor(255, 255, 255);
-	case PinType::Bool:     return ImColor(220, 48, 48);
-	case PinType::Int:      return ImColor(68, 201, 156);
-	case PinType::Float:    return ImColor(147, 226, 74);
-	case PinType::String:   return ImColor(124, 21, 153);
-	case PinType::Object:   return ImColor(51, 150, 215);
-	case PinType::Function: return ImColor(218, 0, 183);
-	case PinType::Delegate: return ImColor(255, 48, 48);
-	}
-};
-
-void MainWindow::DrawPinIcon(const Pin& pin, bool connected, int alpha) {
-	using ax::Widgets::IconType;
-	IconType iconType;
-	ImColor  color = GetIconColor(pin.Type);
-	color.Value.w = alpha / 255.0f;
-	switch (pin.Type) {
-	case PinType::Flow:     iconType = IconType::Flow;   break;
-	case PinType::Bool:     iconType = IconType::Circle; break;
-	case PinType::Int:      iconType = IconType::Circle; break;
-	case PinType::Float:    iconType = IconType::Circle; break;
-	case PinType::String:   iconType = IconType::Circle; break;
-	case PinType::Object:   iconType = IconType::Circle; break;
-	case PinType::Function: iconType = IconType::Circle; break;
-	case PinType::Delegate: iconType = IconType::Square; break;
-	default:
-		return;
-	}
-
-	ax::Widgets::Icon(ImVec2(static_cast<float>(m_PinIconSize), static_cast<float>(m_PinIconSize)), iconType, connected, color, ImColor(32, 32, 32, alpha));
-};
 
 void MainWindow::NodeMenu() {
 	auto node = FindNode(contextNodeId);
@@ -299,78 +238,6 @@ void MainWindow::LinkMenu() {
 	ImGui::EndPopup();
 }
 
-void MainWindow::CreateNewNode(ImVec2 openPopupPosition) {
-	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
-
-	//auto drawList = ImGui::GetWindowDrawList();
-	//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
-
-	Node* node = nullptr;
-	if (ImGui::MenuItem("Input Action"))
-		node = SpawnInputActionNode();
-	if (ImGui::MenuItem("Output Action"))
-		node = SpawnOutputActionNode();
-	if (ImGui::MenuItem("Branch"))
-		node = SpawnBranchNode();
-	if (ImGui::MenuItem("Do N"))
-		node = SpawnDoNNode();
-	if (ImGui::MenuItem("Set Timer"))
-		node = SpawnSetTimerNode();
-	if (ImGui::MenuItem("Less"))
-		node = SpawnLessNode();
-	if (ImGui::MenuItem("Weird"))
-		node = SpawnWeirdNode();
-	if (ImGui::MenuItem("Trace by Channel"))
-		node = SpawnTraceByChannelNode();
-	if (ImGui::MenuItem("Print String"))
-		node = SpawnPrintStringNode();
-	ImGui::Separator();
-	if (ImGui::MenuItem("Comment"))
-		node = SpawnComment();
-	ImGui::Separator();
-	if (ImGui::MenuItem("Sequence"))
-		node = SpawnTreeSequenceNode();
-	if (ImGui::MenuItem("Move To"))
-		node = SpawnTreeTaskNode();
-	if (ImGui::MenuItem("Random Wait"))
-		node = SpawnTreeTask2Node();
-	ImGui::Separator();
-	if (ImGui::MenuItem("Message"))
-		node = SpawnMessageNode();
-	ImGui::Separator();
-	if (ImGui::MenuItem("Transform"))
-		node = SpawnHoudiniTransformNode();
-	if (ImGui::MenuItem("Group"))
-		node = SpawnHoudiniGroupNode();
-
-	if (node) {
-		BuildNodes();
-
-		createNewNode = false;
-
-		ed::SetNodePosition(node->ID, openPopupPosition);
-
-		if (auto startPin = newNodeLinkPin) {
-			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
-
-			for (auto& pin : pins) {
-				if (CanCreateLink(startPin, &pin)) {
-					auto endPin = &pin;
-					if (startPin->Kind == PinKind::Input)
-						std::swap(startPin, endPin);
-
-					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-					m_Links.back().Color = GetIconColor(startPin->Type);
-
-					break;
-				}
-			}
-		}
-	}
-
-	ImGui::EndPopup();
-}
-
 void MainWindow::NodeEditor() {
 	auto cursorTopLeft = ImGui::GetCursorScreenPos();
 	BlueprintNode::builder = ax::NodeEditor::Utilities::BlueprintNodeBuilder(m_HeaderBackground, GetTextureWidth(m_HeaderBackground), GetTextureHeight(m_HeaderBackground));
@@ -383,23 +250,6 @@ void MainWindow::NodeEditor() {
 
 	if (!createNewNode) {
 		if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
-			auto showLabel = [](const char* label, ImColor color) {
-				ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
-				auto size = ImGui::CalcTextSize(label);
-
-				auto padding = ImGui::GetStyle().FramePadding;
-				auto spacing = ImGui::GetStyle().ItemSpacing;
-
-				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(spacing.x, -spacing.y));
-
-				auto rectMin = ImGui::GetCursorScreenPos() - padding;
-				auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
-
-				auto drawList = ImGui::GetWindowDrawList();
-				drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-				ImGui::TextUnformatted(label);
-			};
-
 			ed::PinId startPinId = 0, endPinId = 0;
 			if (ed::QueryNewLink(&startPinId, &endPinId)) {
 				auto startPin = FindPin(startPinId);
@@ -413,9 +263,8 @@ void MainWindow::NodeEditor() {
 				}
 
 				if (startPin && endPin) {
-					if (endPin == startPin) {
+					if (endPin == startPin)
 						ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-					}
 					else if (endPin->Kind == startPin->Kind) {
 						showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
 						ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
@@ -433,7 +282,7 @@ void MainWindow::NodeEditor() {
 						showLabel("+ Create Link", ImColor(32, 45, 32, 180));
 						if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
 							m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
-							m_Links.back().Color = GetIconColor(startPin->Type);
+							m_Links.back().Color = Pin::GetIconColor(startPin->Type);
 						}
 					}
 				}
