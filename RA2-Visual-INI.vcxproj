@@ -71,13 +71,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir);$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir);$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
@@ -156,6 +156,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="nodes\TreeNode.cpp" />
+    <ClCompile Include="Pin.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="nodes\Node.h" />
     <ClInclude Include="nodes\TreeNode.h" />
+    <ClInclude Include="Pin.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />

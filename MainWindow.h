@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -7,8 +7,8 @@
 #include <map>
 
 #include "nodes/Node.h"
+#include "LeftPanelClass.h"
 
-class LeftPanelClass;
 class MainWindow : public Application {
 public:
 	using Application::Application;
@@ -52,7 +52,6 @@ private:
 
 	ImColor GetIconColor(PinType type);
 	void ShowStyleEditor(bool* show = nullptr);
-	void ShowLeftPane(float paneWidth);
 
 public:
 	virtual void OnStart() override;
@@ -65,7 +64,7 @@ public:
 	float GetTouchProgress(ed::NodeId id);
 	void DrawPinIcon(const Pin& pin, bool connected, int alpha);
 private:
-	LeftPanelClass*						m_LeftPanel;
+	LeftPanelClass m_LeftPanel;
 	int									m_NextId = 1;
 	const int							m_PinIconSize = 24;
 	std::vector<std::unique_ptr<Node>>	m_Nodes;

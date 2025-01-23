@@ -4,6 +4,7 @@
 #include "utilities/builders.h"
 #include "utilities/widgets.h"
 #include <ImGui.h>
+#include <imgui_internal.h>
 
 LeftPanelClass::LeftPanelClass(MainWindow* owner) :Owner(owner) {
 	m_RestoreIcon = Owner->LoadTexture("data/ic_restore_white_24dp.png");
@@ -94,7 +95,7 @@ void LeftPanelClass::ShowStyleEditor(bool* show) {
 	ImGui::End();
 }
 
-void LeftPanelClass::ShowLeftPane(float paneWidth) {
+void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 	namespace ed = ax::NodeEditor;
 	auto& io = ImGui::GetIO();
 
@@ -269,4 +270,43 @@ void LeftPanelClass::ShowLeftPane(float paneWidth) {
 		++changeCount;
 
 	ImGui::EndChild();
+}
+
+void LeftPanelClass::ShowOrdinals() const {
+	auto editorMin = ImGui::GetItemRectMin();
+	auto editorMax = ImGui::GetItemRectMax();
+	if (m_ShowOrdinals) {
+		int nodeCount = ed::GetNodeCount();
+		std::vector<ed::NodeId> orderedNodeIds;
+		orderedNodeIds.resize(static_cast<size_t>(nodeCount));
+		ed::GetOrderedNodeIds(orderedNodeIds.data(), nodeCount);
+
+
+		auto drawList = ImGui::GetWindowDrawList();
+		drawList->PushClipRect(editorMin, editorMax);
+
+		int ordinal = 0;
+		for (auto& nodeId : orderedNodeIds) {
+			auto p0 = ed::GetNodePosition(nodeId);
+			auto p1 = p0 + ed::GetNodeSize(nodeId);
+			p0 = ed::CanvasToScreen(p0);
+			p1 = ed::CanvasToScreen(p1);
+
+
+			ImGuiTextBuffer builder;
+			builder.appendf("#%d", ordinal++);
+
+			auto textSize = ImGui::CalcTextSize(builder.c_str());
+			auto padding = ImVec2(2.0f, 2.0f);
+			auto widgetSize = textSize + padding * 2;
+
+			auto widgetPosition = ImVec2(p1.x, p0.y) + ImVec2(0.0f, -widgetSize.y);
+
+			drawList->AddRectFilled(widgetPosition, widgetPosition + widgetSize, IM_COL32(100, 80, 80, 190), 3.0f, ImDrawFlags_RoundCornersAll);
+			drawList->AddRect(widgetPosition, widgetPosition + widgetSize, IM_COL32(200, 160, 160, 190), 3.0f, ImDrawFlags_RoundCornersAll);
+			drawList->AddText(widgetPosition + padding, IM_COL32(255, 255, 255, 255), builder.c_str());
+		}
+
+		drawList->PopClipRect();
+	}
 }
