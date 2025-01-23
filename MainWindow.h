@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -49,6 +49,11 @@ private:
 	Node* SpawnHoudiniTransformNode();
 	Node* SpawnHoudiniGroupNode();
 	void BuildNodes();
+	void NodeEditor();
+	void NodeMenu();
+	void PinMenu();
+	void LinkMenu();
+	void CreateNewNode(ImVec2 openPopupPosition);
 
 	ImColor GetIconColor(PinType type);
 	void ShowStyleEditor(bool* show = nullptr);

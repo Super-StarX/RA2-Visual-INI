@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LeftPanelClass.cpp" />
+    <ClCompile Include="Link.cpp" />
     <ClCompile Include="nodes\BlueprintNode.cpp" />
     <ClCompile Include="nodes\CommentNode.cpp" />
     <ClCompile Include="nodes\HoudiniNode.cpp" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LeftPanelClass.h" />
+    <ClInclude Include="Link.h" />
     <ClInclude Include="nodes\BlueprintNode.h" />
     <ClInclude Include="nodes\CommentNode.h" />
     <ClInclude Include="nodes\HoudiniNode.h" />

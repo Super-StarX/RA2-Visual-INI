@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Pin.h"
+#include "Link.h"
 #include "utilities/builders.h"
 
 #include <vector>
@@ -35,20 +36,6 @@ public:
 
 	std::string State;
 	std::string SavedState;
-};
-
-class Link {
-public:
-	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-		ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255) {
-	}
-
-	ed::LinkId ID;
-
-	ed::PinId StartPinID;
-	ed::PinId EndPinID;
-
-	ImColor Color;
 };
 
 struct NodeIdLess {

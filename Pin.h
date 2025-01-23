@@ -34,6 +34,8 @@ public:
 		return true;
 	}
 
+	void Menu() const;
+
 	ed::PinId   ID;
 	::Node* Node;
 	std::string Name;
