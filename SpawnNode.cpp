@@ -3,6 +3,7 @@
 #include "nodes/BlueprintNode.h"
 #include "nodes/TreeNode.h"
 #include "nodes/CommentNode.h"
+#include "nodes/SimpleNode.h"
 #include "nodes/HoudiniNode.h"
 
 void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
@@ -75,8 +76,7 @@ Node* MainWindow::SpawnPrintStringNode() {
 }
 
 Node* MainWindow::SpawnMessageNode() {
-	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), "", ImColor(128, 195, 248)));
-	m_Nodes.back()->Type = NodeType::Simple;
+	m_Nodes.emplace_back(std::make_unique<SimpleNode>(this, GetNextId(), "", ImColor(128, 195, 248)));
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "Message", PinType::String);
 
 	BuildNode(m_Nodes.back());
@@ -99,8 +99,7 @@ Node* MainWindow::SpawnSetTimerNode() {
 }
 
 Node* MainWindow::SpawnLessNode() {
-	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), "<", ImColor(128, 195, 248)));
-	m_Nodes.back()->Type = NodeType::Simple;
+	m_Nodes.emplace_back(std::make_unique<SimpleNode>(this, GetNextId(), "<", ImColor(128, 195, 248)));
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);
@@ -111,8 +110,7 @@ Node* MainWindow::SpawnLessNode() {
 }
 
 Node* MainWindow::SpawnWeirdNode() {
-	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), "o.O", ImColor(128, 195, 248)));
-	m_Nodes.back()->Type = NodeType::Simple;
+	m_Nodes.emplace_back(std::make_unique<SimpleNode>(this, GetNextId(), "o.O", ImColor(128, 195, 248)));
 	m_Nodes.back()->Inputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);
 	m_Nodes.back()->Outputs.emplace_back(GetNextId(), "", PinType::Float);

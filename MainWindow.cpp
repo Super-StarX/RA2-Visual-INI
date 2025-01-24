@@ -344,7 +344,6 @@ void MainWindow::OnFrame(float deltaTime) {
 	ed::Begin("Node editor");
 	NodeEditor();
 
-# if 1
 	auto openPopupPosition = ImGui::GetMousePos();
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))
@@ -373,8 +372,6 @@ void MainWindow::OnFrame(float deltaTime) {
 		createNewNode = false;
 	ImGui::PopStyleVar();
 	ed::Resume();
-# endif
-
 
 	/*
 		cubic_bezier_t c;
