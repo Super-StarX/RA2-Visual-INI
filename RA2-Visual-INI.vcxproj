@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="nodes\BaseNode.cpp" />
     <ClCompile Include="LeftPanelClass.cpp" />
     <ClCompile Include="Link.cpp" />
     <ClCompile Include="nodes\BlueprintNode.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="utilities\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="nodes\BaseNode.h" />
     <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="Link.h" />
     <ClInclude Include="nodes\BlueprintNode.h" />

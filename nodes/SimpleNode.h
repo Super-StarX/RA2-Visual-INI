@@ -1,11 +1,8 @@
 ﻿#pragma once
-#include "Node.h"
-class SimpleNode : public Node {
+#include "BaseNode.h"
+class SimpleNode : public BaseNode {
 public:
-	static ImTextureID m_HeaderBackground;
-
-	SimpleNode(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255));
-	~SimpleNode();
+	using BaseNode::BaseNode;
 
 	virtual void Update();
 };

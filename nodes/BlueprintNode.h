@@ -1,13 +1,9 @@
 ﻿#pragma once
-#include "Node.h"
+#include "BaseNode.h"
 
-class BlueprintNode : public Node {
+class BlueprintNode : public BaseNode {
 public:
-	static ImTextureID m_HeaderBackground;
-
-	BlueprintNode(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255));
-	~BlueprintNode();
-
+	using BaseNode::BaseNode;
 	virtual void Update();
 };
 
