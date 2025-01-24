@@ -3,8 +3,10 @@
 
 class BlueprintNode : public Node {
 public:
-	static ax::NodeEditor::Utilities::BlueprintNodeBuilder builder;
-	using Node::Node;
+	static ImTextureID m_HeaderBackground;
+
+	BlueprintNode(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255));
+	~BlueprintNode();
 
 	virtual void Update();
 };

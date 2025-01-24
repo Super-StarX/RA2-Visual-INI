@@ -1,8 +1,28 @@
 ﻿#include "BlueprintNode.h"
 #include "MainWindow.h"
 
-ax::NodeEditor::Utilities::BlueprintNodeBuilder BlueprintNode::builder;
+ImTextureID BlueprintNode::m_HeaderBackground = nullptr;
+BlueprintNode::BlueprintNode(MainWindow* owner, int id, const char* name, ImColor color) :
+	Node(owner, id, name, color) {
+	m_HeaderBackground = owner->LoadTexture("data/BlueprintBackground.png");
+}
+
+BlueprintNode::~BlueprintNode() {
+	auto releaseTexture = [this](ImTextureID& id) {
+		if (id) {
+			Owner->DestroyTexture(id);
+			id = nullptr;
+		}
+	};
+
+	releaseTexture(m_HeaderBackground);
+}
+
 void BlueprintNode::Update() {
+	using namespace ax::NodeEditor::Utilities;
+	static BlueprintNodeBuilder builder = BlueprintNodeBuilder(m_HeaderBackground, 
+			Owner->GetTextureWidth(m_HeaderBackground), Owner->GetTextureHeight(m_HeaderBackground));
+
 	auto newLinkPin = Owner->newLinkPin;
 	const auto isSimple = this->Type == NodeType::Simple;
 
@@ -27,7 +47,7 @@ void BlueprintNode::Update() {
 
 				auto alpha = ImGui::GetStyle().Alpha;
 				if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
-					alpha = alpha * (48.0f / 255.0f);
+					alpha *= 48.0f / 255.0f;
 
 				ed::BeginPin(output.ID, ed::PinKind::Output);
 				ed::PinPivotAlignment(ImVec2(1.0f, 0.5f));

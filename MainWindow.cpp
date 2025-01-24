@@ -100,13 +100,6 @@ bool MainWindow::IsPinLinked(ed::PinId id) {
 	return false;
 }
 
-bool MainWindow::CanCreateLink(Pin* a, Pin* b) {
-	if (!a || !b || a == b || a->Kind == b->Kind || a->Type != b->Type || a->Node == b->Node)
-		return false;
-
-	return true;
-}
-
 //void MainWindow::DrawItemRect(ImColor color, float expand = 0.0f)
 //{
 //    ImGui::GetWindowDrawList()->AddRect(
@@ -169,22 +162,11 @@ void MainWindow::OnStart() {
 
 	BuildNodes();
 
-	m_HeaderBackground = LoadTexture("data/BlueprintBackground.png");
-
 	m_LeftPanel = LeftPanelClass(this);
 	//auto& io = ImGui::GetIO();
 }
 
 void MainWindow::OnStop() {
-	auto releaseTexture = [this](ImTextureID& id) {
-		if (id) {
-			DestroyTexture(id);
-			id = nullptr;
-		}
-	};
-
-	releaseTexture(m_HeaderBackground);
-
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
@@ -240,7 +222,6 @@ void MainWindow::LinkMenu() {
 
 void MainWindow::NodeEditor() {
 	auto cursorTopLeft = ImGui::GetCursorScreenPos();
-	BlueprintNode::builder = ax::NodeEditor::Utilities::BlueprintNodeBuilder(m_HeaderBackground, GetTextureWidth(m_HeaderBackground), GetTextureHeight(m_HeaderBackground));
 
 	for (auto& node : m_Nodes)
 		node->Update();

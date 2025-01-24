@@ -30,7 +30,6 @@ private:
 	Node* FindNode(ed::NodeId id);
 	Link* FindLink(ed::LinkId id);
 	Pin* FindPin(ed::PinId id);
-	bool CanCreateLink(Pin* a, Pin* b);
 	void BuildNode(const std::unique_ptr<Node>& node);
 	Node* SpawnInputActionNode();
 	Node* SpawnBranchNode();
@@ -72,7 +71,6 @@ private:
 	int									m_NextId = 1;
 	std::vector<std::unique_ptr<Node>>	m_Nodes;
 	std::vector<Link>					m_Links;
-	ImTextureID							m_HeaderBackground = nullptr;
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
 };

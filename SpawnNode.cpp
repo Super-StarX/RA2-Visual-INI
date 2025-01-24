@@ -281,7 +281,7 @@ void MainWindow::CreateNewNode(ImVec2 openPopupPosition) {
 			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
 
 			for (auto& pin : pins) {
-				if (CanCreateLink(startPin, &pin)) {
+				if (Pin::CanCreateLink(startPin, &pin)) {
 					auto endPin = &pin;
 					if (startPin->Kind == PinKind::Input)
 						std::swap(startPin, endPin);
