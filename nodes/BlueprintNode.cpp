@@ -130,5 +130,10 @@ void BlueprintNode::Update() {
 		builder.EndOutput();
 	}
 
+	if (ImGui::Button("+")) {
+		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", PinType::Delegate);
+		this->Outputs.emplace_back(Owner->GetNextId(), "NewAddOutput", PinType::Bool);
+	}
+
 	builder.End();
 }

@@ -23,7 +23,6 @@ public:
 	static float leftPaneWidth;
 	static float rightPaneWidth;
 private:
-	int GetNextId();
 	ed::LinkId GetNextLinkId();
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
@@ -62,6 +61,7 @@ public:
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
 
+	int GetNextId();
 	bool IsPinLinked(ed::PinId id);
 	std::vector<std::unique_ptr<Node>>& GetNodes() { return m_Nodes; };
 	std::vector<Link>& GetLinks() { return m_Links; };
