@@ -53,11 +53,11 @@ void BlueprintNode::Update() {
 	builder.EndHeader();
 
 	for (auto& input : this->Inputs)
-		UpdateInput(input);
+		UpdateInput(input, builder);
 
 	for (auto& output : this->Outputs)
 		if (output.Type != PinType::Delegate)
-			UpdateOutput(output);
+			UpdateOutput(output, builder);
 
 	if (ImGui::Button("+")) {
 		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", PinType::Delegate);

@@ -18,8 +18,7 @@ BaseNode::~BaseNode() {
 	releaseTexture(m_HeaderBackground);
 }
 
-void BaseNode::UpdateInput(Pin& input) {
-	auto builder = GetBuilder();
+void BaseNode::UpdateInput(Pin& input, BlueprintNodeBuilder& builder) {
 	auto newLinkPin = Owner->newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
 	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &input) && &input != newLinkPin)
@@ -41,8 +40,7 @@ void BaseNode::UpdateInput(Pin& input) {
 	builder.EndInput();
 }
 
-void BaseNode::UpdateOutput(Pin& output) {
-	auto builder = GetBuilder();
+void BaseNode::UpdateOutput(Pin& output, BlueprintNodeBuilder& builder) {
 	auto newLinkPin = Owner->newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
 	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
@@ -77,8 +75,7 @@ void BaseNode::UpdateOutput(Pin& output) {
 	builder.EndOutput();
 }
 
-ax::NodeEditor::Utilities::BlueprintNodeBuilder BaseNode::GetBuilder() {
-	using namespace ax::NodeEditor::Utilities;
+BlueprintNodeBuilder BaseNode::GetBuilder() {
 	static BlueprintNodeBuilder builder = BlueprintNodeBuilder(m_HeaderBackground,
 			Owner->GetTextureWidth(m_HeaderBackground), Owner->GetTextureHeight(m_HeaderBackground));
 	
