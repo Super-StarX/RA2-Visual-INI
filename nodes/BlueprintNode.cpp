@@ -3,15 +3,14 @@
 
 void BlueprintNode::Update() {
 	auto builder = GetBuilder();
-	auto newLinkPin = Owner->newLinkPin;
 
 	bool hasOutputDelegates = false;
 	for (auto& output : this->Outputs)
 		if (output.Type == PinType::Delegate)
 			hasOutputDelegates = true;
 
-	builder.Begin(this->ID);
-	builder.Header(this->Color);
+	builder->Begin(this->ID);
+	builder->Header(this->Color);
 	ImGui::Spring(0);
 	ImGui::TextUnformatted(this->Name.c_str());
 	ImGui::Spring(1);
@@ -23,10 +22,7 @@ void BlueprintNode::Update() {
 			if (output.Type != PinType::Delegate)
 				continue;
 
-			auto alpha = ImGui::GetStyle().Alpha;
-			if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
-				alpha *= 48.0f / 255.0f;
-
+			float alpha = output.GetAlpha(Owner->newLinkPin);
 			ed::BeginPin(output.ID, ed::PinKind::Output);
 			ed::PinPivotAlignment(ImVec2(1.0f, 0.5f));
 			ed::PinPivotSize(ImVec2(0, 0));
@@ -50,19 +46,19 @@ void BlueprintNode::Update() {
 	}
 	else
 		ImGui::Spring(0);
-	builder.EndHeader();
+	builder->EndHeader();
 
 	for (auto& input : this->Inputs)
-		UpdateInput(input, builder);
+		UpdateInput(input);
 
 	for (auto& output : this->Outputs)
 		if (output.Type != PinType::Delegate)
-			UpdateOutput(output, builder);
+			UpdateOutput(output);
 
 	if (ImGui::Button("+")) {
 		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", PinType::Delegate);
 		this->Outputs.emplace_back(Owner->GetNextId(), "NewAddOutput", PinType::Bool);
 	}
 
-	builder.End();
+	builder->End();
 }

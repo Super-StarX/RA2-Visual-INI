@@ -18,13 +18,10 @@ BaseNode::~BaseNode() {
 	releaseTexture(m_HeaderBackground);
 }
 
-void BaseNode::UpdateInput(Pin& input, BlueprintNodeBuilder& builder) {
-	auto newLinkPin = Owner->newLinkPin;
-	auto alpha = ImGui::GetStyle().Alpha;
-	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &input) && &input != newLinkPin)
-		alpha *= 48.0f / 255.0f;
-
-	builder.Input(input.ID);
+void BaseNode::UpdateInput(Pin& input) {
+	auto builder = GetBuilder();
+	float alpha = input.GetAlpha(Owner->newLinkPin);
+	builder->Input(input.ID);
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 	input.DrawPinIcon(Owner->IsPinLinked(input.ID), (int)(alpha * 255));
 	ImGui::Spring(0);
@@ -37,17 +34,18 @@ void BaseNode::UpdateInput(Pin& input, BlueprintNodeBuilder& builder) {
 		ImGui::Spring(0);
 	}
 	ImGui::PopStyleVar();
-	builder.EndInput();
+	builder->EndInput();
 }
 
-void BaseNode::UpdateOutput(Pin& output, BlueprintNodeBuilder& builder) {
+void BaseNode::UpdateOutput(Pin& output) {
+	auto builder = GetBuilder();
 	auto newLinkPin = Owner->newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
 	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
 		alpha = alpha * (48.0f / 255.0f);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-	builder.Output(output.ID);
+	builder->Output(output.ID);
 	if (output.Type == PinType::String) {
 		static char buffer[128] = "Edit Me\nMultiline!";
 		static bool wasActive = false;
@@ -72,12 +70,12 @@ void BaseNode::UpdateOutput(Pin& output, BlueprintNodeBuilder& builder) {
 	ImGui::Spring(0);
 	output.DrawPinIcon(Owner->IsPinLinked(output.ID), (int)(alpha * 255));
 	ImGui::PopStyleVar();
-	builder.EndOutput();
+	builder->EndOutput();
 }
 
-BlueprintNodeBuilder BaseNode::GetBuilder() {
+BlueprintNodeBuilder* BaseNode::GetBuilder() {
 	static BlueprintNodeBuilder builder = BlueprintNodeBuilder(m_HeaderBackground,
 			Owner->GetTextureWidth(m_HeaderBackground), Owner->GetTextureHeight(m_HeaderBackground));
 	
-	return builder;
+	return &builder;
 }

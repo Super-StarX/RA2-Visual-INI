@@ -37,6 +37,7 @@ public:
 	}
 	static ImColor GetIconColor(PinType type);
 
+	float GetAlpha(Pin* newLinkPin);
 	void DrawPinIcon(bool connected, int alpha) const;
 	void Menu() const;
 

@@ -24,6 +24,13 @@ void Pin::Menu() const {
 		ImGui::Text("Node: %s", "<none>");
 }
 
+float Pin::GetAlpha(Pin* newLinkPin) {
+	auto alpha = ImGui::GetStyle().Alpha;
+	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, this) && this != newLinkPin)
+		alpha *= 48.0f / 255.0f;
+	return alpha;
+}
+
 void Pin::DrawPinIcon(bool connected, int alpha) const {
 	using ax::Widgets::IconType;
 	IconType iconType;

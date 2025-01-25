@@ -9,9 +9,9 @@ public:
 	BaseNode(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255));
 	~BaseNode();
 
-	virtual void UpdateInput(Pin& input, BlueprintNodeBuilder& builder);
-	virtual void UpdateOutput(Pin& output, BlueprintNodeBuilder& builder);
+	virtual void UpdateInput(Pin& input);
+	virtual void UpdateOutput(Pin& output);
 
-	BlueprintNodeBuilder GetBuilder();
+	BlueprintNodeBuilder* GetBuilder();
 };
 

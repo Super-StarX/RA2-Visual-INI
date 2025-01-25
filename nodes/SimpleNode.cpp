@@ -11,19 +11,19 @@ void SimpleNode::Update() {
 		if (output.Type == PinType::Delegate)
 			hasOutputDelegates = true;
 
-	builder.Begin(this->ID);
+	builder->Begin(this->ID);
 
 	for (auto& input : this->Inputs)
-		UpdateInput(input, builder);
+		UpdateInput(input);
 
-	builder.Middle();
+	builder->Middle();
 
 	ImGui::Spring(1, 0);
 	ImGui::TextUnformatted(this->Name.c_str());
 	ImGui::Spring(1, 0);
 
 	for (auto& output : this->Outputs)
-		UpdateOutput(output, builder);
+		UpdateOutput(output);
 
-	builder.End();
+	builder->End();
 }
