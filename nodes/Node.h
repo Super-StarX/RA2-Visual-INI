@@ -43,3 +43,16 @@ struct NodeIdLess {
 		return lhs.AsPointer() < rhs.AsPointer();
 	}
 };
+
+namespace std {
+	template<>
+	struct hash<ax::NodeEditor::NodeId> {
+		size_t operator()(const ax::NodeEditor::NodeId& id) const noexcept {
+			return hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(id.AsPointer()));
+		}
+	};
+}
+
+inline bool operator==(const ax::NodeEditor::NodeId& lhs, const ax::NodeEditor::NodeId& rhs) {
+	return lhs.AsPointer() == rhs.AsPointer();
+}

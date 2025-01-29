@@ -17,29 +17,6 @@ Pin* MainWindow::newLinkPin = nullptr;
 float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
 
-static bool Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f) {
-	using namespace ImGui;
-	ImGuiContext& g = *GImGui;
-	ImGuiWindow* window = g.CurrentWindow;
-	ImGuiID id = window->GetID("##Splitter");
-	ImRect bb;
-	bb.Min = window->DC.CursorPos + (split_vertically ? ImVec2(*size1, 0.0f) : ImVec2(0.0f, *size1));
-	bb.Max = bb.Min + CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f);
-	return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
-}
-
-int MainWindow::GetNextId() {
-	return m_NextId++;
-}
-
-ed::LinkId MainWindow::GetNextLinkId() {
-	return ed::LinkId(GetNextId());
-}
-
-void MainWindow::TouchNode(ed::NodeId id) {
-	m_NodeTouchTime[id] = m_TouchTime;
-}
-
 float MainWindow::GetTouchProgress(ed::NodeId id) {
 	auto it = m_NodeTouchTime.find(id);
 	if (it != m_NodeTouchTime.end() && it->second > 0.0f)
@@ -344,7 +321,6 @@ void MainWindow::OnFrame(float deltaTime) {
 	ed::Begin("Node editor");
 	NodeEditor();
 
-	auto openPopupPosition = ImGui::GetMousePos();
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))
 		ImGui::OpenPopup("Node Context Menu");
@@ -367,7 +343,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	if (ImGui::BeginPopup("Link Context Menu"))
 		LinkMenu();
 	if (ImGui::BeginPopup("Create New Node"))
-		CreateNewNode(openPopupPosition);
+		CreateNewNode();
 	else
 		createNewNode = false;
 	ImGui::PopStyleVar();
@@ -402,4 +378,32 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	//ImGui::ShowTestWindow();
 	//ImGui::ShowMetricsWindow();
+}
+
+void MainWindow::ClearAll() {
+	m_Nodes.clear();
+	m_Links.clear();
+	m_SectionMap.clear();
+	m_NodeSections.clear();
+}
+
+Node* MainWindow::SpawnSectionNode(const std::string& section) {
+	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), section.c_str()));
+	auto node = m_Nodes.back().get();
+	m_SectionMap[section] = node;
+	m_NodeSections[node->ID] = section;
+	return node;
+}
+
+void MainWindow::CreateLinkFromReference(Pin* outputPin, const std::string& targetSection) {
+	if (m_SectionMap.find(targetSection) != m_SectionMap.end()) {
+		auto targetNode = m_SectionMap[targetSection];
+		for (auto& input : targetNode->Inputs) {
+			if (Pin::CanCreateLink(outputPin, &input)) {
+				m_Links.emplace_back(Link(GetNextId(), outputPin->ID, input.ID));
+				m_Links.back().Color = Pin::GetIconColor(outputPin->Type);
+				break;
+			}
+		}
+	}
 }

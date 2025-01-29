@@ -224,7 +224,8 @@ void MainWindow::CreateInitNodes() {
 	m_Links.push_back(Link(GetNextLinkId(), m_Nodes[14]->Outputs[0].ID, m_Nodes[15]->Inputs[0].ID));
 }
 
-void MainWindow::CreateNewNode(ImVec2 openPopupPosition) {
+void MainWindow::CreateNewNode() {
+	auto openPopupPosition = ImGui::GetMousePos();
 	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
 
 	//auto drawList = ImGui::GetWindowDrawList();

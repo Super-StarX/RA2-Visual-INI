@@ -5,6 +5,10 @@
 #include "utilities/widgets.h"
 #include <ImGui.h>
 #include <imgui_internal.h>
+#include <fstream>
+#include <sstream>
+#include <windows.h>
+#include <commdlg.h>
 
 LeftPanelClass::LeftPanelClass(MainWindow* owner) :Owner(owner) {
 	m_RestoreIcon = Owner->LoadTexture("data/ic_restore_white_24dp.png");
@@ -235,6 +239,44 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::EndChild();
 }
 
+void LeftPanelClass::ShowFileDialog(bool isSaving) {
+	char path[MAX_PATH] = { 0 };
+	if (OpenFileDialog(path, MAX_PATH, isSaving)) {
+		if (isSaving)
+			SaveINI(path);
+		else
+			LoadINI(path);
+	}
+}
+
+bool LeftPanelClass::OpenFileDialog(char* path, int maxPath, bool isSaving) {
+	OPENFILENAMEA ofn;
+	CHAR szFile[260] = { 0 };
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetActiveWindow();
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	if (isSaving) {
+		ofn.Flags |= OFN_OVERWRITEPROMPT;
+		if (GetSaveFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	else {
+		if (GetOpenFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	return false;
+}
+
 void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 
 	ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
@@ -270,6 +312,14 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 
 	selectedNodes.resize(nodeCount);
 	selectedLinks.resize(linkCount);
+
+	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
+	if (ImGui::Button("Load INI"))
+		ShowFileDialog(false);
+	ImGui::SameLine();
+	if (ImGui::Button("Save INI"))
+		ShowFileDialog(true);
+	ImGui::EndHorizontal();
 
 	NodesPanel(paneWidth, selectedNodes);
 	SelectionPanel(paneWidth, nodeCount, selectedNodes, linkCount, selectedLinks);
@@ -311,5 +361,64 @@ void LeftPanelClass::ShowOrdinals() const {
 		}
 
 		drawList->PopClipRect();
+	}
+}
+
+void LeftPanelClass::LoadINI(const std::string& path) {
+	Owner->ClearAll();
+	std::ifstream file(path);
+	std::string line, currentSection;
+
+	while (std::getline(file, line)) {
+		// 处理section
+		if (line.find('[') != std::string::npos) {
+			currentSection = line.substr(1, line.find(']') - 1);
+			Owner->SpawnSectionNode(currentSection);
+		}
+		// 处理key=value
+		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
+			std::istringstream iss(line);
+			std::string key, value;
+			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
+				auto currentNode = Owner->m_SectionMap[currentSection];
+				// 添加输出引脚
+				auto& newPin = currentNode->Outputs.emplace_back(
+					Owner->GetNextId(), key.c_str(), PinType::String);
+				newPin.Node = currentNode;
+				newPin.Kind = PinKind::Output;
+				// 创建连线
+				Owner->CreateLinkFromReference(&newPin, value);
+			}
+		}
+	}
+
+	// 重建所有节点
+	Owner->BuildNodes();
+}
+
+void LeftPanelClass::SaveINI(const std::string& path) {
+	std::ofstream file(path);
+
+	for (auto& [section, node] : Owner->m_SectionMap) {
+		file << "[" << section << "]\n";
+
+		// 收集输出引脚对应的连接
+		std::unordered_map<std::string, std::string> keyValues;
+		for (auto& output : node->Outputs) {
+			for (auto& link : Owner->m_Links) {
+				if (link.StartPinID == output.ID) {
+					auto targetNode = Owner->FindNode(
+						Owner->FindPin(link.EndPinID)->Node->ID);
+					keyValues[output.Name] = Owner->m_NodeSections[targetNode->ID];
+				}
+			}
+		}
+
+		// 写入键值对
+		for (auto& [key, value] : keyValues) {
+			file << key << "=" << value << "\n";
+		}
+
+		file << "\n";
 	}
 }

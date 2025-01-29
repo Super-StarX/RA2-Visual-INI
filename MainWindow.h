@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <map>
 
 #include "nodes/Node.h"
@@ -22,14 +23,24 @@ public:
 
 	static float leftPaneWidth;
 	static float rightPaneWidth;
-private:
-	ed::LinkId GetNextLinkId();
-	void TouchNode(ed::NodeId id);
-	void UpdateTouch();
+
+	int GetNextId() { return m_NextId++; };
+	ed::LinkId GetNextLinkId() { return ed::LinkId(GetNextId()); }
+	float GetTouchProgress(ed::NodeId id);
+	std::vector<Link>& GetLinks() { return m_Links; };
+	std::vector<std::unique_ptr<Node>>& GetNodes() { return m_Nodes; };
 	Node* FindNode(ed::NodeId id);
 	Link* FindLink(ed::LinkId id);
 	Pin* FindPin(ed::PinId id);
+	bool IsPinLinked(ed::PinId id);
+
 	void BuildNode(const std::unique_ptr<Node>& node);
+	void BuildNodes();
+	void ClearAll();
+	void CreateLinkFromReference(Pin* outputPin, const std::string& targetSection);
+	void TouchNode(ed::NodeId id) { m_NodeTouchTime[id] = m_TouchTime; };
+	void UpdateTouch();
+
 	Node* SpawnInputActionNode();
 	Node* SpawnBranchNode();
 	Node* SpawnDoNNode();
@@ -46,27 +57,22 @@ private:
 	Node* SpawnComment();
 	Node* SpawnHoudiniTransformNode();
 	Node* SpawnHoudiniGroupNode();
-	void BuildNodes();
+	Node* SpawnSectionNode(const std::string& section);
 	void NodeEditor();
 	void NodeMenu();
 	void PinMenu();
 	void LinkMenu();
 	void CreateInitNodes();
-	void CreateNewNode(ImVec2 openPopupPosition);
-
+	void CreateNewNode();
 	void ShowStyleEditor(bool* show = nullptr);
 
-public:
 	virtual void OnStart() override;
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
 
-	int GetNextId();
-	bool IsPinLinked(ed::PinId id);
-	std::vector<std::unique_ptr<Node>>& GetNodes() { return m_Nodes; };
-	std::vector<Link>& GetLinks() { return m_Links; };
-	float GetTouchProgress(ed::NodeId id);
-private:
+
+	std::unordered_map<std::string, Node*> m_SectionMap;
+	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
 	LeftPanelClass m_LeftPanel;
 	int									m_NextId = 1;
 	std::vector<std::unique_ptr<Node>>	m_Nodes;
