@@ -85,53 +85,25 @@ void LeftPanelClass::ShowStyleEditor(bool* show) {
 	ImGui::PushItemWidth(-160);
 	for (int i = 0; i < ed::StyleColor_Count; ++i) {
 		auto name = ed::GetStyleColorName((ed::StyleColor)i);
-		if (!filter.PassFilter(name))
-			continue;
-
-		ImGui::ColorEdit4(name, &editorStyle.Colors[i].x, edit_mode);
+		if (filter.PassFilter(name))
+			ImGui::ColorEdit4(name, &editorStyle.Colors[i].x, edit_mode);
 	}
 	ImGui::PopItemWidth();
 
 	ImGui::End();
 }
 
-void LeftPanelClass::ShowLeftPanel(float paneWidth) {
-	namespace ed = ax::NodeEditor;
+void LeftPanelClass::DrawIcon(ImDrawList* drawList, ImTextureID* icon) {
+	if (ImGui::IsItemActive())
+		drawList->AddImage(icon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
+	else if (ImGui::IsItemHovered())
+		drawList->AddImage(icon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
+	else
+		drawList->AddImage(icon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+}
+
+void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes) {
 	auto& io = ImGui::GetIO();
-
-	ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
-
-	paneWidth = ImGui::GetContentRegionAvail().x;
-
-	static bool showStyleEditor = false;
-	ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
-	ImGui::Spring(0.0f, 0.0f);
-	if (ImGui::Button("Zoom to Content"))
-		ed::NavigateToContent();
-	ImGui::Spring(0.0f);
-	if (ImGui::Button("Show Flow")) {
-		for (auto& link : Owner->GetLinks())
-			ed::Flow(link.ID);
-	}
-	ImGui::Spring();
-	if (ImGui::Button("Edit Style"))
-		showStyleEditor = true;
-	ImGui::EndHorizontal();
-	ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals);
-
-	if (showStyleEditor)
-		ShowStyleEditor(&showStyleEditor);
-
-	std::vector<ed::NodeId> selectedNodes;
-	std::vector<ed::LinkId> selectedLinks;
-	selectedNodes.resize(ed::GetSelectedObjectCount());
-	selectedLinks.resize(ed::GetSelectedObjectCount());
-
-	int nodeCount = ed::GetSelectedNodes(selectedNodes.data(), static_cast<int>(selectedNodes.size()));
-	int linkCount = ed::GetSelectedLinks(selectedLinks.data(), static_cast<int>(selectedLinks.size()));
-
-	selectedNodes.resize(nodeCount);
-	selectedLinks.resize(linkCount);
 
 	int saveIconWidth = Owner->GetTextureWidth(m_SaveIcon);
 	int saveIconHeight = Owner->GetTextureWidth(m_SaveIcon);
@@ -180,9 +152,8 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 		auto iconPanelPos = start + ImVec2(
 			paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1,
 			(ImGui::GetTextLineHeight() - saveIconHeight) / 2);
-		ImGui::GetWindowDrawList()->AddText(
-			ImVec2(iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y),
-			IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
+		auto textPos = ImVec2(iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y);
+		ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
 
 		auto drawList = ImGui::GetWindowDrawList();
 		ImGui::SetCursorScreenPos(iconPanelPos);
@@ -195,12 +166,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 			if (ImGui::InvisibleButton("save", ImVec2((float)saveIconWidth, (float)saveIconHeight)))
 				node->SavedState = node->State;
 
-			if (ImGui::IsItemActive())
-				drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
-			else if (ImGui::IsItemHovered())
-				drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
-			else
-				drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+			DrawIcon(drawList, &m_SaveIcon);
 		}
 		else {
 			ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
@@ -220,12 +186,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 				node->SavedState.clear();
 			}
 
-			if (ImGui::IsItemActive())
-				drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 96));
-			else if (ImGui::IsItemHovered())
-				drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255));
-			else
-				drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
+			DrawIcon(drawList, &m_RestoreIcon);
 		}
 		else {
 			ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
@@ -241,7 +202,9 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 		ImGui::PopID();
 	}
 	ImGui::Unindent();
+}
 
+void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<ed::NodeId>& selectedNodes, int linkCount, std::vector<ed::LinkId>& selectedLinks) {
 	static int changeCount = 0;
 
 	ImGui::GetWindowDrawList()->AddRectFilled(
@@ -270,6 +233,46 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 		++changeCount;
 
 	ImGui::EndChild();
+}
+
+void LeftPanelClass::ShowLeftPanel(float paneWidth) {
+
+	ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
+
+	paneWidth = ImGui::GetContentRegionAvail().x;
+
+	static bool showStyleEditor = false;
+	ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
+	ImGui::Spring(0.0f, 0.0f);
+	if (ImGui::Button("Zoom to Content"))
+		ed::NavigateToContent();
+	ImGui::Spring(0.0f);
+	if (ImGui::Button("Show Flow")) {
+		for (auto& link : Owner->GetLinks())
+			ed::Flow(link.ID);
+	}
+	ImGui::Spring();
+	if (ImGui::Button("Edit Style"))
+		showStyleEditor = true;
+	ImGui::EndHorizontal();
+	ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals);
+
+	if (showStyleEditor)
+		ShowStyleEditor(&showStyleEditor);
+
+	std::vector<ed::NodeId> selectedNodes;
+	std::vector<ed::LinkId> selectedLinks;
+	selectedNodes.resize(ed::GetSelectedObjectCount());
+	selectedLinks.resize(ed::GetSelectedObjectCount());
+
+	int nodeCount = ed::GetSelectedNodes(selectedNodes.data(), static_cast<int>(selectedNodes.size()));
+	int linkCount = ed::GetSelectedLinks(selectedLinks.data(), static_cast<int>(selectedLinks.size()));
+
+	selectedNodes.resize(nodeCount);
+	selectedLinks.resize(linkCount);
+
+	NodesPanel(paneWidth, selectedNodes);
+	SelectionPanel(paneWidth, nodeCount, selectedNodes, linkCount, selectedLinks);
 }
 
 void LeftPanelClass::ShowOrdinals() const {
