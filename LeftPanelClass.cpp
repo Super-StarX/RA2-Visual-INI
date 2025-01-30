@@ -367,48 +367,34 @@ void LeftPanelClass::ShowOrdinals() const {
 
 // LeftPanelClass.cpp
 void LeftPanelClass::LoadINI(const std::string& path) {
-    Owner->ClearAll();
-    std::ifstream file(path);
-    std::string line, currentSection;
+	Owner->ClearAll();
+	std::ifstream file(path);
+	std::string line, currentSection;
 
-    // 第一阶段：创建所有Section节点
-    while (std::getline(file, line)) {
-        if (line.find('[') != std::string::npos) {
-            currentSection = line.substr(1, line.find(']') - 1);
-            Owner->SpawnSectionNode(currentSection);
-        }
-    }
+	while (std::getline(file, line)) {
+		// 处理section
+		if (line.find('[') != std::string::npos) {
+			currentSection = line.substr(1, line.find(']') - 1);
+			Owner->SpawnSectionNode(currentSection);
+		}
+		// 处理key=value
+		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
+			std::istringstream iss(line);
+			std::string key, value;
+			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
+				auto currentNode = Owner->m_SectionMap[currentSection];
+				// 添加输出引脚
+				auto& kv = currentNode->KeyValues.emplace_back(key, value, Pin{ Owner->GetNextId(), key.c_str(), PinType::String });
+				kv.OutputPin.Node = currentNode;
+				kv.OutputPin.Kind = PinKind::Output;
+				// 创建连线
+				Owner->CreateLinkFromReference(&kv.OutputPin, value);
+			}
+		}
+	}
 
-    // 重置文件指针并重新解析
-    file.clear();
-    file.seekg(0);
-
-    // 第二阶段：处理Key-Value和连接
-    while (std::getline(file, line)) {
-        if (line.find('[') != std::string::npos) {
-            currentSection = line.substr(1, line.find(']') - 1);
-        } else if (!currentSection.empty() && line.find('=') != std::string::npos) {
-            std::istringstream iss(line);
-            std::string key, value;
-            if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-                // 创建Key-Value节点
-                auto node = std::make_unique<SectionNode>(Owner, Owner->GetNextId(), "Key-Value");
-                node->Outputs.emplace_back(Owner->GetNextId(), "Value", PinType::String);
-				// 给pin增加key和value的文本框
-                Owner->m_Nodes.push_back(std::move(node));
-
-                // 查找目标Section节点并创建连接
-                if (Owner->m_SectionMap.find(value) != Owner->m_SectionMap.end()) {
-                    auto targetNode = Owner->m_SectionMap[value];
-                    Owner->m_Links.emplace_back(
-                        Owner->GetNextLinkId(),
-                        node->Outputs[0].ID,
-                        targetNode->Inputs[0].ID
-                    );
-                }
-            }
-        }
-    }
+	// 重建所有节点
+	Owner->BuildNodes();
 }
 
 void LeftPanelClass::SaveINI(const std::string& path) {

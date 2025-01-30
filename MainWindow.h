@@ -10,6 +10,8 @@
 #include "nodes/Node.h"
 #include "LeftPanelClass.h"
 
+class SectionNode;
+
 class MainWindow : public Application {
 public:
 	using Application::Application;
@@ -71,7 +73,7 @@ public:
 	virtual void OnFrame(float deltaTime) override;
 
 
-	std::unordered_map<std::string, Node*> m_SectionMap;
+	std::unordered_map<std::string, SectionNode*> m_SectionMap;
 	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
 	LeftPanelClass m_LeftPanel;
 	int									m_NextId = 1;

@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "Utils.h"
-#include "nodes/BlueprintNode.h"
+#include "nodes/SectionNode.h"
 
 #include <imgui_internal.h>
 
@@ -388,9 +388,9 @@ void MainWindow::ClearAll() {
 }
 
 Node* MainWindow::SpawnSectionNode(const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<BlueprintNode>(this, GetNextId(), section.c_str()));
+	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
 	auto node = m_Nodes.back().get();
-	m_SectionMap[section] = node;
+	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
 	return node;
 }

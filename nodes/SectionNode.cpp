@@ -17,46 +17,27 @@ void SectionNode::Update() {
 	for (auto& kv : this->KeyValues) {
 		ImGui::PushID(&kv);
 
-		// Key输入框
+		ImGui::BeginGroup();
 		ImGui::SetNextItemWidth(80);
-		if (ImGui::InputText("##Key", &kv.Key)) {
-			// 处理key修改
-		}
+		ImGui::InputText("##Key", &kv.Key);
+		ImGui::EndGroup();
 
-		ImGui::SameLine();
-
-		// Value输入框
+		ImGui::BeginGroup();
 		ImGui::SetNextItemWidth(120);
-		if (/*kv.HasConnection*/true) {
-			//ImGui::BeginDisabled();
-			ImGui::InputText("##Value", &kv.Value, ImGuiInputTextFlags_ReadOnly);
-			//ImGui::EndDisabled();
-		}
-		else {
-			if (ImGui::InputText("##Value", &kv.Value)) {
-				// 处理value修改
-			}
-		}
+		ImGui::InputText("##Value", &kv.Value, ImGuiInputTextFlags_ReadOnly);
+		ImGui::EndGroup();
 
-		ImGui::SameLine();
+		ImGui::BeginGroup();
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
 
-		// 输出引脚
 		float alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
 		ed::BeginPin(kv.OutputPin.ID, ed::PinKind::Output);
-		ed::PinPivotAlignment(ImVec2(1.0f, 0.5f));
 		kv.OutputPin.DrawPinIcon(Owner->IsPinLinked(kv.OutputPin.ID), (int)(alpha * 255));
 		ed::EndPin();
+		ImGui::EndGroup();
 
 		ImGui::PopID();
-	}
-
-	// 添加新键值对的按钮
-	if (ImGui::Button("+ Add Key")) {
-		auto newID = Owner->GetNextId();
-		this->KeyValues.emplace_back(KeyValuePair{
-			"", "",
-			Pin(newID, "", PinType::String)
-		});
+		ImGui::Dummy(ImVec2(0, 28));
 	}
 
 	builder->End();
