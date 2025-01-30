@@ -1,5 +1,6 @@
 ﻿#include "SectionNode.h"
 #include "MainWindow.h"
+#include <misc/cpp/imgui_stdlib.h>
 
 void SectionNode::Update() {
 	auto builder = GetBuilder();
@@ -26,10 +27,10 @@ void SectionNode::Update() {
 
 		// Value输入框
 		ImGui::SetNextItemWidth(120);
-		if (kv.HasConnection) {
-			ImGui::BeginDisabled();
+		if (/*kv.HasConnection*/true) {
+			//ImGui::BeginDisabled();
 			ImGui::InputText("##Value", &kv.Value, ImGuiInputTextFlags_ReadOnly);
-			ImGui::EndDisabled();
+			//ImGui::EndDisabled();
 		}
 		else {
 			if (ImGui::InputText("##Value", &kv.Value)) {
@@ -54,8 +55,7 @@ void SectionNode::Update() {
 		auto newID = Owner->GetNextId();
 		this->KeyValues.emplace_back(KeyValuePair{
 			"", "",
-			Pin(newID, "", PinType::String),
-			false
+			Pin(newID, "", PinType::String)
 		});
 	}
 
