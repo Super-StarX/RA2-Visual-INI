@@ -157,6 +157,7 @@
     <ClCompile Include="nodes\HoudiniNode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="nodes\Node.cpp" />
     <ClCompile Include="nodes\SectionNode.cpp" />
     <ClCompile Include="nodes\TreeNode.cpp" />
     <ClCompile Include="Pin.cpp" />
