@@ -14,6 +14,9 @@ void SectionNode::Update() {
 	ImGui::Spring(0);
 	builder->EndHeader();
 
+	UpdateInput(*InputPin.get());
+	UpdateOutput(*OutputPin.get());
+
 	// 渲染键值对
 	for (auto& kv : this->KeyValues) {
 		auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);

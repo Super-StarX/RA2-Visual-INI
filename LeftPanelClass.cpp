@@ -1,4 +1,4 @@
-#define IMGUI_DEFINE_MATH_OPERATORS
+﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "LeftPanelClass.h"
 #include "MainWindow.h"
 #include "nodes/SectionNode.h"
@@ -445,6 +445,7 @@ public:
 		return result;
 	}
 };
+
 void LeftPanelClass::ApplyForceDirectedLayout() {
 	// 初始化空间网格
 	SpatialGrid grid(150.0f); // 根据节点平均大小调整网格尺寸
@@ -578,11 +579,22 @@ void LeftPanelClass::LoadINI(const std::string& path) {
 				auto currentNode = Owner->m_SectionMap[currentSection];
 				currentNode->SetPosition({ 0,0 });
 				// 添加输出引脚
-				auto& kv = currentNode->KeyValues.emplace_back(key, value, Pin{ Owner->GetNextId(), key.c_str(), PinType::String });
+				auto& kv = currentNode->KeyValues.emplace_back(key, value, 
+					Pin{ Owner->GetNextId(), key.c_str(), PinType::String }
+				);
 				kv.OutputPin.Node = currentNode;
 				kv.OutputPin.Kind = PinKind::Output;
+				currentNode->InputPin = std::make_unique<Pin>(Owner->GetNextId(), "input", PinType::Flow);
+				currentNode->OutputPin = std::make_unique<Pin>(Owner->GetNextId(), "output", PinType::Flow);
 				// 创建连线
-				Owner->CreateLinkFromReference(&kv.OutputPin, value);
+				if (Owner->m_SectionMap.contains(value)) {
+					auto targetNode = Owner->m_SectionMap[value];
+					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
+						Owner->m_Links.emplace_back(Link(Owner->GetNextId(), (kv.OutputPin).ID, targetNode->InputPin->ID));
+						Owner->m_Links.back().Color = Pin::GetIconColor((kv.OutputPin).Type);
+						break;
+					}
+				}
 			}
 		}
 	}

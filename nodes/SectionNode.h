@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "BaseNode.h"
+#include <memory>
+
 class SectionNode : public BaseNode {
 public:
 	struct KeyValuePair {
@@ -12,5 +14,7 @@ public:
 	virtual void Update();
 
 	std::vector<KeyValuePair> KeyValues;
+	std::unique_ptr<Pin> InputPin;
+	std::unique_ptr<Pin> OutputPin;
 };
 

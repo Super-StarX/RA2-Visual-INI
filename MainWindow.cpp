@@ -404,14 +404,4 @@ Node* MainWindow::SpawnSectionNode(const std::string& section) {
 }
 
 void MainWindow::CreateLinkFromReference(Pin* outputPin, const std::string& targetSection) {
-	if (m_SectionMap.find(targetSection) != m_SectionMap.end()) {
-		auto targetNode = m_SectionMap[targetSection];
-		for (auto& input : targetNode->Inputs) {
-			if (Pin::CanCreateLink(outputPin, &input)) {
-				m_Links.emplace_back(Link(GetNextId(), outputPin->ID, input.ID));
-				m_Links.back().Color = Pin::GetIconColor(outputPin->Type);
-				break;
-			}
-		}
-	}
 }
