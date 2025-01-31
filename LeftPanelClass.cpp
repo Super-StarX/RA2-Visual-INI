@@ -580,7 +580,7 @@ void LeftPanelClass::LoadINI(const std::string& path) {
 				currentNode->SetPosition({ 0,0 });
 				// 添加输出引脚
 				auto& kv = currentNode->KeyValues.emplace_back(key, value, 
-					Pin{ Owner->GetNextId(), key.c_str(), PinType::String }
+					Pin{ Owner->GetNextId(), key.c_str(), PinType::Flow }
 				);
 				kv.OutputPin.Node = currentNode;
 				kv.OutputPin.Kind = PinKind::Output;
@@ -590,8 +590,8 @@ void LeftPanelClass::LoadINI(const std::string& path) {
 				if (Owner->m_SectionMap.contains(value)) {
 					auto targetNode = Owner->m_SectionMap[value];
 					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
-						Owner->m_Links.emplace_back(Link(Owner->GetNextId(), (kv.OutputPin).ID, targetNode->InputPin->ID));
-						Owner->m_Links.back().Color = Pin::GetIconColor((kv.OutputPin).Type);
+						Owner->m_Links.emplace_back(Link(Owner->GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
+						Owner->m_Links.back().Color = Pin::GetIconColor(kv.OutputPin.Type);
 						break;
 					}
 				}
