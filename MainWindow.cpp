@@ -67,6 +67,12 @@ Pin* MainWindow::FindPin(ed::PinId id) {
 			for (auto& [_, __, pin] : sectionNode->KeyValues)
 				if (pin.ID == id)
 					return &pin;
+
+			if (sectionNode->OutputPin->ID == id)
+				return sectionNode->OutputPin.get();
+
+			if (sectionNode->InputPin->ID == id)
+				return sectionNode->InputPin.get();
 		}
 	}
 
