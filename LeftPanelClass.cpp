@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "LeftPanelClass.h"
 #include "MainWindow.h"
 #include "nodes/SectionNode.h"
@@ -329,10 +329,8 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 	if (ImGui::Button("Save INI"))
 		ShowFileDialog(true);
 	ImGui::EndHorizontal();
-	ImGui::SliderFloat("斥力系数", &REPULSION_FORCE, 10000.0f, 100000.0f);
-	ImGui::SliderFloat("引力系数", &ATTRACTION_FORCE, 0.001f, 0.1f);
 
-	if (ImGui::Button("重新布局")) {
+	if (ImGui::Button("rebuild layout")) {
 		ApplyForceDirectedLayout();
 	}
 
@@ -405,7 +403,55 @@ namespace {
 	}
 }
 
+// 添加网格划分辅助结构
+struct GridCell {
+	std::vector<Node*> Nodes;
+};
+
+class SpatialGrid {
+private:
+	float m_CellSize;
+	std::unordered_map<int, std::unordered_map<int, GridCell>> m_Grid;
+
+public:
+	explicit SpatialGrid(float cellSize = 200.0f) : m_CellSize(cellSize) {}
+
+	void Clear() {
+		m_Grid.clear();
+	}
+
+	void Insert(Node* node) {
+		ImVec2 pos = node->GetPosition();
+		int x = static_cast<int>(pos.x / m_CellSize);
+		int y = static_cast<int>(pos.y / m_CellSize);
+		m_Grid[x][y].Nodes.push_back(node);
+	}
+
+	std::vector<Node*> GetNearbyNodes(Node* node) {
+		std::vector<Node*> result;
+		ImVec2 pos = node->GetPosition();
+		int x = static_cast<int>(pos.x / m_CellSize);
+		int y = static_cast<int>(pos.y / m_CellSize);
+
+		// 检查3x3区域
+		for (int i = -1; i <= 1; ++i) {
+			for (int j = -1; j <= 1; ++j) {
+				if (m_Grid.count(x + i) && m_Grid[x + i].count(y + j)) {
+					auto& cell = m_Grid[x + i][y + j];
+					result.insert(result.end(), cell.Nodes.begin(), cell.Nodes.end());
+				}
+			}
+		}
+		return result;
+	}
+};
 void LeftPanelClass::ApplyForceDirectedLayout() {
+	// 初始化空间网格
+	SpatialGrid grid(150.0f); // 根据节点平均大小调整网格尺寸
+	for (auto& node : Owner->m_Nodes) {
+		grid.Insert(node.get());
+	}
+
 	// 初始化物理状态
 	std::unordered_map<Node*, ImVec2> velocities;
 	std::unordered_map<Node*, ImVec2> accelerations;
@@ -414,13 +460,11 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 		accelerations[node.get()] = ImVec2(0, 0);
 	}
 
-	// 迭代优化
-	constexpr int ITERATIONS = 1;
+	// 迭代优化参数
+	constexpr int ITERATIONS = 500;
 	constexpr float DAMPING = 0.85f;
 	constexpr float MAX_SPEED = 15.0f;
-	float repulsion_force = REPULSION_FORCE;
-	float attraction_force = ATTRACTION_FORCE;
-	ImVec2 PADDING{ 30, 30 };
+	constexpr float PADDING = 30.0f;
 
 	for (int iter = 0; iter < ITERATIONS; ++iter) {
 		// 重置加速度
@@ -428,35 +472,33 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 			acc = ImVec2(0, 0);
 		}
 
-		// 节点间斥力（带碰撞检测）
-		for (size_t i = 0; i < Owner->m_Nodes.size(); ++i) {
-			auto& node1 = Owner->m_Nodes[i];
-			const ImVec2 pos1 = node1->GetPosition();
-			const ImVec2 size1 = GetNodeSize(node1->ID) + PADDING;
+		// 节点间斥力（使用空间网格优化）
+		for (auto& node : Owner->m_Nodes) {
+			auto nearbyNodes = grid.GetNearbyNodes(node.get());
 
-			for (size_t j = i + 1; j < Owner->m_Nodes.size(); ++j) {
-				auto& node2 = Owner->m_Nodes[j];
-				const ImVec2 pos2 = node2->GetPosition();
-				const ImVec2 size2 = GetNodeSize(node2->ID) + PADDING;
+			const ImVec2 pos1 = node->GetPosition();
+			const ImVec2 size1 = GetNodeSize(node->ID) + ImVec2(PADDING, PADDING);
 
-				const ImVec2 delta = pos2 - pos1;
-				const float dx = delta.x;
-				const float dy = delta.y;
+			for (auto& other : nearbyNodes) {
+				if (node.get() == other) continue;
+
+				const ImVec2 pos2 = other->GetPosition();
+				const ImVec2 size2 = GetNodeSize(other->ID) + ImVec2(PADDING, PADDING);
 
 				// 计算实际边界距离
 				const float minDistX = (size1.x + size2.x) / 2;
-				const float minDistY = (size1.y + size2.y) / 2;
-				const float overlapX = minDistX - std::abs(dx);
-				const float overlapY = minDistY - std::abs(dy);
+				const float minDistY = (size1.y + size2.y) * 0.5f;
+				const float overlapX = minDistX - std::abs(pos1.x - pos2.x);
+				const float overlapY = minDistY - std::abs(pos1.y - pos2.y);
 
 				if (overlapX > 0 && overlapY > 0) {
-					const float dist = std::hypot(dx, dy);
+					const float dist = std::hypot(pos1.x - pos2.x, pos1.y - pos2.y);
 					const float safeDist = std::hypot(minDistX, minDistY);
-					const float force = repulsion_force / (dist * dist + 1e-6f);
-					const ImVec2 dir = ImNormalized(delta);
+					const float force = REPULSION_FORCE / (dist * dist + 1e-6f);
+					const ImVec2 dir = ImNormalized(ImVec2(pos2.x - pos1.x, pos2.y - pos1.y));
 
-					accelerations[node1.get()] -= dir * (force + (std::min)(overlapX, overlapY) * 2.0f);
-					accelerations[node2.get()] += dir * (force + (std::min)(overlapX, overlapY) * 2.0f);
+					accelerations[node.get()] -= dir * (force + (std::min)(overlapX, overlapY) * 2.0f);
+					accelerations[other] += dir * (force + (std::min)(overlapX, overlapY) * 2.0f);
 				}
 			}
 		}
@@ -476,7 +518,7 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 			// 动态调整理想距离
 			const int linkCount = GetConnectedLinkCount(startNode);
 			const float idealDist = 150.0f / std::sqrt(linkCount + 1);
-			const float attraction = attraction_force * (dist - idealDist) / dist;
+			const float attraction = ATTRACTION_FORCE * (dist - idealDist) / dist;
 
 			accelerations[startNode] += delta * attraction;
 			accelerations[endNode] -= delta * attraction;
@@ -496,17 +538,19 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 			}
 
 			// 更新位置
-			ImVec2 newPos = node->GetPosition() + vel;
-
-			node->SetPosition(newPos);
+			node->SetPosition(node->GetPosition() + vel);
 		}
 
-		// 模拟退火
-		repulsion_force *= 0.995f;
-		attraction_force *= 1.005f;
+		// 每5次迭代更新一次网格（平衡精度和性能）
+		if (iter % 5 == 0) {
+			grid.Clear();
+			for (auto& node : Owner->m_Nodes) {
+				grid.Insert(node.get());
+			}
+		}
 	}
 
-	// 最终对齐（可选）
+	// 最终对齐（保持原逻辑）
 	for (auto& node : Owner->m_Nodes) {
 		ImVec2 pos = node->GetPosition();
 		pos.x = std::round(pos.x / 10) * 10;

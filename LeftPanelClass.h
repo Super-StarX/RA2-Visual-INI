@@ -6,6 +6,7 @@
 
 namespace ed = ax::NodeEditor;
 
+class Node;
 class MainWindow;
 class LeftPanelClass {
 public:
@@ -20,6 +21,8 @@ public:
 	void ShowOrdinals() const;
 	void ShowFileDialog(bool isSaving);
 	bool OpenFileDialog(char* path, int maxPath, bool isSaving);
+	void ClampPosition(Node* node);
+	void ResolveCollisions(Node* node);
 	void ApplyForceDirectedLayout();
 	void LoadINI(const std::string& path);
 	void SaveINI(const std::string& path);

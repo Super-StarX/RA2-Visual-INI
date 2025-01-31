@@ -293,7 +293,6 @@ void MainWindow::NodeEditor() {
 }
 
 void MainWindow::OnFrame(float deltaTime) {
-	m_LeftPanel.ApplyForceDirectedLayout();
 	UpdateTouch();
 
 	auto& io = ImGui::GetIO();
