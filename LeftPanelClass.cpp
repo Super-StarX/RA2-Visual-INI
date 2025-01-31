@@ -605,9 +605,6 @@ void LeftPanelClass::LoadINI(const std::string& path) {
 				kv.OutputPin.Node = currentNode;
 				kv.OutputPin.Kind = PinKind::Output;
 
-				currentNode->InputPin = std::make_unique<Pin>(Owner->GetNextId(), "input", PinType::Flow);
-				currentNode->OutputPin = std::make_unique<Pin>(Owner->GetNextId(), "output", PinType::Flow);
-
 				// 创建连线
 				if (Owner->m_SectionMap.contains(value)) {
 					auto targetNode = Owner->m_SectionMap[value];

@@ -406,6 +406,8 @@ Node* MainWindow::SpawnSectionNode(const std::string& section) {
 	node->Type = NodeType::Section;
 	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
+	m_SectionMap[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
+	m_SectionMap[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
 	return node;
 }
 
