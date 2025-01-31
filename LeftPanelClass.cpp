@@ -449,9 +449,8 @@ public:
 void LeftPanelClass::ApplyForceDirectedLayout() {
 	// 初始化空间网格
 	SpatialGrid grid(150.0f); // 根据节点平均大小调整网格尺寸
-	for (auto& node : Owner->m_Nodes) {
+	for (auto& node : Owner->m_Nodes)
 		grid.Insert(node.get());
-	}
 
 	// 初始化物理状态
 	std::unordered_map<Node*, ImVec2> velocities;
@@ -469,9 +468,8 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 
 	for (int iter = 0; iter < ITERATIONS; ++iter) {
 		// 重置加速度
-		for (auto& [node, acc] : accelerations) {
+		for (auto& [node, acc] : accelerations)
 			acc = ImVec2(0, 0);
-		}
 
 		// 节点间斥力（使用空间网格优化）
 		for (auto& node : Owner->m_Nodes) {
@@ -534,9 +532,8 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 
 			// 限速
 			const float speed = ImLength(vel);
-			if (speed > MAX_SPEED) {
+			if (speed > MAX_SPEED)
 				vel = ImNormalized(vel) * MAX_SPEED;
-			}
 
 			// 更新位置
 			node->SetPosition(node->GetPosition() + vel);
@@ -545,9 +542,8 @@ void LeftPanelClass::ApplyForceDirectedLayout() {
 		// 每5次迭代更新一次网格（平衡精度和性能）
 		if (iter % 5 == 0) {
 			grid.Clear();
-			for (auto& node : Owner->m_Nodes) {
+			for (auto& node : Owner->m_Nodes) 
 				grid.Insert(node.get());
-			}
 		}
 	}
 
@@ -576,9 +572,8 @@ void LeftPanelClass::LoadINI(const std::string& path) {
 		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
 			std::istringstream iss(line);
 			std::string key, value;
-			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
+			if (std::getline(iss, key, '=') && std::getline(iss, value))
 				keyValuePairs[currentSection].emplace_back(key, value);
-			}
 		}
 	}
 
@@ -663,24 +658,8 @@ void LeftPanelClass::SaveINI(const std::string& path) {
 
 	for (auto& [section, node] : Owner->m_SectionMap) {
 		file << "[" << section << "]\n";
-
-		// 收集输出引脚对应的连接
-		std::unordered_map<std::string, std::string> keyValues;
-		for (auto& output : node->Outputs) {
-			for (auto& link : Owner->m_Links) {
-				if (link.StartPinID == output.ID) {
-					auto targetNode = Owner->FindNode(
-						Owner->FindPin(link.EndPinID)->Node->ID);
-					keyValues[output.Name] = Owner->m_NodeSections[targetNode->ID];
-				}
-			}
-		}
-
-		// 写入键值对
-		for (auto& [key, value] : keyValues) {
-			file << key << "=" << value << "\n";
-		}
-
+		for (auto& output : node->KeyValues)
+			file << output.Key << "=" << output.Value << "\n";
 		file << "\n";
 	}
 }
