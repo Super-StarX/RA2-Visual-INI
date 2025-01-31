@@ -61,6 +61,13 @@ Pin* MainWindow::FindPin(ed::PinId id) {
 		for (auto& pin : node->Outputs)
 			if (pin.ID == id)
 				return &pin;
+
+		if (node->Type == NodeType::Section) {
+			auto sectionNode = dynamic_cast<SectionNode*>(node.get());
+			for (auto& [_, __, pin] : sectionNode->KeyValues)
+				if (pin.ID == id)
+					return &pin;
+		}
 	}
 
 	return nullptr;
@@ -390,6 +397,7 @@ void MainWindow::ClearAll() {
 Node* MainWindow::SpawnSectionNode(const std::string& section) {
 	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
 	auto node = m_Nodes.back().get();
+	node->Type = NodeType::Section;
 	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
 	return node;

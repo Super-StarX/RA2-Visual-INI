@@ -11,8 +11,8 @@ enum class NodeType {
 	Simple,
 	Tree,
 	Comment,
-	Houdini
-
+	Houdini,
+	Section,
 };
 
 class MainWindow;
