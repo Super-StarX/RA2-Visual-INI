@@ -401,7 +401,7 @@ void MainWindow::ClearAll() {
 }
 
 SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
-	m_Nodes.emplace_back();
+	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
 	auto node = m_Nodes.back().get();
 	node->Type = NodeType::Section;
 	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
