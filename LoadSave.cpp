@@ -26,6 +26,9 @@ void MainWindow::LoadINI(const std::string& path) {
 		}
 	}
 
+	// 重建所有节点
+	BuildNodes();
+
 	// 重置文件指针到文件开头
 	file.clear();
 	file.seekg(0, std::ios::beg);
@@ -98,8 +101,6 @@ void MainWindow::LoadINI(const std::string& path) {
 	}
 
 	ApplyForceDirectedLayout();
-	// 重建所有节点
-	BuildNodes();
 }
 
 void MainWindow::SaveINI(const std::string& path) {

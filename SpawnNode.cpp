@@ -5,6 +5,7 @@
 #include "nodes/CommentNode.h"
 #include "nodes/SimpleNode.h"
 #include "nodes/HoudiniNode.h"
+#include "nodes/SectionNode.h"
 
 void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 	for (auto& input : node->Inputs) {
@@ -15,6 +16,14 @@ void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 	for (auto& output : node->Outputs) {
 		output.Node = node.get();
 		output.Kind = PinKind::Output;
+	}
+
+	if (node->Type == NodeType::Section) {
+		auto sectionNode = reinterpret_cast<SectionNode*>(node.get());
+		sectionNode->InputPin->Node = sectionNode;
+		sectionNode->InputPin->Kind = PinKind::Input;
+		sectionNode->OutputPin->Node = sectionNode;
+		sectionNode->OutputPin->Kind = PinKind::Output;
 	}
 }
 
