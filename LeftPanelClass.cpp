@@ -6,10 +6,6 @@
 #include "utilities/widgets.h"
 #include <ImGui.h>
 #include <imgui_internal.h>
-#include <windows.h>
-#include <commdlg.h>
-#include <algorithm>
-#include <unordered_map>
 
 LeftPanelClass::LeftPanelClass(MainWindow* owner) :Owner(owner) {
 	m_RestoreIcon = Owner->LoadTexture("data/ic_restore_white_24dp.png");
@@ -240,44 +236,6 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::EndChild();
 }
 
-void LeftPanelClass::ShowFileDialog(bool isSaving) {
-	char path[MAX_PATH] = { 0 };
-	if (OpenFileDialog(path, MAX_PATH, isSaving)) {
-		if (isSaving)
-			Owner->SaveINI(path);
-		else
-			Owner->LoadINI(path);
-	}
-}
-
-bool LeftPanelClass::OpenFileDialog(char* path, int maxPath, bool isSaving) {
-	OPENFILENAMEA ofn;
-	CHAR szFile[260] = { 0 };
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = GetActiveWindow();
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = "INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0";
-	ofn.nFilterIndex = 1;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-	if (isSaving) {
-		ofn.Flags |= OFN_OVERWRITEPROMPT;
-		if (GetSaveFileNameA(&ofn) == TRUE) {
-			strcpy_s(path, maxPath, szFile);
-			return true;
-		}
-	}
-	else {
-		if (GetOpenFileNameA(&ofn) == TRUE) {
-			strcpy_s(path, maxPath, szFile);
-			return true;
-		}
-	}
-	return false;
-}
-
 void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 
 	ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
@@ -316,10 +274,16 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 
 	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
 	if (ImGui::Button("Load INI"))
-		ShowFileDialog(false);
-	ImGui::SameLine();
+		ShowINIFileDialog(false);
 	if (ImGui::Button("Save INI"))
-		ShowFileDialog(true);
+		ShowINIFileDialog(true);
+	ImGui::EndHorizontal();
+	
+	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
+	if (ImGui::Button("Load Project"))
+		ShowProjFileDialog(false);
+	if (ImGui::Button("Save Project"))
+		ShowProjFileDialog(true);
 	ImGui::EndHorizontal();
 
 	if (ImGui::Button("rebuild layout"))

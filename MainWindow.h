@@ -60,7 +60,7 @@ public:
 	Node* SpawnComment();
 	Node* SpawnHoudiniTransformNode();
 	Node* SpawnHoudiniGroupNode();
-	Node* SpawnSectionNode(const std::string& section);
+	SectionNode* SpawnSectionNode(const std::string& section);
 	void NodeEditor();
 	void NodeMenu();
 	void PinMenu();
@@ -68,8 +68,10 @@ public:
 	void CreateInitNodes();
 	void CreateNewNode();
 	void ShowStyleEditor(bool* show = nullptr);
-	void LoadINI(const std::string& path);
-	void SaveINI(const std::string& path);
+	void LoadProject(const std::string& path);
+	void SaveProject(const std::string& path);
+	void ImportINI(const std::string& path);
+	void ExportINI(const std::string& path);
 
 	virtual void OnStart() override;
 	virtual void OnStop() override;

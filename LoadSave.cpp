@@ -1,11 +1,154 @@
 ﻿#include "MainWindow.h"
 #include "nodes/SectionNode.h"
+#include <crude_json.h>
 
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <windows.h>
+#include <commdlg.h>
 
-void MainWindow::LoadINI(const std::string& path) {
+bool OpenFileDialog(LPCSTR fliter,char* path, int maxPath, bool isSaving) {
+	OPENFILENAMEA ofn;
+	CHAR szFile[260] = { 0 };
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetActiveWindow();
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = fliter;
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	if (isSaving) {
+		ofn.Flags |= OFN_OVERWRITEPROMPT;
+		if (GetSaveFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	else {
+		if (GetOpenFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	return false;
+}
+
+void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
+	char path[MAX_PATH] = { 0 };
+	if (OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
+		if (isSaving)
+			Owner->ExportINI(path);
+		else
+			Owner->ImportINI(path);
+	}
+}
+
+void LeftPanelClass::ShowProjFileDialog(bool isSaving) {
+	char path[MAX_PATH] = { 0 };
+	if (OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
+		if (isSaving)
+			Owner->SaveProject(path);
+		else
+			Owner->LoadProject(path);
+	}
+}
+
+void MainWindow::LoadProject(const std::string& filePath) {
+	std::ifstream file(filePath);
+	if (!file.is_open()) {
+		// 处理文件打开失败的情况
+		return;
+	}
+
+	using namespace crude_json;
+	std::string jsonString((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	value j = value::parse(jsonString);
+
+	// 清除现有数据
+	m_SectionMap.clear();
+	m_Links.clear();
+
+	// 加载节点
+	for (const auto& nodeJson : j["nodes"].get<array>()) {
+		std::string section = nodeJson["section"].get<string>();
+		ImVec2 position = { 
+			float(nodeJson["position"][0].get<number>()),
+			float(nodeJson["position"][1].get<number>())
+		};
+
+		auto node = SpawnSectionNode(section);
+		node->SetPosition(position);
+
+		for (const auto& kvJson : nodeJson["key_values"].get<array>()) {
+			std::string key = kvJson["key"].get<string>();
+			std::string value = kvJson["value"].get<string>();
+			int outputPinId = kvJson["output_pin_id"].get<number>();
+
+			auto& kv = node->KeyValues.emplace_back(key, value,
+				Pin{ outputPinId, key.c_str(), PinType::Flow }
+			);
+			kv.OutputPin.Node = node;
+			kv.OutputPin.Kind = PinKind::Output;
+		}
+
+		node->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
+		node->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
+	}
+
+	// 加载链接
+	for (const auto& linkJson : j["links"].get<array>()) {
+		int startPinId = linkJson["start_pin_id"].get<number>();
+		int endPinId = linkJson["end_pin_id"].get<number>();
+
+		auto startPin = FindPin(startPinId);
+		auto endPin = FindPin(endPinId);
+
+		if (startPin && endPin) {
+			m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
+		}
+	}
+}
+
+//把注释取消，就会开局弹框，我不理解
+void MainWindow::SaveProject(const std::string& filePath) {
+	crude_json::value j;
+
+	// 保存节点信息
+	for (const auto& [section, node] : m_SectionMap) {
+		/*crude_json::value nodeJson;
+		nodeJson["section"] = node->Name;
+
+		auto pos = node->GetPosition();
+		nodeJson["position"] = crude_json::array({ pos.x, pos.y });
+
+		crude_json::array keyValuesJson;
+		for (const auto& kv : node->KeyValues) {
+			crude_json::value kvJson;
+			kvJson["key"] = kv.Key;
+			kvJson["value"] = kv.Value;
+			kvJson["output_pin_id"] = static_cast<double>(kv.OutputPin.ID.Get());
+			keyValuesJson.push_back(kvJson);
+		}
+		nodeJson["key_values"] = keyValuesJson;
+
+		j["nodes"].push_back(nodeJson);*/
+	}
+
+	// 保存链接信息
+	for (const auto& link : m_Links) {
+		/*crude_json::value linkJson;
+		linkJson["start_pin_id"] = static_cast<double>(link.StartPinID.Get());
+		linkJson["end_pin_id"] = static_cast<double>(link.EndPinID.Get());
+		j["links"].push_back(linkJson); */
+	}
+
+	j.save(filePath);
+}
+
+void MainWindow::ImportINI(const std::string& path) {
 	ClearAll();
 	std::ifstream file(path);
 	std::string line, currentSection;
@@ -103,7 +246,7 @@ void MainWindow::LoadINI(const std::string& path) {
 	ApplyForceDirectedLayout();
 }
 
-void MainWindow::SaveINI(const std::string& path) {
+void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 
 	for (auto& [section, node] : m_SectionMap) {

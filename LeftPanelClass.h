@@ -19,8 +19,8 @@ public:
 	void NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes);
 	void ShowLeftPanel(float paneWidth);
 	void ShowOrdinals() const;
-	void ShowFileDialog(bool isSaving);
-	bool OpenFileDialog(char* path, int maxPath, bool isSaving);
+	void ShowProjFileDialog(bool isSaving);
+	void ShowINIFileDialog(bool isSaving);
 	void ClampPosition(Node* node);
 	void ResolveCollisions(Node* node);
 	bool                 m_ShowOrdinals = false;

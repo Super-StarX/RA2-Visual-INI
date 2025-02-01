@@ -400,15 +400,15 @@ void MainWindow::ClearAll() {
 	m_NodeSections.clear();
 }
 
-Node* MainWindow::SpawnSectionNode(const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
+SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
+	m_Nodes.emplace_back();
 	auto node = m_Nodes.back().get();
 	node->Type = NodeType::Section;
 	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
 	m_SectionMap[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
 	m_SectionMap[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
-	return node;
+	return reinterpret_cast<SectionNode*>(node);
 }
 
 void MainWindow::CreateLinkFromReference(Pin* outputPin, const std::string& targetSection) {
