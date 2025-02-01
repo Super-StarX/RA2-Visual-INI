@@ -2,10 +2,12 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <cmath>
 
 static inline ImRect ImGui_GetItemRect() {
 	return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 }
+
 static inline void showLabel(const char* label, ImColor color) {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
 	auto size = ImGui::CalcTextSize(label);
@@ -32,4 +34,13 @@ static bool Splitter(bool split_vertically, float thickness, float* size1, float
 	bb.Min = window->DC.CursorPos + (split_vertically ? ImVec2(*size1, 0.0f) : ImVec2(0.0f, *size1));
 	bb.Max = bb.Min + CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f);
 	return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
+}
+
+static inline float ImLength(const ImVec2& vec) {
+	return std::hypot(vec.x, vec.y);
+}
+
+static inline ImVec2 ImNormalized(const ImVec2& vec) {
+	float len = ImLength(vec);
+	return len > 0.0f ? ImVec2(vec.x / len, vec.y / len) : ImVec2(0, 0);
 }

@@ -25,6 +25,7 @@ public:
 	virtual void Update() = 0;
 	ImVec2 GetPosition();
 	void SetPosition(ImVec2 pos);
+	int GetConnectedLinkCount();
 
 	MainWindow* Owner = nullptr;
 

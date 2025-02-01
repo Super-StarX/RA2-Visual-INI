@@ -23,9 +23,6 @@ public:
 	bool OpenFileDialog(char* path, int maxPath, bool isSaving);
 	void ClampPosition(Node* node);
 	void ResolveCollisions(Node* node);
-	void ApplyForceDirectedLayout();
-	void LoadINI(const std::string& path);
-	void SaveINI(const std::string& path);
 	bool                 m_ShowOrdinals = false;
 private:
 	MainWindow*			 Owner = nullptr;

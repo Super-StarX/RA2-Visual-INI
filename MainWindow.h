@@ -42,6 +42,7 @@ public:
 	void CreateLinkFromReference(Pin* outputPin, const std::string& targetSection);
 	void TouchNode(ed::NodeId id) { m_NodeTouchTime[id] = m_TouchTime; };
 	void UpdateTouch();
+	void ApplyForceDirectedLayout();
 
 	Node* SpawnInputActionNode();
 	Node* SpawnBranchNode();
@@ -67,6 +68,8 @@ public:
 	void CreateInitNodes();
 	void CreateNewNode();
 	void ShowStyleEditor(bool* show = nullptr);
+	void LoadINI(const std::string& path);
+	void SaveINI(const std::string& path);
 
 	virtual void OnStart() override;
 	virtual void OnStop() override;
