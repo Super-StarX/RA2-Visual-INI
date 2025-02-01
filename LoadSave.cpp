@@ -1,6 +1,6 @@
 ﻿#include "MainWindow.h"
 #include "nodes/SectionNode.h"
-#include <crude_json.h>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -57,35 +57,35 @@ void LeftPanelClass::ShowProjFileDialog(bool isSaving) {
 }
 
 void MainWindow::LoadProject(const std::string& filePath) {
+	using json = nlohmann::json;
+
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
 		// 处理文件打开失败的情况
 		return;
 	}
 
-	using namespace crude_json;
-	std::string jsonString((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-	value j = value::parse(jsonString);
+	json j = json::parse(file);
 
 	// 清除现有数据
 	m_SectionMap.clear();
 	m_Links.clear();
-
+	
 	// 加载节点
-	for (const auto& nodeJson : j["nodes"].get<array>()) {
-		std::string section = nodeJson["section"].get<string>();
+	for (const auto& nodeJson : j["nodes"]) {
+		std::string section = nodeJson["section"].get<std::string>();
 		ImVec2 position = { 
-			float(nodeJson["position"][0].get<number>()),
-			float(nodeJson["position"][1].get<number>())
+			float(nodeJson["position"][0].get<int>()),
+			float(nodeJson["position"][1].get<int>())
 		};
 
 		auto node = SpawnSectionNode(section);
 		node->SetPosition(position);
 
-		for (const auto& kvJson : nodeJson["key_values"].get<array>()) {
-			std::string key = kvJson["key"].get<string>();
-			std::string value = kvJson["value"].get<string>();
-			int outputPinId = kvJson["output_pin_id"].get<number>();
+		for (const auto& kvJson : nodeJson["key_values"]) {
+			std::string key = kvJson["key"].get<std::string>();
+			std::string value = kvJson["value"].get<std::string>();
+			int outputPinId = kvJson["output_pin_id"].get<int>();
 
 			auto& kv = node->KeyValues.emplace_back(key, value,
 				Pin{ outputPinId, key.c_str(), PinType::Flow }
@@ -99,9 +99,9 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	}
 
 	// 加载链接
-	for (const auto& linkJson : j["links"].get<array>()) {
-		int startPinId = linkJson["start_pin_id"].get<number>();
-		int endPinId = linkJson["end_pin_id"].get<number>();
+	for (const auto& linkJson : j["links"]) {
+		int startPinId = linkJson["start_pin_id"].get<int>();
+		int endPinId = linkJson["end_pin_id"].get<int>();
 
 		auto startPin = FindPin(startPinId);
 		auto endPin = FindPin(endPinId);
@@ -110,42 +110,49 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
 		}
 	}
+	
 }
 
 //把注释取消，就会开局弹框，我不理解
 void MainWindow::SaveProject(const std::string& filePath) {
-	crude_json::value j;
+	using json = nlohmann::json;
+	json j;
 
 	// 保存节点信息
 	for (const auto& [section, node] : m_SectionMap) {
-		/*crude_json::value nodeJson;
+		json nodeJson;
 		nodeJson["section"] = node->Name;
 
 		auto pos = node->GetPosition();
-		nodeJson["position"] = crude_json::array({ pos.x, pos.y });
+		nodeJson["position"] = { pos.x, pos.y };
 
-		crude_json::array keyValuesJson;
+		json keyValuesJson;
 		for (const auto& kv : node->KeyValues) {
-			crude_json::value kvJson;
+			json kvJson;
 			kvJson["key"] = kv.Key;
 			kvJson["value"] = kv.Value;
-			kvJson["output_pin_id"] = static_cast<double>(kv.OutputPin.ID.Get());
+			kvJson["output_pin_id"] = kv.OutputPin.ID.Get();
 			keyValuesJson.push_back(kvJson);
 		}
 		nodeJson["key_values"] = keyValuesJson;
 
-		j["nodes"].push_back(nodeJson);*/
+		j["nodes"].push_back(nodeJson);
 	}
 
 	// 保存链接信息
 	for (const auto& link : m_Links) {
-		/*crude_json::value linkJson;
-		linkJson["start_pin_id"] = static_cast<double>(link.StartPinID.Get());
-		linkJson["end_pin_id"] = static_cast<double>(link.EndPinID.Get());
-		j["links"].push_back(linkJson); */
+		json linkJson;
+		linkJson["start_pin_id"] = link.StartPinID.Get();
+		linkJson["end_pin_id"] = link.EndPinID.Get();
+		j["links"].push_back(linkJson);
 	}
 
-	j.save(filePath);
+	std::ofstream file(filePath);
+	if (!file.is_open()) {
+		// 处理文件打开失败的情况
+		return;
+	}
+	file << std::setw(4) << j << std::endl;
 }
 
 void MainWindow::ImportINI(const std::string& path) {
