@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="AutoLayout.cpp" />
     <ClCompile Include="LoadSave.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="nodes\BaseNode.cpp" />
     <ClCompile Include="LeftPanelClass.cpp" />
     <ClCompile Include="Link.cpp" />

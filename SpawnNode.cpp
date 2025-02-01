@@ -27,42 +27,18 @@ void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 	}
 }
 
-void MainWindow::CreateNewNode() {
-	auto openPopupPosition = ImGui::GetMousePos();
-	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
+void MainWindow::BuildNodes() {
+	for (const auto& node : m_Nodes)
+		BuildNode(node);
+}
 
-	//auto drawList = ImGui::GetWindowDrawList();
-	//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
-
-	Node* node = nullptr;
-	if (ImGui::MenuItem("Section"))
-		node = SpawnSectionNode();
-	ImGui::Separator();
-
-	if (node) {
-		BuildNodes();
-
-		createNewNode = false;
-
-		ed::SetNodePosition(node->ID, openPopupPosition);
-
-		if (auto startPin = newNodeLinkPin) {
-			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
-
-			for (auto& pin : pins) {
-				if (Pin::CanCreateLink(startPin, &pin)) {
-					auto endPin = &pin;
-					if (startPin->Kind == PinKind::Input)
-						std::swap(startPin, endPin);
-
-					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-					m_Links.back().Color = Pin::GetIconColor(startPin->Type);
-
-					break;
-				}
-			}
-		}
-	}
-
-	ImGui::EndPopup();
+SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
+	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
+	auto node = m_Nodes.back().get();
+	node->Type = NodeType::Section;
+	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
+	m_NodeSections[node->ID] = section;
+	m_SectionMap[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
+	m_SectionMap[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
+	return reinterpret_cast<SectionNode*>(node);
 }

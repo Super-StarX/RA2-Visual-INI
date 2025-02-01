@@ -30,7 +30,12 @@ public:
 	static int GetNextId() { return m_NextId++; };
 	static ed::LinkId GetNextLinkId() { return ed::LinkId(GetNextId()); }
 
+	void ClearAll();
+
 	float GetTouchProgress(ed::NodeId id);
+	void TouchNode(ed::NodeId id);
+	void UpdateTouch();
+
 	Node* FindNode(ed::NodeId id);
 	Link* FindLink(ed::LinkId id);
 	Pin* FindPin(ed::PinId id);
@@ -38,18 +43,16 @@ public:
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();
-	void ClearAll();
-	void TouchNode(ed::NodeId id) { m_NodeTouchTime[id] = m_TouchTime; };
-	void UpdateTouch();
-	void ApplyForceDirectedLayout();
-
 	SectionNode* SpawnSectionNode(const std::string& section = "");
+
+	void ApplyForceDirectedLayout();
 	void NodeEditor();
+	void Menu();
+
+	void LayerMenu();
 	void NodeMenu();
 	void PinMenu();
 	void LinkMenu();
-	void CreateNewNode();
-	void ShowStyleEditor(bool* show = nullptr);
 
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
@@ -59,7 +62,6 @@ public:
 	virtual void OnStart() override;
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
-
 
 	std::unordered_map<std::string, SectionNode*> m_SectionMap;
 	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
