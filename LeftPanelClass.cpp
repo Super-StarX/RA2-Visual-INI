@@ -118,7 +118,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 	ImGui::Spacing(); ImGui::SameLine();
 	ImGui::TextUnformatted("Nodes");
 	ImGui::Indent();
-	for (auto& node : Owner->GetNodes()) {
+	for (auto& node : Owner->m_Nodes) {
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
 
@@ -227,7 +227,7 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::Unindent();
 
 	if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
-		for (auto& link : Owner->GetLinks())
+		for (auto& link : Owner->m_Links)
 			ed::Flow(link.ID);
 
 	if (ed::HasSelectionChanged())
@@ -249,7 +249,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 		ed::NavigateToContent();
 	ImGui::Spring(0.0f);
 	if (ImGui::Button("Show Flow")) {
-		for (auto& link : Owner->GetLinks())
+		for (auto& link : Owner->m_Links)
 			ed::Flow(link.ID);
 	}
 	ImGui::Spring();

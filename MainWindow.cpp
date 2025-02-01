@@ -7,6 +7,7 @@
 #include <imgui_internal.h>
 
 static ed::EditorContext* m_Editor = nullptr;
+int MainWindow::m_NextId = 1;
 ed::NodeId MainWindow::contextNodeId = 0;
 ed::LinkId MainWindow::contextLinkId = 0;
 ed::PinId  MainWindow::contextPinId = 0;
@@ -147,7 +148,8 @@ void MainWindow::OnStart() {
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 
-	CreateInitNodes();
+	SpawnSectionNode();
+
 	ed::NavigateToContent();
 
 	BuildNodes();
@@ -409,7 +411,4 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 	m_SectionMap[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
 	m_SectionMap[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
 	return reinterpret_cast<SectionNode*>(node);
-}
-
-void MainWindow::CreateLinkFromReference(Pin* outputPin, const std::string& targetSection) {
 }
