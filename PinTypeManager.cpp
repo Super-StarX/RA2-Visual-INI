@@ -1,4 +1,5 @@
 ﻿#include "PinTypeManager.h"
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
 
@@ -29,36 +30,23 @@ void PinTypeManager::RemoveCustomType(const std::string& identifier) {
 }
 
 bool PinTypeManager::LoadFromFile(const std::string& path) {
-	std::ifstream file(path);
-	if (!file.is_open())
-		return false;
-
 	try {
-		std::string content((std::istreambuf_iterator<char>(file)),
-						   std::istreambuf_iterator<char>());
-
-		/*value json;
-		if (!parser::parse(content, json))
-			return false;
-
-		auto& types = json["Types"].get<array>();
-		for (auto& typeVal : types) {
-			auto& typeObj = typeVal.get<object>();
+		using json = nlohmann::json;
+		json j = json::parse(path);
+		for (const auto& type : j["Types"]) {
 
 			PinTypeInfo info;
-			info.Identifier = typeObj["Identifier"].get<string>();
-			info.DisplayName = typeObj["DisplayName"].get<string>();
+			info.Identifier = type["Identifier"].get<std::string>();
+			info.DisplayName = type["DisplayName"].get<std::string>();
 
-			auto& color = typeObj["Color"].get<array>();
+			auto& color = type["Color"];
 			info.Color = ImColor(
-				static_cast<float>(color[0].get<double>()),
-				static_cast<float>(color[1].get<double>()),
-				static_cast<float>(color[2].get<double>()),
-				static_cast<float>(color[3].get<double>())
+				color[0].get<float>(), color[1].get<float>(),
+				color[2].get<float>(), color[3].get<float>()
 			);
 
-			info.IconType = static_cast<int>(typeObj["IconType"].get<double>());
-			info.IsUserDefined = typeObj["IsUserDefined"].get<boolean>();
+			info.IconType = static_cast<int>(type["IconType"].get<double>());
+			info.IsUserDefined = type["IsUserDefined"].get<bool>();
 
 			// 替换已存在的自定义类型
 			if (info.IsUserDefined) {
@@ -71,7 +59,7 @@ bool PinTypeManager::LoadFromFile(const std::string& path) {
 					AddCustomType(info);
 				}
 			}
-		}*/
+		}
 		return true;
 	}
 	catch (...) {
@@ -80,37 +68,37 @@ bool PinTypeManager::LoadFromFile(const std::string& path) {
 }
 
 bool PinTypeManager::SaveToFile(const std::string& path) {
-	/*value json(object_val);
-	array typesArr;
-
+	using json = nlohmann::json;
+	json j;
+	json typesArr;
 	for (const auto& type : m_Types) {
 		if (!type.IsUserDefined)
 			continue;
 
-		value typeObj(object_val);
-		typeObj["Identifier"] = value(type.Identifier);
-		typeObj["DisplayName"] = value(type.DisplayName);
+		json typeObj;
+		typeObj["Identifier"] = type.Identifier;
+		typeObj["DisplayName"] = type.DisplayName;
 
-		array color;
+		json color;
 		color.push_back(type.Color.Value.x);
 		color.push_back(type.Color.Value.y);
 		color.push_back(type.Color.Value.z);
 		color.push_back(type.Color.Value.w);
 		typeObj["Color"] = color;
 
-		typeObj["IconType"] = value(static_cast<double>(type.IconType));
-		typeObj["IsUserDefined"] = value(type.IsUserDefined);
+		typeObj["IconType"] = type.IconType;
+		typeObj["IsUserDefined"] = type.IsUserDefined;
 
 		typesArr.push_back(typeObj);
 	}
 
-	json["Types"] = typesArr;
+	j["Types"] = typesArr;
 
 	std::ofstream file(path);
 	if (!file.is_open())
 		return false;
 
-	file << json.serialize();*/
+	file << std::setw(4) << j << std::endl;
 	return true;
 }
 
