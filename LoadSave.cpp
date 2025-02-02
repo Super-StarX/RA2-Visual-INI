@@ -88,14 +88,14 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			int outputPinId = kvJson["output_pin_id"].get<int>();
 
 			auto& kv = node->KeyValues.emplace_back(key, value,
-				Pin{ outputPinId, key.c_str(), PinType::Flow }
+				Pin{ outputPinId, key.c_str() }
 			);
 			kv.OutputPin.Node = node;
 			kv.OutputPin.Kind = PinKind::Output;
 		}
 
-		node->InputPin = std::make_unique<Pin>(GetNextId(), "input", PinType::Flow);
-		node->OutputPin = std::make_unique<Pin>(GetNextId(), "output", PinType::Flow);
+		node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
+		node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
 	}
 
 	// 加载链接
@@ -197,7 +197,7 @@ void MainWindow::ImportINI(const std::string& path) {
 
 				// 添加输出引脚
 				auto& kv = currentNode->KeyValues.emplace_back(key, value,
-					Pin{ GetNextId(), key.c_str(), PinType::Flow }
+					Pin{ GetNextId(), key.c_str() }
 				);
 				kv.OutputPin.Node = currentNode;
 				kv.OutputPin.Kind = PinKind::Output;
@@ -207,7 +207,7 @@ void MainWindow::ImportINI(const std::string& path) {
 					auto targetNode = m_SectionMap[value];
 					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
 						m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-						m_Links.back().Color = Pin::GetIconColor(kv.OutputPin.Type);
+						m_Links.back().Color = kv.OutputPin.GetIconColor();
 					}
 				}
 			}
@@ -223,7 +223,7 @@ void MainWindow::ImportINI(const std::string& path) {
 				auto targetNode = m_SectionMap[value];
 				if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
 					m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-					m_Links.back().Color = Pin::GetIconColor(kv.OutputPin.Type);
+					m_Links.back().Color = kv.OutputPin.GetIconColor();
 				}
 			}
 		}

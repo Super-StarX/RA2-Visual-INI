@@ -6,7 +6,7 @@ void BlueprintNode::Update() {
 
 	bool hasOutputDelegates = false;
 	for (auto& output : this->Outputs)
-		if (output.Type == PinType::Delegate)
+		if (output.TypeIdentifier == "delegate")
 			hasOutputDelegates = true;
 
 	builder->Begin(this->ID);
@@ -19,7 +19,7 @@ void BlueprintNode::Update() {
 		ImGui::BeginVertical("delegates", ImVec2(0, 28));
 		ImGui::Spring(1, 0);
 		for (auto& output : this->Outputs) {
-			if (output.Type != PinType::Delegate)
+			if (output.TypeIdentifier != "delegate")
 				continue;
 
 			float alpha = output.GetAlpha(Owner->newLinkPin);
@@ -52,12 +52,12 @@ void BlueprintNode::Update() {
 		UpdateInput(input);
 
 	for (auto& output : this->Outputs)
-		if (output.Type != PinType::Delegate)
+		if (output.TypeIdentifier != "delegate")
 			UpdateOutput(output);
 
 	if (ImGui::Button("+")) {
-		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", PinType::Delegate);
-		this->Outputs.emplace_back(Owner->GetNextId(), "NewAddOutput", PinType::Bool);
+		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", "delegate");
+		this->Outputs.emplace_back(Owner->GetNextId(), "NewAddOutput", "bool");
 	}
 
 	builder->End();

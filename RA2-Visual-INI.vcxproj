@@ -165,6 +165,7 @@
     <ClCompile Include="nodes\TreeNode.cpp" />
     <ClCompile Include="Pin.cpp" />
     <ClCompile Include="nodes\SimpleNode.cpp" />
+    <ClCompile Include="PinTypeManager.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="nodes\TreeNode.h" />
     <ClInclude Include="Pin.h" />
     <ClInclude Include="nodes\SimpleNode.h" />
+    <ClInclude Include="PinTypeManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />

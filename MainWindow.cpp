@@ -1,6 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
+#include "PinTypeManager.h"
 #include "Utils.h"
 #include "nodes/SectionNode.h"
 
@@ -134,7 +135,8 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
-
+	PinTypeManager::Get().InitializeDefaults();
+	PinTypeManager::Get().LoadFromFile("custom_types.json");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 
@@ -149,6 +151,7 @@ void MainWindow::OnStart() {
 }
 
 void MainWindow::OnStop() {
+	PinTypeManager::Get().SaveToFile("custom_types.json");
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
@@ -188,7 +191,7 @@ void MainWindow::NodeEditor() {
 				//    showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
 				//    ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
 				//}
-				else if (endPin->Type != startPin->Type) {
+				else if (endPin->TypeIdentifier != startPin->TypeIdentifier) {
 					showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
 					ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
 				}
@@ -196,7 +199,7 @@ void MainWindow::NodeEditor() {
 					showLabel("+ Create Link", ImColor(32, 45, 32, 180));
 					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
 						m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
-						m_Links.back().Color = Pin::GetIconColor(startPin->Type);
+						m_Links.back().Color = startPin->GetIconColor();
 					}
 				}
 			}

@@ -1,4 +1,5 @@
-﻿#include <MainWindow.h>
+#include "MainWindow.h"
+#include "PinTypeManager.h"
 
 void MainWindow::Menu() {
 	ed::Suspend();
@@ -59,7 +60,7 @@ void MainWindow::LayerMenu() {
 						std::swap(startPin, endPin);
 
 					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-					m_Links.back().Color = Pin::GetIconColor(startPin->Type);
+					m_Links.back().Color = startPin->GetIconColor();
 
 					break;
 				}

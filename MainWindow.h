@@ -47,12 +47,13 @@ public:
 
 	void ApplyForceDirectedLayout();
 	void NodeEditor();
-	void Menu();
 
+	void Menu();
 	void LayerMenu();
 	void NodeMenu();
 	void PinMenu();
 	void LinkMenu();
+	void ShowTypeEditor();
 
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
@@ -70,4 +71,5 @@ public:
 	std::vector<Link>					m_Links;
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
+	bool								m_ShowTypeEditor = false;
 };

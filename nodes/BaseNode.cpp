@@ -29,7 +29,7 @@ void BaseNode::UpdateInput(Pin& input) {
 		ImGui::TextUnformatted(input.Name.c_str());
 		ImGui::Spring(0);
 	}
-	if (input.Type == PinType::Bool) {
+	if (input.TypeIdentifier == "bool") {
 		ImGui::Button("Hello");
 		ImGui::Spring(0);
 	}
@@ -46,7 +46,7 @@ void BaseNode::UpdateOutput(Pin& output) {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 	builder->Output(output.ID);
-	if (output.Type == PinType::String) {
+	if (output.TypeIdentifier == "string") {
 		static char buffer[128] = "Edit Me\nMultiline!";
 		static bool wasActive = false;
 

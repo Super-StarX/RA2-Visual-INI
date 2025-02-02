@@ -8,7 +8,7 @@ void SimpleNode::Update() {
 
 	bool hasOutputDelegates = false;
 	for (auto& output : this->Outputs)
-		if (output.Type == PinType::Delegate)
+		if (output.TypeIdentifier == "delegate")
 			hasOutputDelegates = true;
 
 	builder->Begin(this->ID);

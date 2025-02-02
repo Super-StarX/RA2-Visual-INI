@@ -4,17 +4,6 @@
 #include <string>
 
 namespace ed = ax::NodeEditor;
-enum class PinType {
-	Flow,
-	Bool,
-	Int,
-	Float,
-	String,
-	Object,
-	Function,
-	Delegate,
-};
-
 enum class PinKind {
 	Output,
 	Input
@@ -25,18 +14,13 @@ class Pin {
 public:
 	constexpr static float IconSize = 24.f;
 
-	Pin(int id, const char* name, PinType type) :
-		ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input) {
+	Pin(int id, const char* name, std::string type = "flow") :
+		ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(PinKind::Input) {
 	}
 
-	static bool CanCreateLink(Pin* a, Pin* b) {
-		if (!a || !b || a == b || a->Kind == b->Kind || a->Type != b->Type || a->Node == b->Node)
-			return false;
+	static bool CanCreateLink(Pin* a, Pin* b);
 
-		return true;
-	}
-	static ImColor GetIconColor(PinType type);
-
+	ImColor GetIconColor() const;
 	float GetAlpha(Pin* newLinkPin);
 	void DrawPinIcon(bool connected, int alpha) const;
 	void Menu() const;
@@ -44,6 +28,6 @@ public:
 	ed::PinId   ID;
 	::Node* Node;
 	std::string Name;
-	PinType     Type;
+	std::string TypeIdentifier;
 	PinKind     Kind;
 };
