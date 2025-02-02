@@ -114,11 +114,11 @@ void MainWindow::PinMenu() {
 			for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
 				if (ImGui::MenuItem(type.DisplayName.c_str())) {
 					pin->TypeIdentifier = type.Identifier;
-					/*ed::SetNodeDirty(pin->Node->ID); // 标记节点需要刷新
+					// 标记节点需要刷新
 					// 通过微小位置变化强制刷新
 					auto pos = pin->Node->GetPosition();
-					ed::SetNodePosition(pin->Node->ID, pos + ImVec2(0.1f, 0.1f));
-					ed::SetNodePosition(pin->Node->ID, pos);*/
+					ed::SetNodePosition(pin->Node->ID, ImVec2(pos.x + 0.1f, pos.y + 0.1f));
+					ed::SetNodePosition(pin->Node->ID, pos);
 				}
 
 				// 在菜单项显示颜色标记
@@ -131,13 +131,71 @@ void MainWindow::PinMenu() {
 
 		// 自定义类型管理
 		if (ImGui::MenuItem("Manage Custom Types..."))
-			m_ShowTypeEditor = true;
+			m_ShowPinTypeEditor = true;
 	}
 	else {
 		ImGui::Text("Unknown pin: %p", contextPinId.AsPointer());
 	}
 
 	ImGui::EndPopup();
+}
+
+// 类型编辑器窗口
+void MainWindow::ShowPinTypeEditor() {
+	if (!m_ShowPinTypeEditor) return;
+
+	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Pin Type Manager", &m_ShowPinTypeEditor)) {
+		static char newIdentifier[128] = "";
+		static char newDisplayName[128] = "";
+		static ImColor newColor = ImColor(255, 255, 255);
+		static int newIconType = 0;
+
+		// 添加新类型
+		ImGui::InputText("Identifier", newIdentifier, IM_ARRAYSIZE(newIdentifier));
+		ImGui::InputText("Display Name", newDisplayName, IM_ARRAYSIZE(newDisplayName));
+		ImGui::ColorEdit4("Color", &newColor.Value.x);
+		ImGui::Combo("Icon", &newIconType, "Circle\0Square\0Triangle\0Diamond\0");
+
+		if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
+			PinTypeInfo newType;
+			newType.Identifier = newIdentifier;
+			newType.DisplayName = newDisplayName[0] ? newDisplayName : newIdentifier;
+			newType.Color = newColor;
+			newType.IconType = newIconType;
+			newType.IsUserDefined = true;
+
+			PinTypeManager::Get().AddCustomType(newType);
+
+			// 清空输入
+			memset(newIdentifier, 0, sizeof(newIdentifier));
+			memset(newDisplayName, 0, sizeof(newDisplayName));
+			newColor = ImColor(255, 255, 255);
+		}
+
+		ImGui::Separator();
+
+		// 现有类型列表
+		ImGui::Text("Existing Types:");
+		ImGui::BeginChild("##type_list", ImVec2(0, 200), true);
+		for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
+			ImGui::ColorButton("##color", type.Color,
+				ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
+			ImGui::SameLine();
+
+			if (type.IsUserDefined) {
+				if (ImGui::Button(("X##del_" + type.Identifier).c_str())) {
+					PinTypeManager::Get().RemoveCustomType(type.Identifier);
+				}
+				ImGui::SameLine();
+			}
+
+			ImGui::Text("%s (%s)", type.DisplayName.c_str(),
+				type.Identifier.c_str());
+		}
+		ImGui::EndChild();
+	}
+	ImGui::End();
 }
 
 void MainWindow::LinkMenu() {

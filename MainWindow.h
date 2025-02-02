@@ -53,7 +53,7 @@ public:
 	void NodeMenu();
 	void PinMenu();
 	void LinkMenu();
-	void ShowTypeEditor();
+	void ShowPinTypeEditor();
 
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
@@ -71,5 +71,5 @@ public:
 	std::vector<Link>					m_Links;
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
-	bool								m_ShowTypeEditor = false;
+	bool								m_ShowPinTypeEditor = false;
 };

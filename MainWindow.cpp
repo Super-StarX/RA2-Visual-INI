@@ -285,6 +285,7 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	NodeEditor();
 	Menu();
+	ShowPinTypeEditor();
 	ed::End();
 
 	m_LeftPanel.ShowOrdinals();
