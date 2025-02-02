@@ -112,13 +112,13 @@ void PinTypeManager::InitializeDefaults() {
 	};
 
 	AddType({ "flow",    "Flow",    ImColor(255, 255, 255), 0 });
-	AddType({ "bool",    "Boolean", ImColor(220, 48, 48),   0 });
-	AddType({ "int",     "Integer", ImColor(68, 201, 156),  0 });
-	AddType({ "float",   "Float",   ImColor(147, 226, 74),  0 });
-	AddType({ "string",  "String",  ImColor(124, 21, 153),  0 });
-	AddType({ "object",  "Object",  ImColor(51, 150, 215),  0 });
-	AddType({ "function","Function",ImColor(218, 0, 183),   0 });
-	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   0 });
+	AddType({ "bool",    "Boolean", ImColor(220, 48, 48),   1 });
+	AddType({ "int",     "Integer", ImColor(68, 201, 156),  1 });
+	AddType({ "float",   "Float",   ImColor(147, 226, 74),  1 });
+	AddType({ "string",  "String",  ImColor(124, 21, 153),  1 });
+	AddType({ "object",  "Object",  ImColor(51, 150, 215),  1 });
+	AddType({ "function","Function",ImColor(218, 0, 183),   1 });
+	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   2 });
 }
 
 void PinTypeManager::AddCustomType(const PinTypeInfo& type) {

@@ -155,7 +155,7 @@ void MainWindow::ShowPinTypeEditor() {
 		ImGui::InputText("Identifier", newIdentifier, IM_ARRAYSIZE(newIdentifier));
 		ImGui::InputText("Display Name", newDisplayName, IM_ARRAYSIZE(newDisplayName));
 		ImGui::ColorEdit4("Color", &newColor.Value.x);
-		ImGui::Combo("Icon", &newIconType, "Circle\0Square\0Triangle\0Diamond\0");
+		ImGui::Combo("Icon", &newIconType, "Flow\0Circle\0Square\0Grid\0RoundSquare\0Diamond\0");
 
 		if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
 			PinTypeInfo newType;
