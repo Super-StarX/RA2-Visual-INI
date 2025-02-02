@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "PinTypeManager.h"
 
 void MainWindow::Menu() {
@@ -95,10 +95,47 @@ void MainWindow::PinMenu() {
 
 	ImGui::TextUnformatted("Pin Context Menu");
 	ImGui::Separator();
-	if (pin)
-		pin->Menu();
-	else
+
+	if (pin) {
+		// 显示当前类型
+		if (auto* currentType = PinTypeManager::Get().FindType(pin->TypeIdentifier)) {
+			ImGui::Text("Current Type: %s", currentType->DisplayName.c_str());
+			ImGui::ColorButton("##color", currentType->Color,
+				ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
+			ImGui::SameLine();
+			ImGui::TextColored(currentType->Color, "%s",
+				currentType->DisplayName.c_str());
+		}
+
+		ImGui::Separator();
+
+		// 类型选择菜单
+		if (ImGui::BeginMenu("Change Type")) {
+			for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
+				if (ImGui::MenuItem(type.DisplayName.c_str())) {
+					pin->TypeIdentifier = type.Identifier;
+					/*ed::SetNodeDirty(pin->Node->ID); // 标记节点需要刷新
+					// 通过微小位置变化强制刷新
+					auto pos = pin->Node->GetPosition();
+					ed::SetNodePosition(pin->Node->ID, pos + ImVec2(0.1f, 0.1f));
+					ed::SetNodePosition(pin->Node->ID, pos);*/
+				}
+
+				// 在菜单项显示颜色标记
+				ImGui::SameLine();
+				ImGui::ColorButton(("##color_" + type.Identifier).c_str(),
+					type.Color, ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
+			}
+			ImGui::EndMenu();
+		}
+
+		// 自定义类型管理
+		if (ImGui::MenuItem("Manage Custom Types..."))
+			m_ShowTypeEditor = true;
+	}
+	else {
 		ImGui::Text("Unknown pin: %p", contextPinId.AsPointer());
+	}
 
 	ImGui::EndPopup();
 }
