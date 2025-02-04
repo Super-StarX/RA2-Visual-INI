@@ -27,7 +27,7 @@ void SectionNode::Update() {
 	{
 		auto alpha = OutputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-		ed::BeginPin(OutputPin->ID, ed::PinKind::Input);
+		ed::BeginPin(OutputPin->ID, ed::PinKind::Output);
 		OutputPin->DrawPinIcon(Owner->IsPinLinked(OutputPin->ID), (int)(alpha * 255));
 		ed::EndPin();
 		ImGui::PopStyleVar();
