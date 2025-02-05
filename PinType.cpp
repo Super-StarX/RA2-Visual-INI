@@ -1,4 +1,5 @@
 ﻿#include "PinType.h"
+#include "LinkType.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
@@ -8,12 +9,33 @@ void PinTypeManager::Menu() {
 	static char newDisplayName[128] = "";
 	static ImColor newColor = ImColor(255, 255, 255);
 	static int newIconType = 0;
+	static int selectedLinkTypeIndex = 0;
+	static std::string linkType = "";
 
 	// 添加新类型
 	ImGui::InputText("Identifier", newIdentifier, IM_ARRAYSIZE(newIdentifier));
 	ImGui::InputText("Display Name", newDisplayName, IM_ARRAYSIZE(newDisplayName));
 	ImGui::ColorEdit4("Color", &newColor.Value.x);
 	ImGui::Combo("Icon", &newIconType, "Flow\0Circle\0Square\0Grid\0RoundSquare\0Diamond\0");
+
+	// 新增Link类型选择下拉框
+	auto& linkTypes = LinkTypeManager::Get().GetAllTypes();
+	if (ImGui::Combo("Link Type", &selectedLinkTypeIndex,
+		[](void* data, int idx, const char** out_text) {
+			auto& types = *static_cast<const std::vector<LinkTypeInfo>*>(data);
+			if (idx >= 0 && idx < static_cast<int>(types.size())) {
+				*out_text = types[idx].DisplayName.c_str();
+				return true;
+			}
+			return false;
+		},
+		(void*)&linkTypes,
+		static_cast<int>(linkTypes.size()))) {
+		// 这里可以添加选择变化后的处理逻辑
+		if (selectedLinkTypeIndex >= 0 && selectedLinkTypeIndex < static_cast<int>(linkTypes.size())) {
+			linkType = linkTypes[selectedLinkTypeIndex].Identifier;
+		}
+	}
 
 	if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
 		PinTypeInfo newType;
@@ -22,6 +44,7 @@ void PinTypeManager::Menu() {
 		newType.Color = newColor;
 		newType.IconType = newIconType;
 		newType.IsUserDefined = true;
+		newType.LinkType = linkType;
 
 		PinTypeManager::Get().AddCustomType(newType);
 
