@@ -117,7 +117,7 @@ void MainWindow::ApplyForceDirectedLayout() {
 
 			// 动态调整理想距离
 			const int linkCount = startNode->GetConnectedLinkCount();
-			const float idealDist = 150.0f / std::sqrtf(linkCount + 1);
+			const float idealDist = 150.0f / std::sqrtf(linkCount + 1.f);
 			const float attraction = ATTRACTION_FORCE * (dist - idealDist) / dist;
 
 			accelerations[startNode] += delta * attraction;

@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AutoLayout.cpp" />
+    <ClCompile Include="LinkType.cpp" />
     <ClCompile Include="LoadSave.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="nodes\BaseNode.cpp" />
@@ -165,13 +166,14 @@
     <ClCompile Include="nodes\TreeNode.cpp" />
     <ClCompile Include="Pin.cpp" />
     <ClCompile Include="nodes\SimpleNode.cpp" />
-    <ClCompile Include="PinTypeManager.cpp" />
+    <ClCompile Include="PinType.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LinkType.h" />
     <ClInclude Include="nodes\BaseNode.h" />
     <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="Link.h" />
@@ -186,7 +188,7 @@
     <ClInclude Include="nodes\TreeNode.h" />
     <ClInclude Include="Pin.h" />
     <ClInclude Include="nodes\SimpleNode.h" />
-    <ClInclude Include="PinTypeManager.h" />
+    <ClInclude Include="PinType.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />

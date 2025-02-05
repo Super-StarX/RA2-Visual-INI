@@ -24,6 +24,7 @@ public:
 		static PinTypeManager instance;
 		return instance;
 	}
+	static void Menu();
 
 	void InitializeDefaults();
 	bool LoadFromFile(const std::string& path);

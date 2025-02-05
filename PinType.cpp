@@ -1,7 +1,58 @@
-﻿#include "PinTypeManager.h"
+﻿#include "PinType.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
+
+void PinTypeManager::Menu() {
+	static char newIdentifier[128] = "";
+	static char newDisplayName[128] = "";
+	static ImColor newColor = ImColor(255, 255, 255);
+	static int newIconType = 0;
+
+	// 添加新类型
+	ImGui::InputText("Identifier", newIdentifier, IM_ARRAYSIZE(newIdentifier));
+	ImGui::InputText("Display Name", newDisplayName, IM_ARRAYSIZE(newDisplayName));
+	ImGui::ColorEdit4("Color", &newColor.Value.x);
+	ImGui::Combo("Icon", &newIconType, "Flow\0Circle\0Square\0Grid\0RoundSquare\0Diamond\0");
+
+	if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
+		PinTypeInfo newType;
+		newType.Identifier = newIdentifier;
+		newType.DisplayName = newDisplayName[0] ? newDisplayName : newIdentifier;
+		newType.Color = newColor;
+		newType.IconType = newIconType;
+		newType.IsUserDefined = true;
+
+		PinTypeManager::Get().AddCustomType(newType);
+
+		// 清空输入
+		memset(newIdentifier, 0, sizeof(newIdentifier));
+		memset(newDisplayName, 0, sizeof(newDisplayName));
+		newColor = ImColor(255, 255, 255);
+	}
+
+	ImGui::Separator();
+
+	// 现有类型列表
+	ImGui::Text("Existing Types:");
+	ImGui::BeginChild("##type_list", ImVec2(0, 200), true);
+	for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
+		ImGui::ColorButton("##color", type.Color,
+			ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
+		ImGui::SameLine();
+
+		if (type.IsUserDefined) {
+			if (ImGui::Button(("X##del_" + type.Identifier).c_str())) {
+				PinTypeManager::Get().RemoveCustomType(type.Identifier);
+			}
+			ImGui::SameLine();
+		}
+
+		ImGui::Text("%s (%s)", type.DisplayName.c_str(),
+			type.Identifier.c_str());
+	}
+	ImGui::EndChild();
+}
 
 const PinTypeInfo* PinTypeManager::FindType(const std::string& identifier) const {
 	auto it = m_TypeIndex.find(identifier);
@@ -70,7 +121,6 @@ bool PinTypeManager::LoadFromFile(const std::string& path) {
 bool PinTypeManager::SaveToFile(const std::string& path) {
 	using json = nlohmann::json;
 	json j;
-	json typesArr;
 	for (const auto& type : m_Types) {
 		if (!type.IsUserDefined)
 			continue;
@@ -89,10 +139,8 @@ bool PinTypeManager::SaveToFile(const std::string& path) {
 		typeObj["IconType"] = type.IconType;
 		typeObj["IsUserDefined"] = type.IsUserDefined;
 
-		typesArr.push_back(typeObj);
+		j["Types"].push_back(typeObj);
 	}
-
-	j["Types"] = typesArr;
 
 	std::ofstream file(path);
 	if (!file.is_open())

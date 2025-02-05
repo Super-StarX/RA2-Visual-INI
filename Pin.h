@@ -23,7 +23,7 @@ public:
 	ImColor GetIconColor() const;
 	float GetAlpha(Pin* newLinkPin);
 	void DrawPinIcon(bool connected, int alpha) const;
-	void Menu() const;
+	void Menu();
 
 	ed::PinId   ID;
 	::Node* Node;
