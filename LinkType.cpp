@@ -53,15 +53,17 @@ bool LinkTypeManager::LoadFromFile(const std::string& path) {
 	try {
 		using json = nlohmann::json;
 		json j = json::parse(path);
-		for (auto& typeVal : j["LinkTypes"]) {
-			auto& t = typeVal;
+		for (auto& t : j["LinkTypes"]) {
+			auto& color = t["Color"];
 			LinkTypeInfo info{
 				t["Identifier"].get<std::string>(),
 				t["DisplayName"].get<std::string>(),
-				t["Color"].get<ImU32>(),
+				ImColor(
+				color[0].get<float>(), color[1].get<float>(),
+				color[2].get<float>(), color[3].get<float>()
+				),
 				t["HighlightColor"].get<ImU32>(),
 				t["Thickness"].get<float>(),
-				t["Style"].get<int>(),
 				t["IsUserDefined"].get<bool>()
 			};
 			AddCustomType(info);
@@ -79,13 +81,18 @@ bool LinkTypeManager::SaveToFile(const std::string& path) {
 	for (const auto& type : m_Types) {
 		if (!type.IsUserDefined) continue;
 
+		json color;
+		color.push_back(type.Color.Value.x);
+		color.push_back(type.Color.Value.y);
+		color.push_back(type.Color.Value.z);
+		color.push_back(type.Color.Value.w);
+
 		json t;
 		t["Identifier"] = type.Identifier;
 		t["DisplayName"] = type.DisplayName;
-		t["Color"] = static_cast<double>(type.Color);
-		t["HighlightColor"] = static_cast<double>(type.HighlightColor);
+		t["Color"] = color;
+		t["HighlightColor"] = type.HighlightColor;
 		t["Thickness"] = type.Thickness;
-		t["Style"] = static_cast<double>(type.Style);
 		t["IsUserDefined"] = type.IsUserDefined;
 
 		j["LinkTypes"].push_back(t);

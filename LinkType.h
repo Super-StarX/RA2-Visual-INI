@@ -8,17 +8,16 @@
 struct LinkTypeInfo {
 	std::string Identifier;  // 唯一标识符
 	std::string DisplayName; // 显示名称
-	ImU32       Color;       // 基础颜色
+	ImColor       Color;       // 基础颜色
 	ImU32       HighlightColor; // 高亮颜色
 	float       Thickness;   // 线宽
-	int         Style;       // 0=实线, 1=虚线
 	bool        IsUserDefined = false;
 
 	// 序列化支持
 	template<class Archive>
 	void serialize(Archive& archive) {
 		archive(Identifier, DisplayName, Color, HighlightColor,
-				Thickness, Style, IsUserDefined);
+				Thickness, IsUserDefined);
 	}
 };
 

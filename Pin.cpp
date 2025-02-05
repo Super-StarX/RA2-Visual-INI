@@ -33,14 +33,8 @@ void Pin::Menu() {
 	// 类型选择菜单
 	if (ImGui::BeginMenu("Change Type")) {
 		for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
-			if (ImGui::MenuItem(type.DisplayName.c_str())) {
+			if (ImGui::MenuItem(type.DisplayName.c_str()))
 				TypeIdentifier = type.Identifier;
-				// 标记节点需要刷新
-				// 通过微小位置变化强制刷新
-				auto pos = Node->GetPosition();
-				ed::SetNodePosition(Node->ID, ImVec2(pos.x + 0.1f, pos.y + 0.1f));
-				ed::SetNodePosition(Node->ID, pos);
-			}
 
 			// 在菜单项显示颜色标记
 			ImGui::SameLine();
@@ -49,7 +43,6 @@ void Pin::Menu() {
 		}
 		ImGui::EndMenu();
 	}
-
 }
 
 float Pin::GetAlpha(Pin* newLinkPin) {

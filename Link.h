@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "utilities/builders.h"
+#include <string>
 
 namespace ed = ax::NodeEditor;
 class Link {
@@ -8,7 +9,7 @@ public:
 		ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255) {
 	}
 
-	void Menu() const;
+	void Menu();
 
 	ed::LinkId ID;
 
@@ -16,4 +17,5 @@ public:
 	ed::PinId EndPinID;
 
 	ImColor Color;
+	std::string TypeIdentifier;
 };
