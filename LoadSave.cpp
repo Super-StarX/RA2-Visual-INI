@@ -207,7 +207,7 @@ void MainWindow::ImportINI(const std::string& path) {
 					auto targetNode = m_SectionMap[value];
 					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
 						m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-						m_Links.back().Color = kv.OutputPin.GetIconColor();
+						m_Links.back().TypeIdentifier = kv.OutputPin.GetLinkType();
 					}
 				}
 			}
@@ -223,7 +223,7 @@ void MainWindow::ImportINI(const std::string& path) {
 				auto targetNode = m_SectionMap[value];
 				if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
 					m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-					m_Links.back().Color = kv.OutputPin.GetIconColor();
+					m_Links.back().TypeIdentifier = kv.OutputPin.GetLinkType();
 				}
 			}
 		}

@@ -9,6 +9,7 @@ struct PinTypeInfo {
 	std::string DisplayName; // 显示名称
 	ImColor     Color;       // 显示颜色
 	int         IconType;    // 图标类型（0=圆形，1=方形...）
+	std::string LinkType = "default";
 	bool        IsUserDefined = false; // 是否用户自定义类型
 
 	// 序列化支持
@@ -26,7 +27,7 @@ public:
 	}
 	static void Menu();
 
-	void InitializeDefaults();
+	PinTypeManager();
 	bool LoadFromFile(const std::string& path);
 	bool SaveToFile(const std::string& path);
 

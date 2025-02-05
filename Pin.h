@@ -21,6 +21,7 @@ public:
 	static bool CanCreateLink(Pin* a, Pin* b);
 
 	ImColor GetIconColor() const;
+	std::string GetLinkType() const;
 	float GetAlpha(Pin* newLinkPin);
 	void DrawPinIcon(bool connected, int alpha) const;
 	void Menu();

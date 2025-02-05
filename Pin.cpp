@@ -15,7 +15,14 @@ ImColor Pin::GetIconColor() const {
 	if (!typeInfo) return ImColor(255, 255, 255);
 
 	return typeInfo->Color;
-};
+}
+
+std::string Pin::GetLinkType() const {
+	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
+	if (!typeInfo) return std::string();
+
+	return typeInfo->LinkType;
+}
 
 void Pin::Menu() {
 	// 显示当前类型

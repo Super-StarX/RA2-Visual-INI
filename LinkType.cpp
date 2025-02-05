@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-void LinkTypeManager::InitializeDefaults() {
+LinkTypeManager::LinkTypeManager() {
 	auto AddType = [this](const LinkTypeInfo& type) {
 		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 			return;

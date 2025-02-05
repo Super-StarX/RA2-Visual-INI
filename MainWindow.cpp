@@ -135,7 +135,6 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
-	PinTypeManager::Get().InitializeDefaults();
 	PinTypeManager::Get().LoadFromFile("custom_types.json");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
@@ -199,7 +198,7 @@ void MainWindow::NodeEditor() {
 					showLabel("+ Create Link", ImColor(32, 45, 32, 180));
 					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
 						m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
-						m_Links.back().Color = startPin->GetIconColor();
+						m_Links.back().TypeIdentifier = startPin->GetLinkType();
 					}
 				}
 			}
@@ -283,7 +282,7 @@ void MainWindow::OnFrame(float deltaTime) {
 		node->Update();
 
 	for (auto& link : m_Links)
-		ed::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
+		link.Draw();
 
 	NodeEditor();
 	Menu();

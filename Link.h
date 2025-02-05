@@ -6,9 +6,10 @@ namespace ed = ax::NodeEditor;
 class Link {
 public:
 	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-		ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255) {
+		ID(id), StartPinID(startPinId), EndPinID(endPinId) {
 	}
 
+	void Draw() const;
 	void Menu();
 
 	ed::LinkId ID;
@@ -16,6 +17,5 @@ public:
 	ed::PinId StartPinID;
 	ed::PinId EndPinID;
 
-	ImColor Color;
 	std::string TypeIdentifier;
 };

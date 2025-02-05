@@ -1,6 +1,13 @@
 ﻿#include "Link.h"
 #include "LinkType.h"
 
+void Link::Draw() const {
+	auto* typeInfo = LinkTypeManager::Get().FindType(TypeIdentifier);
+	if (!typeInfo) return;
+
+	ed::Link(ID, StartPinID, EndPinID, typeInfo->Color, typeInfo->Thickness);
+}
+
 void Link::Menu() {
 	// 显示当前类型
 	if (auto* currentType = LinkTypeManager::Get().FindType(TypeIdentifier)) {

@@ -150,7 +150,7 @@ bool PinTypeManager::SaveToFile(const std::string& path) {
 	return true;
 }
 
-void PinTypeManager::InitializeDefaults() {
+PinTypeManager::PinTypeManager() {
 	auto AddType = [this](const PinTypeInfo& type) {
 		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 			return;

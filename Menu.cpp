@@ -60,7 +60,7 @@ void MainWindow::LayerMenu() {
 						std::swap(startPin, endPin);
 
 					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-					m_Links.back().Color = startPin->GetIconColor();
+					m_Links.back().TypeIdentifier = startPin->GetLinkType();
 
 					break;
 				}

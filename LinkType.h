@@ -28,15 +28,15 @@ public:
 		return instance;
 	}
 
-	void InitializeDefaults();
-	bool LoadFromFile(const std::string& path);
-	bool SaveToFile(const std::string& path);
-
+	LinkTypeManager();
 	const LinkTypeInfo* FindType(const std::string& identifier) const;
 	const std::vector<LinkTypeInfo>& GetAllTypes() const { return m_Types; }
 
 	void AddCustomType(const LinkTypeInfo& type);
 	void RemoveCustomType(const std::string& identifier);
+
+	bool LoadFromFile(const std::string& path);
+	bool SaveToFile(const std::string& path);
 
 private:
 	std::vector<LinkTypeInfo> m_Types;
