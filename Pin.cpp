@@ -1,6 +1,8 @@
 ﻿#include "Pin.h"
 #include "PinType.h"
 #include "nodes/Node.h"
+#include "nodes/SectionNode.h"
+#include "MainWindow.h"
 #include "utilities/widgets.h"
 
 bool Pin::CanCreateLink(Pin* a, Pin* b) {
@@ -49,6 +51,23 @@ void Pin::Menu() {
 				type.Color, ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
 		}
 		ImGui::EndMenu();
+	}
+
+	if (this->Node->Type == NodeType::Section) {
+		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
+		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
+				   [this](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == this; });
+		
+		if (ImGui::MenuItem("Add Key Value")) {
+			auto kv = SectionNode::KeyValuePair{ "", "", Pin(MainWindow::GetNextId(), "") };
+			kv.OutputPin.Node = sectionNode;
+			kv.OutputPin.Kind = PinKind::Output;
+
+			sectionNode->KeyValues.insert(it, kv);
+		}
+		if (ImGui::MenuItem("Delete")) {
+
+		}
 	}
 }
 
