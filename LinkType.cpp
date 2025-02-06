@@ -15,11 +15,11 @@ LinkTypeManager::LinkTypeManager() {
 	AddType({ "default", "Default",
 			IM_COL32(255, 255, 255, 255), IM_COL32(200, 200, 255, 255),
 			1.0f, 0 });
-	AddType({ "dashed", "Dashed",
-			IM_COL32(180, 180, 180, 255), IM_COL32(220, 220, 220, 255),
+	AddType({ "red", "Red",
+			IM_COL32(180, 0, 0, 255), IM_COL32(220, 0, 0, 255),
 			1.0f, 1 });
-	AddType({ "highlight", "Highlight",
-			IM_COL32(255, 200, 0, 255), IM_COL32(255, 150, 0, 255),
+	AddType({ "blue", "Blue",
+			IM_COL32(0, 0, 180, 255), IM_COL32(0, 0, 255, 255),
 			2.0f, 0 });
 }
 

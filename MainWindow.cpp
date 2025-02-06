@@ -77,9 +77,9 @@ Pin* MainWindow::FindPin(ed::PinId id) {
 
 		if (node->Type == NodeType::Section) {
 			auto sectionNode = dynamic_cast<SectionNode*>(node.get());
-			for (auto& [_, __, pin] : sectionNode->KeyValues)
-				if (pin.ID == id)
-					return &pin;
+			for (auto& keyValue : sectionNode->KeyValues)
+				if (keyValue.OutputPin.ID == id)
+					return &keyValue.OutputPin;
 
 			if (sectionNode->OutputPin->ID == id)
 				return sectionNode->OutputPin.get();

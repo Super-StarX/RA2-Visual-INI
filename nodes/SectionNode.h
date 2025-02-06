@@ -8,6 +8,7 @@ public:
 		std::string Key;
 		std::string Value;
 		Pin         OutputPin;
+		bool		IsInherited = false;
 	};
 
 	using BaseNode::BaseNode;

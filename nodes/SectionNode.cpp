@@ -47,11 +47,13 @@ void SectionNode::Update() {
 		ImGui::PushID(&kv);
 		builder->Output(kv.OutputPin.ID);
 
-		ImGui::SetNextItemWidth(80);
-		ImGui::InputText("##Key", &kv.Key);
+		if (!kv.IsInherited) {
+			ImGui::SetNextItemWidth(80);
+			ImGui::InputText("##Key", &kv.Key);
 
-		ImGui::SetNextItemWidth(120);
-		ImGui::InputText("##Value", &kv.Value);
+			ImGui::SetNextItemWidth(120);
+			ImGui::InputText("##Value", &kv.Value);
+		}
 
 		ImGui::Spring(0);
 		kv.OutputPin.DrawPinIcon(Owner->IsPinLinked(kv.OutputPin.ID), (int)(alpha * 255));
