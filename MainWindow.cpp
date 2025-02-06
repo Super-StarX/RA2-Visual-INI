@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "PinType.h"
@@ -276,6 +276,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	ImGui::SameLine(0.0f, 12.0f);
 
 	ShowPinTypeEditor();
+	ShowSectionEditor();
 
 	ed::Begin("Node editor");
 	for (auto& node : m_Nodes)
