@@ -1,4 +1,4 @@
-#define IMGUI_DEFINE_MATH_OPERATORS
+﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "PinType.h"
@@ -101,6 +101,16 @@ bool MainWindow::IsPinLinked(ed::PinId id) {
 			return true;
 
 	return false;
+}
+
+Node* MainWindow::GetLinkedNode(ed::PinId outputPinId) {
+	for (const auto& link : m_Links) {
+		if (link.StartPinID == outputPinId) {
+			if (auto pin = FindPin(link.EndPinID))
+				return pin->Node;
+		}
+	}
+	return nullptr;
 }
 
 void MainWindow::OnStart() {

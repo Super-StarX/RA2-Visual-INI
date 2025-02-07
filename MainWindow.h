@@ -40,6 +40,7 @@ public:
 	Link* FindLink(ed::LinkId id);
 	Pin* FindPin(ed::PinId id);
 	bool IsPinLinked(ed::PinId id);
+	Node* GetLinkedNode(ed::PinId outputPinId);
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();

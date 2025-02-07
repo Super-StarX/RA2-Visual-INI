@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
 #include <random>
 #include <windows.h>
 #include <commdlg.h>
@@ -256,10 +257,72 @@ void MainWindow::ImportINI(const std::string& path) {
 void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 
+	// 定义处理单个键值对的 lambda
+	auto ProcessKeyValue = [&](SectionNode::KeyValuePair& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
+		if (kv.IsHide) return;
+
+		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
+		if (auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID)) {
+			if (kv.IsInherited) {
+				// 递归处理继承节点
+				std::function<void(SectionNode*)> Collect = [&](SectionNode* node) {
+					if (!node || visited.count(node)) return;
+					visited.insert(node);
+
+					for (auto& childKv : node->KeyValues) {
+						if (childKv.IsHide) continue;
+
+						if (auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin.ID)) {
+							if (childKv.IsInherited) {
+								Collect(childLinkedNode);
+							}
+							else {
+								output.emplace_back(childKv.Key, childLinkedNode->Name);
+							}
+						}
+						else {
+							output.emplace_back(childKv.Key, childKv.Value);
+						}
+					}
+				};
+
+				// 根节点的继承需要新建 visited 集合
+				if (isRootProcessing) {
+					std::unordered_set<SectionNode*> newVisited;
+					Collect(linkedNode);
+				}
+				else {
+					Collect(linkedNode);
+				}
+			}
+			else {
+				output.emplace_back(kv.Key, linkedNode->Name);
+			}
+		}
+		else {
+			output.emplace_back(kv.Key, kv.Value);
+		}
+	};
+
+	// 主逻辑
 	for (auto& [section, node] : m_SectionMap) {
 		file << "[" << section << "]\n";
-		for (auto& output : node->KeyValues)
-			file << output.Key << "=" << output.Value << "\n";
+		std::vector<std::pair<std::string, std::string>> outputEntries;
+		std::unordered_set<SectionNode*> visited;
+
+		for (auto& kv : node->KeyValues) {
+			ProcessKeyValue(kv, outputEntries, visited, true); // true 表示根节点处理
+		}
+
+		// 写入文件（保留最后出现的重复键）
+		std::unordered_map<std::string, std::string> finalMap;
+		for (auto& entry : outputEntries) {
+			finalMap[entry.first] = entry.second; // 自动覆盖重复键
+		}
+		for (auto& [key, val] : finalMap) {
+			file << key << "=" << val << "\n";
+		}
+
 		file << "\n";
 	}
 }

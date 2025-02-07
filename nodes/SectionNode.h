@@ -9,6 +9,7 @@ public:
 		std::string Value;
 		Pin         OutputPin;
 		bool		IsInherited = false;
+		bool		IsHide = false;
 	};
 
 	using BaseNode::BaseNode;
