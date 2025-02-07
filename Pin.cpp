@@ -66,7 +66,7 @@ void Pin::Menu() {
 			sectionNode->KeyValues.insert(it, kv);
 		}
 		if (ImGui::MenuItem("Delete")) {
-
+			sectionNode->KeyValues.erase(it);
 		}
 	}
 }
