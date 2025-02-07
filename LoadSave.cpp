@@ -262,46 +262,45 @@ void MainWindow::ExportINI(const std::string& path) {
 		if (kv.IsHide) return;
 
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
-		if (auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID)) {
-			if (kv.IsInherited) {
-				// 递归处理继承节点
-				std::function<void(SectionNode*)> Collect = [&](SectionNode* node) {
-					if (!node || visited.count(node)) return;
-					visited.insert(node);
-
-					for (auto& childKv : node->KeyValues) {
-						if (childKv.IsHide) continue;
-
-						if (auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin.ID)) {
-							if (childKv.IsInherited) {
-								Collect(childLinkedNode);
-							}
-							else {
-								output.emplace_back(childKv.Key, childLinkedNode->Name);
-							}
-						}
-						else {
-							output.emplace_back(childKv.Key, childKv.Value);
-						}
-					}
-				};
-
-				// 根节点的继承需要新建 visited 集合
-				if (isRootProcessing) {
-					std::unordered_set<SectionNode*> newVisited;
-					Collect(linkedNode);
-				}
-				else {
-					Collect(linkedNode);
-				}
-			}
-			else {
-				output.emplace_back(kv.Key, linkedNode->Name);
-			}
-		}
-		else {
+		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID);
+		if (!linkedNode) {
 			output.emplace_back(kv.Key, kv.Value);
+			return;
 		}
+
+		if (!kv.IsInherited) {
+			output.emplace_back(kv.Key, linkedNode->Name);
+			return;
+		}
+
+		// 递归处理继承节点
+		std::function<void(SectionNode*)> Collect = [&](SectionNode* node) {
+			if (!node || visited.count(node)) return;
+			visited.insert(node);
+
+			for (auto& childKv : node->KeyValues) {
+				if (childKv.IsHide) continue;
+
+				auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin.ID);
+				if (!childLinkedNode) {
+					output.emplace_back(childKv.Key, childKv.Value);
+					continue;
+				}
+
+				if (childKv.IsInherited)
+					Collect(childLinkedNode);
+				else
+					output.emplace_back(childKv.Key, childLinkedNode->Name);
+			}
+		};
+
+		// 根节点的继承需要新建 visited 集合
+		if (isRootProcessing) {
+			std::unordered_set<SectionNode*> newVisited;
+			Collect(linkedNode);
+		}
+		else
+			Collect(linkedNode);
 	};
 
 	// 主逻辑
@@ -310,18 +309,15 @@ void MainWindow::ExportINI(const std::string& path) {
 		std::vector<std::pair<std::string, std::string>> outputEntries;
 		std::unordered_set<SectionNode*> visited;
 
-		for (auto& kv : node->KeyValues) {
+		for (auto& kv : node->KeyValues)
 			ProcessKeyValue(kv, outputEntries, visited, true); // true 表示根节点处理
-		}
 
 		// 写入文件（保留最后出现的重复键）
 		std::unordered_map<std::string, std::string> finalMap;
-		for (auto& entry : outputEntries) {
+		for (auto& entry : outputEntries)
 			finalMap[entry.first] = entry.second; // 自动覆盖重复键
-		}
-		for (auto& [key, val] : finalMap) {
+		for (auto& [key, val] : finalMap)
 			file << key << "=" << val << "\n";
-		}
 
 		file << "\n";
 	}
