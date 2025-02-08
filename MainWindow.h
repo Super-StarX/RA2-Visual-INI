@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -9,6 +9,7 @@
 
 #include "nodes/Node.h"
 #include "LeftPanelClass.h"
+#include "TemplateManager.h"
 
 class SectionNode;
 
@@ -56,6 +57,7 @@ public:
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
+	void CreateNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
 
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
@@ -69,6 +71,7 @@ public:
 	std::unordered_map<std::string, SectionNode*> m_SectionMap;
 	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
 	LeftPanelClass m_LeftPanel;
+	TemplateManager m_TemplateManager;
 	std::vector<std::unique_ptr<Node>>	m_Nodes;
 	std::vector<Link>					m_Links;
 	const float							m_TouchTime = 1.0f;

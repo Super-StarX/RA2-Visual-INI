@@ -146,6 +146,7 @@ void MainWindow::OnStart() {
 		return true;
 	};
 	PinTypeManager::Get().LoadFromFile("custom_types.json");
+	m_TemplateManager.LoadTemplates("templates.ini");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 
