@@ -47,7 +47,7 @@ void SectionNode::Update() {
 		ImGui::PushID(&kv);
 		builder->Output(kv.OutputPin.ID);
 
-		if (!kv.IsInherited) {
+		if (!kv.IsInherited || !kv.IsHide) {
 			ImGui::SetNextItemWidth(80);
 			ImGui::InputText("##Key", &kv.Key);
 

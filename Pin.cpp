@@ -68,6 +68,18 @@ void Pin::Menu() {
 		if (ImGui::MenuItem("Delete")) {
 			sectionNode->KeyValues.erase(it);
 		}
+		if (!(*it).IsHide && ImGui::MenuItem("Hide")) {
+			(*it).IsHide = true;
+		}
+		if ((*it).IsHide && ImGui::MenuItem("Unhide")) {
+			(*it).IsHide = false;
+		}
+		if (!(*it).IsInherited && ImGui::MenuItem("Set Inherited")) {
+			(*it).IsInherited = true;
+		}
+		if ((*it).IsInherited && ImGui::MenuItem("Cancel Inherited")) {
+			(*it).IsInherited = false;
+		}
 	}
 }
 
