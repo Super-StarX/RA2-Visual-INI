@@ -253,24 +253,28 @@ void MainWindow::CreateNodeFromTemplate(const std::string& sectionName, const st
 
 	// 创建节点
 	auto* newNode = SpawnSectionNode(sectionName);
+	BuildNode(m_Nodes.back());
 	ed::SetNodePosition(newNode->ID, canvasPos);
 
 	// 填充键值对
 	for (const auto& kv : keyValues) {
-		newNode->KeyValues.push_back({
+		auto& keyvalue = newNode->KeyValues.emplace_back(
 			kv.Key,
 			kv.Value,
 			Pin(GetNextId(), "output"),
 			kv.IsInherited,
 			kv.IsHide
-		});
+		);
+		keyvalue.OutputPin.Kind = PinKind::Output;
+		keyvalue.OutputPin.Node = newNode;
+
 		// 如果场内有对应的section就连上Link
 		if (m_SectionMap.contains(kv.Value)) {
 			auto targetNode = m_SectionMap[kv.Value];
-			auto outpin = newNode->OutputPin.get();
-			if (Pin::CanCreateLink(outpin, targetNode->InputPin.get())) {
-				m_Links.emplace_back(Link(GetNextId(), outpin->ID, targetNode->InputPin->ID));
-				m_Links.back().TypeIdentifier = outpin->GetLinkType();
+			auto& outpin = keyvalue.OutputPin;
+			if (Pin::CanCreateLink(&outpin, targetNode->InputPin.get())) {
+				m_Links.emplace_back(Link(GetNextId(), outpin.ID, targetNode->InputPin->ID));
+				m_Links.back().TypeIdentifier = outpin.GetLinkType();
 			}
 		}
 	}
