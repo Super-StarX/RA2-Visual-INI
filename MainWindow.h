@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -12,6 +12,7 @@
 #include "TemplateManager.h"
 
 class SectionNode;
+class CommentNode;
 
 class MainWindow : public Application {
 public:
@@ -45,7 +46,9 @@ public:
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();
+	Node* SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
 	SectionNode* SpawnSectionNode(const std::string& section = "");
+	CommentNode* SpawnCommentNode(const std::string& section = "");
 
 	void ApplyForceDirectedLayout();
 	void NodeEditor();
@@ -57,8 +60,7 @@ public:
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
-	void CreateNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
-
+	
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
 	void ImportINI(const std::string& path);

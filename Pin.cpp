@@ -65,21 +65,16 @@ void Pin::Menu() {
 
 			sectionNode->KeyValues.insert(it, kv);
 		}
-		if (ImGui::MenuItem("Delete")) {
+		if (ImGui::MenuItem("Delete"))
 			sectionNode->KeyValues.erase(it);
-		}
-		if (!(*it).IsHide && ImGui::MenuItem("Hide")) {
+		if (!(*it).IsHide && ImGui::MenuItem("Hide"))
 			(*it).IsHide = true;
-		}
-		if ((*it).IsHide && ImGui::MenuItem("Unhide")) {
+		if ((*it).IsHide && ImGui::MenuItem("Unhide"))
 			(*it).IsHide = false;
-		}
-		if (!(*it).IsInherited && ImGui::MenuItem("Set Inherited")) {
+		if (!(*it).IsInherited && ImGui::MenuItem("Set Inherited"))
 			(*it).IsInherited = true;
-		}
-		if ((*it).IsInherited && ImGui::MenuItem("Cancel Inherited")) {
+		if ((*it).IsInherited && ImGui::MenuItem("Cancel Inherited"))
 			(*it).IsInherited = false;
-		}
 	}
 }
 
