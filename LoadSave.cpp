@@ -202,6 +202,8 @@ void MainWindow::ImportINI(const std::string& path) {
 				);
 				kv.OutputPin.Node = currentNode;
 				kv.OutputPin.Kind = PinKind::Output;
+				kv.IsComment = line.find(';') != std::string::npos;
+				// 这里还差一句把';'去掉
 
 				// 创建连线
 				if (m_SectionMap.contains(value)) {

@@ -49,12 +49,16 @@ void SectionNode::Update() {
 		ImGui::PushID(&kv);
 		builder->Output(kv.OutputPin.ID);
 
-		if (!kv.IsInherited || !kv.IsComment) {
+		// 设置样式状态
+		const bool isDisabled = kv.IsInherited || kv.IsComment;
+		if (isDisabled)
+			ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
+		else {
 			ImGui::SetNextItemWidth(80);
-			ImGui::InputText("##Key", &kv.Key);
+			ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 
 			ImGui::SetNextItemWidth(120);
-			ImGui::InputText("##Value", &kv.Value);
+			ImGui::InputText("##Value", &kv.Value, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 		}
 
 		ImGui::Spring(0);
