@@ -7,9 +7,10 @@ public:
 	struct KeyValuePair {
 		std::string Key;
 		std::string Value;
-		Pin         OutputPin;
-		bool		IsInherited = false;
-		bool		IsHide = false;
+		Pin OutputPin;
+		bool IsInherited = false;
+		bool IsComment = false;
+		bool IsFolded = false;
 	};
 
 	using BaseNode::BaseNode;

@@ -42,12 +42,14 @@ void SectionNode::Update() {
 
 	// 渲染键值对
 	for (auto& kv : this->KeyValues) {
+		if (kv.IsFolded)
+			continue;
 		auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ImGui::PushID(&kv);
 		builder->Output(kv.OutputPin.ID);
 
-		if (!kv.IsInherited || !kv.IsHide) {
+		if (!kv.IsInherited || !kv.IsComment) {
 			ImGui::SetNextItemWidth(80);
 			ImGui::InputText("##Key", &kv.Key);
 

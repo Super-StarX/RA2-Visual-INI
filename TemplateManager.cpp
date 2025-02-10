@@ -29,8 +29,12 @@ void TemplateManager::LoadTemplates(const std::string& iniPath) {
 			auto eqPos = line.find('=');
 			if (eqPos != std::string::npos) {
 				TemplateSection::KeyValue kv;
-				kv.IsHide = kv.Key.find(";") == 0;
-				kv.Key = line.substr(kv.IsHide, eqPos);
+				kv.IsComment = kv.Key.find(";") == 0;
+				kv.IsInherited = kv.Key.find("@") == 0;
+				kv.IsFolded = kv.Key.find("#") == 0;
+				line.erase(0, line.find_first_not_of(";@#")); // 去除标识符
+				eqPos = line.find('='); // 去除之后再找一遍
+				kv.Key = line.substr(0, eqPos);
 				kv.Value = line.substr(eqPos + 1);
 				currentSection->KeyValues.push_back(kv);
 			}

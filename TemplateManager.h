@@ -9,7 +9,8 @@ struct TemplateSection {
 		std::string Key;
 		std::string Value;
 		bool IsInherited = false;
-		bool IsHide = false;
+		bool IsComment = false;
+		bool IsFolded = false;
 	};
 
 	std::string Name;

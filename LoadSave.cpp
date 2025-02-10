@@ -259,7 +259,7 @@ void MainWindow::ExportINI(const std::string& path) {
 
 	// 定义处理单个键值对的 lambda
 	auto ProcessKeyValue = [&](SectionNode::KeyValuePair& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
-		if (kv.IsHide) return;
+		if (kv.IsComment) return;
 
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
 		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID);
@@ -279,7 +279,7 @@ void MainWindow::ExportINI(const std::string& path) {
 			visited.insert(node);
 
 			for (auto& childKv : node->KeyValues) {
-				if (childKv.IsHide) continue;
+				if (childKv.IsComment) continue;
 
 				auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin.ID);
 				if (!childLinkedNode) {

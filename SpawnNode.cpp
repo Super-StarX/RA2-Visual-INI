@@ -48,7 +48,8 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 			kv.Value,
 			Pin(GetNextId(), "output"),
 			kv.IsInherited,
-			kv.IsHide
+			kv.IsComment,
+			kv.IsFolded
 		);
 		keyvalue.OutputPin.Kind = PinKind::Output;
 		keyvalue.OutputPin.Node = newNode;
