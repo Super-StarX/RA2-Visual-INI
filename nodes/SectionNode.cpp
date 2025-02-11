@@ -8,7 +8,7 @@ void SectionNode::Update() {
 	builder->Begin(this->ID);
 	builder->Header(this->Color);
 	ImGui::Spring(0);
-	
+
 	{
 		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
@@ -18,7 +18,6 @@ void SectionNode::Update() {
 		ImGui::PopStyleVar();
 	}
 
-	//ImGui::TextUnformatted(this->Name.c_str());
 	ImGui::PushID(this);
 	ImGui::SetNextItemWidth(150);
 	ImGui::InputText("##SectionName", &this->Name);
@@ -34,24 +33,24 @@ void SectionNode::Update() {
 	}
 
 	ImGui::Spring(1);
-	//UpdateOutput(*OutputPin.get());
 	ImGui::Dummy(ImVec2(0, 28));
 	ImGui::Spring(0);
 	builder->EndHeader();
 
-
 	// 渲染键值对
-	for (auto& kv : this->KeyValues) {
+	size_t i = 0;
+	while (i < this->KeyValues.size()) {
 		if (IsComment)
 			break;
 
+		auto& kv = this->KeyValues[i];
 		if (!kv.IsFolded) {
+			// 展开状态下的渲染
 			auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 			ImGui::PushID(&kv);
 			builder->Output(kv.OutputPin.ID);
 
-			// 设置样式状态
 			const bool isDisabled = kv.IsInherited || kv.IsComment;
 			if (isDisabled)
 				ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
@@ -69,13 +68,24 @@ void SectionNode::Update() {
 			builder->EndOutput();
 			ImGui::PopID();
 			ImGui::PopStyleVar();
+			i++;
 		}
 		else {
+			// 检测连续折叠的区域
+			size_t foldStart = i;
+			while (i < this->KeyValues.size() && this->KeyValues[i].IsFolded)
+				i++;
+
+			// 绘制合并的折叠线
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImVec2 buttonSize(230, 2.0f);
+			ImGui::PushID(static_cast<int>(foldStart)); // 确保唯一ID
 			if (ImGui::Button("", buttonSize)) {
-				kv.IsFolded = false;
+				// 展开所有连续折叠的项
+				for (size_t j = foldStart; j < i; j++)
+					this->KeyValues[j].IsFolded = false;
 			}
+			ImGui::PopID();
 			ImGui::PopStyleVar();
 		}
 	}
