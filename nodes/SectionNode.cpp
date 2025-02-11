@@ -45,31 +45,39 @@ void SectionNode::Update() {
 		if (IsComment)
 			break;
 
-		if (kv.IsFolded)
-			continue;
-		auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-		ImGui::PushID(&kv);
-		builder->Output(kv.OutputPin.ID);
+		if (!kv.IsFolded) {
+			auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ImGui::PushID(&kv);
+			builder->Output(kv.OutputPin.ID);
 
-		// 设置样式状态
-		const bool isDisabled = kv.IsInherited || kv.IsComment;
-		if (isDisabled)
-			ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
-		else {
-			ImGui::SetNextItemWidth(80);
-			ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
+			// 设置样式状态
+			const bool isDisabled = kv.IsInherited || kv.IsComment;
+			if (isDisabled)
+				ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
+			else {
+				ImGui::SetNextItemWidth(80);
+				ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 
-			ImGui::SetNextItemWidth(120);
-			ImGui::InputText("##Value", &kv.Value, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
+				ImGui::SetNextItemWidth(120);
+				ImGui::InputText("##Value", &kv.Value, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
+			}
+
+			ImGui::Spring(0);
+			kv.OutputPin.DrawPinIcon(Owner->IsPinLinked(kv.OutputPin.ID), (int)(alpha * 255));
+
+			builder->EndOutput();
+			ImGui::PopID();
+			ImGui::PopStyleVar();
 		}
-
-		ImGui::Spring(0);
-		kv.OutputPin.DrawPinIcon(Owner->IsPinLinked(kv.OutputPin.ID), (int)(alpha * 255));
-
-		builder->EndOutput();
-		ImGui::PopID();
-		ImGui::PopStyleVar();
+		else {
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			ImVec2 buttonSize(230, 2.0f);
+			if (ImGui::Button("", buttonSize)) {
+				kv.IsFolded = false;
+			}
+			ImGui::PopStyleVar();
+		}
 	}
 
 	builder->End();

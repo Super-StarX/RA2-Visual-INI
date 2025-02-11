@@ -286,6 +286,9 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	ImGui::SameLine(0.0f, 12.0f);
 
+	ShowPinTypeEditor();
+	ShowSectionEditor();
+
 	ed::Begin("Node editor");
 	for (auto& node : m_Nodes)
 		node->Update();
@@ -293,8 +296,6 @@ void MainWindow::OnFrame(float deltaTime) {
 	for (auto& link : m_Links)
 		link.Draw();
 
-	ShowPinTypeEditor();
-	ShowSectionEditor();
 	NodeEditor();
 
 	Menu();

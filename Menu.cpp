@@ -8,8 +8,15 @@ void MainWindow::Menu() {
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))
 		ImGui::OpenPopup("Node Context Menu");
-	else if (ed::ShowPinContextMenu(&contextPinId))
-		ImGui::OpenPopup("Pin Context Menu");
+	else if (ed::ShowPinContextMenu(&contextPinId)) {
+		auto pin = FindPin(contextPinId);
+		auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
+		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
+		   [pin](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == pin; });
+
+		if (it == sectionNode->KeyValues.end() || !it->IsFolded)
+			ImGui::OpenPopup("Pin Context Menu");
+	}
 	else if (ed::ShowLinkContextMenu(&contextLinkId))
 		ImGui::OpenPopup("Link Context Menu");
 	else if (ed::ShowBackgroundContextMenu()) {
@@ -99,10 +106,8 @@ void MainWindow::NodeMenu() {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
-		if (!node->IsComment && ImGui::MenuItem("Hide"))
-			node->IsComment = true;
-		if (node->IsComment && ImGui::MenuItem("Unhide"))
-			node->IsComment = false;
+		if (ImGui::MenuItem(!node->IsComment ? "Hide" : "Unhide"))
+			node->IsComment = !node->IsComment;
 	}
 
 	if (ImGui::MenuItem("Delete"))

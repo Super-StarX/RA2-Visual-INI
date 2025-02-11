@@ -57,7 +57,7 @@ void Pin::Menu() {
 		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
 		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
 				   [this](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == this; });
-		
+
 		if (ImGui::MenuItem("Add Key Value")) {
 			auto kv = SectionNode::KeyValuePair{ "", "", Pin(MainWindow::GetNextId(), "") };
 			kv.OutputPin.Node = sectionNode;
@@ -65,16 +65,18 @@ void Pin::Menu() {
 
 			sectionNode->KeyValues.insert(it, kv);
 		}
+
 		if (ImGui::MenuItem("Delete"))
 			sectionNode->KeyValues.erase(it);
-		if (!it->IsComment && ImGui::MenuItem("Hide"))
-			it->IsComment = true;
-		if (it->IsComment && ImGui::MenuItem("Unhide"))
-			it->IsComment = false;
-		if (!it->IsInherited && ImGui::MenuItem("Set Inherited"))
-			it->IsInherited = true;
-		if (it->IsInherited && ImGui::MenuItem("Cancel Inherited"))
-			it->IsInherited = false;
+
+		if (ImGui::MenuItem("Fold"))
+			it->IsFolded = true;
+
+		if (ImGui::MenuItem(!it->IsComment ? "Hide" : "Unhide"))
+			it->IsComment = !it->IsComment;
+
+		if (ImGui::MenuItem(!it->IsInherited ? "Set Inherited" : "Cancel Inherited"))
+			it->IsInherited = !it->IsInherited;
 	}
 }
 
