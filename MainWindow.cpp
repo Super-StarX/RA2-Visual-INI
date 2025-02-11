@@ -150,7 +150,11 @@ void MainWindow::OnStart() {
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 
-	SpawnSectionNode();
+	auto node1 = SpawnSectionNode("Section A");
+	node1->KeyValues.emplace_back("key", "Section B", Pin(GetNextId(), "key", "flow", PinKind::Output));
+	auto node2 = SpawnSectionNode("Section B");
+	node2->KeyValues.emplace_back("key", "value", Pin(GetNextId(), "key", "flow", PinKind::Output));
+	m_Links.emplace_back(Link(GetNextId(), node1->KeyValues.back().OutputPin.ID, node2->InputPin->ID));
 
 	ed::NavigateToContent();
 

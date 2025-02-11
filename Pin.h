@@ -14,8 +14,8 @@ class Pin {
 public:
 	constexpr static float IconSize = 24.f;
 
-	Pin(int id, const char* name, std::string type = "flow") :
-		ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(PinKind::Input) {
+	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input) :
+		ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(kind) {
 	}
 
 	static bool CanCreateLink(Pin* a, Pin* b);

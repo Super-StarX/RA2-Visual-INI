@@ -17,5 +17,5 @@ public:
 	ed::PinId StartPinID;
 	ed::PinId EndPinID;
 
-	std::string TypeIdentifier;
+	std::string TypeIdentifier = "default";
 };
