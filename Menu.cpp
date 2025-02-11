@@ -99,6 +99,10 @@ void MainWindow::NodeMenu() {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
+		if (!node->IsComment && ImGui::MenuItem("Hide"))
+			node->IsComment = true;
+		if (node->IsComment && ImGui::MenuItem("Unhide"))
+			node->IsComment = false;
 	}
 
 	if (ImGui::MenuItem("Delete"))

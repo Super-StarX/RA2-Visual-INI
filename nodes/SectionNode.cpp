@@ -42,6 +42,9 @@ void SectionNode::Update() {
 
 	// 渲染键值对
 	for (auto& kv : this->KeyValues) {
+		if (IsComment)
+			break;
+
 		if (kv.IsFolded)
 			continue;
 		auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);

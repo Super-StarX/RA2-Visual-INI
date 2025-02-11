@@ -36,7 +36,7 @@ public:
 	ImColor Color;
 	NodeType Type;
 	ImVec2 Size;
-
+	bool IsComment;
 	std::string State;
 	std::string SavedState;
 };
