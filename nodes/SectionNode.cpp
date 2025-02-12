@@ -40,7 +40,7 @@ void SectionNode::Update() {
 	// 渲染键值对
 	size_t i = 0;
 	while (i < this->KeyValues.size()) {
-		if (IsComment)
+		if (IsFolded)
 			break;
 
 		auto& kv = this->KeyValues[i];
@@ -51,7 +51,7 @@ void SectionNode::Update() {
 			ImGui::PushID(&kv);
 			builder->Output(kv.OutputPin.ID);
 
-			const bool isDisabled = kv.IsInherited || kv.IsComment;
+			const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 			if (isDisabled)
 				ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
 			else {

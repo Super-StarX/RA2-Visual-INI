@@ -92,23 +92,15 @@ void MainWindow::NodeMenu() {
 	ImGui::TextUnformatted("Node Context Menu");
 	ImGui::Separator();
 	if (node) {
-		ImGui::Text("ID: %p", node->ID.AsPointer());
-		ImGui::Text("Type: %s", node->Type == NodeType::Section ? "Section" : "Unexcepted");
-		ImGui::Text("Inputs: %d", (int)node->Inputs.size());
-		ImGui::Text("Outputs: %d", (int)node->Outputs.size());
-	}
-	else
-		ImGui::Text("Unknown node: %p", contextNodeId.AsPointer());
-	ImGui::Separator();
-
-	if (node && node->Type == NodeType::Section) {
+		node->Menu();
 		if (ImGui::MenuItem("Section Editor")) {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
-		if (ImGui::MenuItem(!node->IsComment ? "Hide" : "Unhide"))
-			node->IsComment = !node->IsComment;
 	}
+	else
+		ImGui::Text("Unknown node: %p", contextNodeId.AsPointer());
+	ImGui::Separator();
 
 	if (ImGui::MenuItem("Delete"))
 		ed::DeleteNode(contextNodeId);

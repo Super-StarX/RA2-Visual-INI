@@ -72,10 +72,10 @@ void Pin::Menu() {
 		if (ImGui::MenuItem("Fold"))
 			it->IsFolded = true;
 
-		if (ImGui::MenuItem(!it->IsComment ? "Hide" : "Unhide"))
+		if (ImGui::MenuItem(it->IsComment ? "Uncomment" : "Set Comment"))
 			it->IsComment = !it->IsComment;
 
-		if (ImGui::MenuItem(!it->IsInherited ? "Set Inherited" : "Cancel Inherited"))
+		if (ImGui::MenuItem(it->IsInherited ? "Cancel Inherited" : "Set Inherited"))
 			it->IsInherited = !it->IsInherited;
 	}
 }

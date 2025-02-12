@@ -21,3 +21,18 @@ int Node::GetConnectedLinkCount() {
 	}
 	return count;
 }
+
+void Node::Menu() {
+	ImGui::Text("ID: %p", ID.AsPointer());
+	ImGui::Text("Type: %s", Type == NodeType::Section ? "Section" : "Unexcepted");
+	ImGui::Text("Inputs: %d", (int)Inputs.size());
+	ImGui::Text("Outputs: %d", (int)Outputs.size());
+	ImGui::Separator();
+
+	if (Type == NodeType::Section) {
+		if (ImGui::MenuItem(IsComment ? "Uncomment" : "Set Comment"))
+			IsComment = !IsComment;
+		if (ImGui::MenuItem(IsFolded ? "Unfold" : "Fold"))
+			IsFolded = !IsFolded;
+	}
+}

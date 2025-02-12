@@ -26,6 +26,7 @@ public:
 	ImVec2 GetPosition();
 	void SetPosition(ImVec2 pos);
 	int GetConnectedLinkCount();
+	void Menu();
 
 	MainWindow* Owner = nullptr;
 
@@ -36,6 +37,7 @@ public:
 	ImColor Color;
 	NodeType Type;
 	ImVec2 Size;
+	bool IsFolded;
 	bool IsComment;
 	std::string State;
 	std::string SavedState;
