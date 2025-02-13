@@ -17,6 +17,7 @@ class CommentNode;
 class MainWindow : public Application {
 public:
 	using Application::Application;
+	static MainWindow* Instance;
 	static int m_NextId;
 
 	static ed::NodeId contextNodeId;
@@ -43,6 +44,8 @@ public:
 	Pin* FindPin(ed::PinId id);
 	bool IsPinLinked(ed::PinId id);
 	Node* GetLinkedNode(ed::PinId outputPinId);
+
+	Link* CreateLink(ed::PinId startPinId, ed::PinId endPinId);
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();

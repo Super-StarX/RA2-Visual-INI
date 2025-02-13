@@ -108,7 +108,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		auto endPin = FindPin(endPinId);
 
 		if (startPin && endPin) {
-			m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
+			CreateLink(startPinId, endPinId);
 		}
 	}
 	
@@ -209,8 +209,7 @@ void MainWindow::ImportINI(const std::string& path) {
 				if (m_SectionMap.contains(value)) {
 					auto targetNode = m_SectionMap[value];
 					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
-						m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-						m_Links.back().TypeIdentifier = kv.OutputPin.GetLinkType();
+						CreateLink(kv.OutputPin.ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin.GetLinkType();
 					}
 				}
 			}
@@ -225,8 +224,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			if (m_SectionMap.contains(value)) {
 				auto targetNode = m_SectionMap[value];
 				if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
-					m_Links.emplace_back(Link(GetNextId(), kv.OutputPin.ID, targetNode->InputPin->ID));
-					m_Links.back().TypeIdentifier = kv.OutputPin.GetLinkType();
+					CreateLink(kv.OutputPin.ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin.GetLinkType();
 				}
 			}
 		}

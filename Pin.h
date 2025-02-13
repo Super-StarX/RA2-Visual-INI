@@ -2,6 +2,7 @@
 #include "utilities/builders.h"
 
 #include <string>
+#include <map>
 
 namespace ed = ax::NodeEditor;
 enum class PinKind {
@@ -9,7 +10,14 @@ enum class PinKind {
 	Input
 };
 
+struct CompareLinkId {
+	bool operator()(const ed::LinkId& lhs, const ed::LinkId& rhs) const {
+		return lhs.Get() < rhs.Get();
+	}
+};
+
 class Node;
+class Link;
 class Pin {
 public:
 	constexpr static float IconSize = 24.f;
@@ -28,6 +36,7 @@ public:
 
 	ed::PinId   ID;
 	::Node* Node;
+	std::map<ed::LinkId, Link*, CompareLinkId> Links;
 	std::string Name;
 	std::string TypeIdentifier;
 	PinKind     Kind;

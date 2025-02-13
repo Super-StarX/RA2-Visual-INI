@@ -74,8 +74,7 @@ void MainWindow::LayerMenu() {
 					if (startPin->Kind == PinKind::Input)
 						std::swap(startPin, endPin);
 
-					m_Links.emplace_back(Link(GetNextId(), startPin->ID, endPin->ID));
-					m_Links.back().TypeIdentifier = startPin->GetLinkType();
+					CreateLink(startPin->ID, endPin->ID)->TypeIdentifier = startPin->GetLinkType();
 
 					break;
 				}

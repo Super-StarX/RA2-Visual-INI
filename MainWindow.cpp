@@ -8,6 +8,7 @@
 #include <imgui_internal.h>
 
 static ed::EditorContext* m_Editor = nullptr;
+MainWindow* MainWindow::Instance = nullptr;
 int MainWindow::m_NextId = 1;
 ed::NodeId MainWindow::contextNodeId = 0;
 ed::LinkId MainWindow::contextLinkId = 0;
@@ -96,21 +97,30 @@ bool MainWindow::IsPinLinked(ed::PinId id) {
 	if (!id)
 		return false;
 
-	for (auto& link : m_Links)
-		if (link.StartPinID == id || link.EndPinID == id)
-			return true;
+	if (auto pin = FindPin(id))
+		return !pin->Links.empty();
 
 	return false;
 }
 
 Node* MainWindow::GetLinkedNode(ed::PinId outputPinId) {
-	for (const auto& link : m_Links) {
-		if (link.StartPinID == outputPinId) {
-			if (auto pin = FindPin(link.EndPinID))
-				return pin->Node;
-		}
-	}
+	if (!outputPinId)
+		return nullptr;
+
+	if (auto pin = FindPin(outputPinId))
+		if (auto endpin = FindPin(pin->Links.begin()->second->EndPinID))
+			return endpin->Node;
+
 	return nullptr;
+}
+
+Link* MainWindow::CreateLink(ed::PinId startPinId, ed::PinId endPinId) {
+	auto startPin = FindPin(startPinId);
+	auto endPin = FindPin(endPinId);
+	m_Links.emplace_back(Link(GetNextLinkId(), startPinId, endPinId));
+	startPin->Links[m_Links.back().ID] = &m_Links.back();
+	endPin->Links[m_Links.back().ID] = &m_Links.back();
+	return &m_Links.back();
 }
 
 void MainWindow::OnStart() {
@@ -154,7 +164,7 @@ void MainWindow::OnStart() {
 	node1->KeyValues.emplace_back("key", "Section B", Pin(GetNextId(), "key", "flow", PinKind::Output));
 	auto node2 = SpawnSectionNode("Section B");
 	node2->KeyValues.emplace_back("key", "value", Pin(GetNextId(), "key", "flow", PinKind::Output));
-	m_Links.emplace_back(Link(GetNextId(), node1->KeyValues.back().OutputPin.ID, node2->InputPin->ID));
+	CreateLink(node1->KeyValues.back().OutputPin.ID, node2->InputPin->ID);
 
 	ed::NavigateToContent();
 
@@ -212,8 +222,7 @@ void MainWindow::NodeEditor() {
 				else {
 					showLabel("+ Create Link", ImColor(32, 45, 32, 180));
 					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-						m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
-						m_Links.back().TypeIdentifier = startPin->GetLinkType();
+						CreateLink(startPinId, endPinId)->TypeIdentifier = startPin->GetLinkType();
 					}
 				}
 			}

@@ -9,6 +9,8 @@ public:
 		ID(id), StartPinID(startPinId), EndPinID(endPinId) {
 	}
 
+	~Link();
+
 	void Draw() const;
 	void Menu();
 

@@ -59,8 +59,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 			auto targetNode = m_SectionMap[kv.Value];
 			auto& outpin = keyvalue.OutputPin;
 			if (Pin::CanCreateLink(&outpin, targetNode->InputPin.get())) {
-				m_Links.emplace_back(Link(GetNextId(), outpin.ID, targetNode->InputPin->ID));
-				m_Links.back().TypeIdentifier = outpin.GetLinkType();
+				CreateLink(outpin.ID, targetNode->InputPin->ID)->TypeIdentifier = outpin.GetLinkType();
 			}
 		}
 	}

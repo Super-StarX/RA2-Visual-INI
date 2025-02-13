@@ -1,5 +1,14 @@
 ﻿#include "Link.h"
 #include "LinkType.h"
+#include "MainWindow.h"
+
+Link::~Link() {
+	if (auto pin = MainWindow::Instance->FindPin(StartPinID))
+		pin->Links.erase(ID);
+
+	if (auto pin = MainWindow::Instance->FindPin(EndPinID))
+		pin->Links.erase(ID);
+}
 
 void Link::Draw() const {
 	auto* typeInfo = LinkTypeManager::Get().FindType(TypeIdentifier);
