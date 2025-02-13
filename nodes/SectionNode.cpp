@@ -1,6 +1,7 @@
 ﻿#include "SectionNode.h"
 #include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
+#include <algorithm>
 
 void SectionNode::Update() {
 	auto builder = GetBuilder();
@@ -52,14 +53,20 @@ void SectionNode::Update() {
 			builder->Output(kv.OutputPin.ID);
 
 			const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
-			if (isDisabled)
+			if (isDisabled) {
 				ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
+			}
 			else {
 				ImGui::SetNextItemWidth(80);
 				ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 
+				// 获取当前键的类型信息（假设已实现类型查找逻辑）
+				auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.TypeName);
+
+				// 根据类型绘制不同控件
+				ImGui::SameLine();
 				ImGui::SetNextItemWidth(120);
-				ImGui::InputText("##Value", &kv.Value, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
+				DrawValueWidget(kv.Value, typeInfo);
 			}
 
 			ImGui::Spring(0);
@@ -91,4 +98,278 @@ void SectionNode::Update() {
 	}
 
 	builder->End();
+}
+
+// 辅助函数实现
+std::vector<std::string> SectionNode::SplitString(const std::string& s, char delim) {
+	return TypeLoader::SplitString(s, delim);
+}
+
+std::string SectionNode::JoinStrings(const std::vector<std::string>& elements, const std::string& delim) {
+	std::string result;
+	for (size_t i = 0; i < elements.size(); ++i) {
+		if (i != 0) result += delim;
+		result += elements[i];
+	}
+	return result;
+}
+
+int SectionNode::GetComboIndex(const std::string& value, const std::vector<std::string>& options) {
+	auto it = std::find(options.begin(), options.end(), value);
+	return (it != options.end()) ? static_cast<int>(it - options.begin()) : 0;
+}
+
+const char* SectionNode::GetComboItems(const std::vector<std::string>& options) {
+	static std::string buffer;
+	buffer.clear();
+	for (auto& item : options) {
+		buffer += item;
+		buffer += '\0';
+	}
+	buffer += '\0';
+	return buffer.c_str();
+}
+
+// 列表控件绘制
+void SectionNode::DrawListInput(std::string & listValue, const ListType & listType) {
+	std::vector<std::string> elements = TypeLoader::SplitString(listValue, ',');
+
+	// 自动调整元素数量
+	elements.resize(std::clamp(
+		int(elements.size()),
+		listType.MinLength,
+		listType.MaxLength
+	));
+
+	// 特殊处理多选类型
+	if (auto elemType = GetTypeInfo(listType.ElementType);
+		elemType.Category == TypeCategory::StringLimit &&
+		!elemType.StringLimit.ValidValues.empty()) {
+		// 多选控件
+		std::unordered_set<std::string> selected(elements.begin(), elements.end());
+		if (ImGui::BeginCombo("##multi", "")) {
+			for (auto& option : elemType.StringLimit.ValidValues) {
+				bool isSelected = selected.count(option);
+				if (ImGui::Selectable(option.c_str(), isSelected)) {
+					if (isSelected) selected.erase(option);
+					else selected.insert(option);
+				}
+			}
+			ImGui::EndCombo();
+
+			// 更新元素列表
+			elements.assign(selected.begin(), selected.end());
+		}
+	}
+	else if (listType.MaxLength <= 3) { // 短列表展开显示
+		for (size_t i = 0; i < elements.size(); ++i) {
+			ImGui::PushID(static_cast<int>(i));
+			if (i > 0) ImGui::SameLine();
+
+			// 递归绘制元素控件
+			TypeInfo elemType = GetTypeInfo(listType.ElementType);
+			DrawValueWidget(elements[i], elemType);
+
+			ImGui::PopID();
+		}
+	}
+	else { // 长列表折叠显示
+		if (ImGui::Button("Edit List")) {
+			// 打开列表编辑窗口（需实现弹出窗口逻辑）
+			OpenListEditor(listValue, listType);
+		}
+	}
+
+	listValue = JoinStrings(elements, ",");
+}
+
+// SectionNode 扩展方法实现
+void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
+	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
+
+	ImGui::PushItemWidth(itemWidth);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
+
+	auto DrawTooltip = [&]() {
+		if (ImGui::IsItemHovered()) {
+			ImGui::BeginTooltip();
+			ImGui::Text("Type: %s", type.TypeName.c_str());
+			switch (type.Category) {
+			case TypeCategory::NumberLimit:
+				ImGui::Text("Range: [%d, %d]",
+					type.NumberLimit.Min, type.NumberLimit.Max);
+				break;
+			case TypeCategory::StringLimit:
+				if (!type.StringLimit.ValidValues.empty()) {
+					ImGui::Text("Options: %s",
+						JoinStrings(type.StringLimit.ValidValues, ", ").c_str());
+				}
+				break;
+			case TypeCategory::List:
+				ImGui::Text("Element: %s (%d-%d items)",
+					type.ListType.ElementType.c_str(),
+					type.ListType.MinLength,
+					type.ListType.MaxLength);
+				break;
+			}
+			ImGui::EndTooltip();
+		}
+	};
+
+	switch (type.Category) {
+	case TypeCategory::NumberLimit: {
+		int numValue = atoi(value.c_str());
+		bool modified = ImGui::DragInt("##num", &numValue, 1,
+			type.NumberLimit.Min, type.NumberLimit.Max, "%d",
+			ImGuiSliderFlags_AlwaysClamp);
+
+		if (modified || numValue < type.NumberLimit.Min ||
+			numValue > type.NumberLimit.Max) {
+			numValue = std::clamp(numValue,
+				type.NumberLimit.Min, type.NumberLimit.Max);
+			value = std::to_string(numValue);
+		}
+		DrawTooltip();
+		break;
+	}
+
+	case TypeCategory::StringLimit: {
+		if (!type.StringLimit.ValidValues.empty()) {
+			int current = GetComboIndex(value, type.StringLimit.ValidValues);
+			if (ImGui::Combo("##str", &current,
+				GetComboItems(type.StringLimit.ValidValues))) {
+				value = type.StringLimit.ValidValues[current];
+			}
+		}
+		else
+			ImGui::InputText("##str", &value);
+		DrawTooltip();
+		break;
+	}
+
+	case TypeCategory::List: {
+		DrawListInput(value, type.ListType);
+		break;
+	}
+
+	default: {
+		ImGui::InputText("##value", &value);
+		break;
+	}
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopItemWidth();
+}
+
+// 列表编辑窗口实现
+void SectionNode::OpenListEditor(std::string& listValue, const ListType& listType) {
+	static std::string editBuffer;
+	static ListType editType;
+
+	if (!ImGui::IsPopupOpen("List Editor")) {
+		editBuffer = listValue;
+		editType = listType;
+		ImGui::OpenPopup("List Editor");
+	}
+
+	if (ImGui::BeginPopupModal("List Editor", nullptr,
+		ImGuiWindowFlags_AlwaysAutoResize)) {
+		std::vector<std::string> elements = SplitString(editBuffer, ',');
+
+		// 自动填充/截断
+		if (elements.size() < editType.MinLength)
+			elements.resize(editType.MinLength);
+		else if (elements.size() > editType.MaxLength)
+			elements.resize(editType.MaxLength);
+
+		// 元素类型信息
+		TypeInfo elemType = TypeSystem::Get().GetTypeInfo(editType.ElementType);
+
+		// 动态绘制元素
+		bool modified = false;
+		for (size_t i = 0; i < elements.size(); ++i) {
+			ImGui::PushID(static_cast<int>(i));
+			ImGui::Text("Item %d:", static_cast<int>(i + 1));
+			ImGui::SameLine();
+
+			std::string elemValue = elements[i];
+			if (DrawElementEditor(elemValue, elemType)) {
+				elements[i] = elemValue;
+				modified = true;
+			}
+			ImGui::PopID();
+		}
+
+		// 长度控制按钮
+		if (elements.size() < editType.MaxLength) {
+			if (ImGui::Button("+ Add Item")) {
+				elements.emplace_back("");
+				modified = true;
+			}
+		}
+		if (elements.size() > editType.MinLength) {
+			ImGui::SameLine();
+			if (ImGui::Button("- Remove Last")) {
+				elements.pop_back();
+				modified = true;
+			}
+		}
+
+		// 确认操作
+		ImGui::Separator();
+		if (ImGui::Button("OK", ImVec2(120, 0))) {
+			listValue = JoinStrings(elements, ",");
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0)))
+			ImGui::CloseCurrentPopup();
+
+		if (modified)
+			editBuffer = JoinStrings(elements, ",");
+
+		ImGui::EndPopup();
+	}
+}
+
+// 元素级编辑器
+bool SectionNode::DrawElementEditor(std::string& value, const TypeInfo& type) {
+	const float width = ImGui::GetContentRegionAvail().x * 0.7f;
+	ImGui::PushItemWidth(width);
+
+	bool modified = false;
+	std::string original = value;
+
+	switch (type.Category) {
+	case TypeCategory::NumberLimit: {
+		int numValue = atoi(value.c_str());
+		if (ImGui::DragInt("##elem", &numValue, 1,
+			type.NumberLimit.Min, type.NumberLimit.Max)) {
+			value = std::to_string(numValue);
+			modified = true;
+		}
+		break;
+	}
+	case TypeCategory::StringLimit: {
+		if (!type.StringLimit.ValidValues.empty()) {
+			int current = GetComboIndex(value, type.StringLimit.ValidValues);
+			if (ImGui::Combo("##elem", &current,
+				GetComboItems(type.StringLimit.ValidValues))) {
+				value = type.StringLimit.ValidValues[current];
+				modified = true;
+			}
+		}
+		else if (ImGui::InputText("##elem", &value))
+			modified = true;
+		break;
+	}
+	default: {
+		if (ImGui::InputText("##elem", &value))
+			modified = true;
+	}
+	}
+
+	ImGui::PopItemWidth();
+	return modified || (original != value);
 }

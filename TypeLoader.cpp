@@ -1,4 +1,46 @@
 ﻿#include "TypeLoader.h"
+#include <fstream>
+#include <sstream>
+
+TypeSystem& TypeSystem::Get() {
+	static TypeSystem instance;
+	return instance;
+}
+
+TypeInfo TypeSystem::GetTypeInfo(const std::string& typeName) const {
+	TypeInfo info;
+	info.TypeName = typeName;
+
+	if (Sections.count(typeName)) {
+		info.Category = TypeCategory::Section;
+	}
+	else if (NumberLimits.count(typeName)) {
+		info.Category = TypeCategory::NumberLimit;
+		info.NumberLimit = NumberLimits.at(typeName);
+	}
+	else if (StringLimits.count(typeName)) {
+		info.Category = TypeCategory::StringLimit;
+		info.StringLimit = StringLimits.at(typeName);
+	}
+	else if (Lists.count(typeName)) {
+		info.Category = TypeCategory::List;
+		info.ListType = Lists.at(typeName);
+	}
+	else if (BasicTypes.count(typeName)) {
+		info.Category = TypeCategory::Basic;
+	}
+	return info;
+}
+
+TypeInfo TypeSystem::GetKeyType(const std::string& sectionType, const std::string& key) const {
+	if (Sections.count(sectionType)) {
+		auto& section = Sections.at(sectionType);
+		if (section.KeyTypes.count(key)) {
+			return GetTypeInfo(section.KeyTypes.at(key));
+		}
+	}
+	return {};
+}
 
 std::vector<std::string> TypeLoader::SplitString(const std::string& s, char delimiter) {
 	std::vector<std::string> tokens;
@@ -19,28 +61,27 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 	std::string currentMainCategory;
 
 	while (std::getline(file, line)) {
-		// 移除前后空格和注释
 		line = line.substr(0, line.find(';'));
 		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
 		if (line.empty()) continue;
 
-		// 解析段头
 		if (line[0] == '[') {
 			currentSection = line.substr(1, line.find(']') - 1);
 
-			// 确定主分类状态
-			if (currentSection == "Sections")
+			if (currentSection == "Sections") {
 				state = ParseState::InSections;
-			else if (currentSection == "NumberLimits")
+			}
+			else if (currentSection == "NumberLimits") {
 				state = ParseState::InNumberLimits;
-			else if (currentSection == "Limits")
+			}
+			else if (currentSection == "Limits") {
 				state = ParseState::InLimits;
-			else if (currentSection == "Lists")
+			}
+			else if (currentSection == "Lists") {
 				state = ParseState::InLists;
+			}
 			else {
-				// 处理子段
 				if (state == ParseState::InSections) {
-					// 记录Sections类型
 					ts.Sections[currentSection].KeyTypes.clear();
 					currentMainCategory = currentSection;
 				}
@@ -60,7 +101,6 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 			continue;
 		}
 
-		// 解析键值对
 		size_t eqPos = line.find('=');
 		if (eqPos != std::string::npos) {
 			std::string key = line.substr(0, eqPos);
@@ -68,12 +108,12 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 
 			switch (state) {
 			case ParseState::InSections: {
-				// 主[Sections]段记录类型名称
-				if (currentSection == "Sections")
-					ts.Sections[value] = {}; // 注册新类型
-				// 子段处理键值类型
-				else if (!currentMainCategory.empty())
+				if (currentSection == "Sections") {
+					ts.Sections[value] = {};
+				}
+				else if (!currentMainCategory.empty()) {
 					ts.Sections[currentMainCategory].KeyTypes[key] = value;
+				}
 				break;
 			}
 			case ParseState::InNumberLimits: {
@@ -88,20 +128,15 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 			}
 			case ParseState::InLimits: {
 				auto& limit = ts.StringLimits[currentMainCategory];
-				if (key == "StartWith")
-					limit.StartWith = value;
-				else if (key == "EndWith")
-					limit.EndWith = value;
-				else if (key == "LimitIn")
-					limit.ValidValues = SplitString(value, ',');
-				else if (key == "CaseSensitive")
-					limit.CaseSensitive = (value == "true");
+				if (key == "StartWith") limit.StartWith = value;
+				else if (key == "EndWith") limit.EndWith = value;
+				else if (key == "LimitIn") limit.ValidValues = SplitString(value, ',');
+				else if (key == "CaseSensitive") limit.CaseSensitive = (value == "true");
 				break;
 			}
 			case ParseState::InLists: {
 				auto& list = ts.Lists[currentMainCategory];
-				if (key == "Type")
-					list.ElementType = value;
+				if (key == "Type") list.ElementType = value;
 				else if (key == "Range") {
 					auto parts = SplitString(value, ',');
 					if (parts.size() == 2) {
@@ -111,21 +146,25 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 				}
 				break;
 			}
-			default:
-				// 处理全局键值对（如果有）
-				break;
+			default: break;
 			}
 		}
 		else {
-			// 处理无键值的情况（如注册类型名）
-			if (state == ParseState::InSections && currentSection == "Sections")
-				ts.Sections[line] = {}; // 直接注册类型名
-			else if (state == ParseState::InNumberLimits && currentSection == "NumberLimits")
-				ts.NumberLimits[line] = {}; // 注册数值类型
-			else if (state == ParseState::InLimits && currentSection == "Limits")
-				ts.StringLimits[line] = {}; // 注册限制类型
-			else if (state == ParseState::InLists && currentSection == "Lists")
-				ts.Lists[line] = {}; // 注册列表类型
+			switch (state) {
+			case ParseState::InSections:
+				if (currentSection == "Sections") ts.Sections[line] = {};
+				break;
+			case ParseState::InNumberLimits:
+				ts.NumberLimits[line] = {};
+				break;
+			case ParseState::InLimits:
+				ts.StringLimits[line] = {};
+				break;
+			case ParseState::InLists:
+				ts.Lists[line] = {};
+				break;
+			default: break;
+			}
 		}
 	}
 	return ts;
