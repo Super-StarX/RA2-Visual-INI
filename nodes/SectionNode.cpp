@@ -1,5 +1,6 @@
 ﻿#include "SectionNode.h"
 #include "MainWindow.h"
+#include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <algorithm>
 
@@ -64,7 +65,6 @@ void SectionNode::Update() {
 				auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.TypeName);
 
 				// 根据类型绘制不同控件
-				ImGui::SameLine();
 				ImGui::SetNextItemWidth(120);
 				DrawValueWidget(kv.Value, typeInfo);
 			}
@@ -101,10 +101,6 @@ void SectionNode::Update() {
 }
 
 // 辅助函数实现
-std::vector<std::string> SectionNode::SplitString(const std::string& s, char delim) {
-	return TypeLoader::SplitString(s, delim);
-}
-
 std::string SectionNode::JoinStrings(const std::vector<std::string>& elements, const std::string& delim) {
 	std::string result;
 	for (size_t i = 0; i < elements.size(); ++i) {
@@ -130,9 +126,89 @@ const char* SectionNode::GetComboItems(const std::vector<std::string>& options) 
 	return buffer.c_str();
 }
 
+// SectionNode 扩展方法实现
+void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
+	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
+
+	ImGui::PushItemWidth(itemWidth);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
+
+	auto DrawTooltip = [&]() {
+		if (ImGui::IsItemHovered()) {
+			ImGui::BeginTooltip();
+			ImGui::Text("Type: %s", type.TypeName.c_str());
+			switch (type.Category) {
+			case TypeCategory::NumberLimit:
+				ImGui::Text("Range: [%d, %d]",
+					std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
+				break;
+			case TypeCategory::StringLimit:
+				if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
+					ImGui::Text("Options: %s",
+						JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
+				}
+				break;
+			case TypeCategory::List:
+				ImGui::Text("Element: %s (%d-%d items)",
+					std::get<ListType>(type.Data).ElementType.c_str(),
+					std::get<ListType>(type.Data).MinLength,
+					std::get<ListType>(type.Data).MaxLength);
+				break;
+			}
+			ImGui::EndTooltip();
+		}
+	};
+
+	switch (type.Category) {
+	case TypeCategory::NumberLimit: {
+		int numValue = atoi(value.c_str());
+		bool modified = ImGui::DragInt("##num", &numValue, 1,
+			std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max, "%d",
+			ImGuiSliderFlags_AlwaysClamp);
+
+		if (modified || numValue < std::get<NumberLimit>(type.Data).Min ||
+			numValue > std::get<NumberLimit>(type.Data).Max) {
+			numValue = std::clamp(numValue,
+				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
+			value = std::to_string(numValue);
+		}
+		DrawTooltip();
+		break;
+	}
+
+	case TypeCategory::StringLimit: {
+		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
+			int current = GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
+			if (ImGui::Combo("##str", &current,
+				GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
+				value = std::get<StringLimit>(type.Data).ValidValues[current];
+			}
+		}
+		else
+			ImGui::InputText("##str", &value);
+		DrawTooltip();
+		break;
+	}
+
+	case TypeCategory::List: {
+		DrawListInput(value, std::get<ListType>(type.Data));
+		break;
+	}
+
+	default: {
+		ImGui::SetNextItemWidth(value.size()*10);
+		ImGui::InputText("##value", &value);
+		break;
+	}
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopItemWidth();
+}
+
 // 列表控件绘制
 void SectionNode::DrawListInput(std::string & listValue, const ListType & listType) {
-	std::vector<std::string> elements = TypeLoader::SplitString(listValue, ',');
+	std::vector<std::string> elements = Utils::SplitString(listValue, ',');
 
 	// 自动调整元素数量
 	elements.resize(std::clamp(
@@ -144,11 +220,11 @@ void SectionNode::DrawListInput(std::string & listValue, const ListType & listTy
 	// 特殊处理多选类型
 	if (auto elemType = GetTypeInfo(listType.ElementType);
 		elemType.Category == TypeCategory::StringLimit &&
-		!elemType.StringLimit.ValidValues.empty()) {
+		!std::get<StringLimit>(elemType.Data).ValidValues.empty()) {
 		// 多选控件
 		std::unordered_set<std::string> selected(elements.begin(), elements.end());
 		if (ImGui::BeginCombo("##multi", "")) {
-			for (auto& option : elemType.StringLimit.ValidValues) {
+			for (auto& option : std::get<StringLimit>(elemType.Data).ValidValues) {
 				bool isSelected = selected.count(option);
 				if (ImGui::Selectable(option.c_str(), isSelected)) {
 					if (isSelected) selected.erase(option);
@@ -183,85 +259,6 @@ void SectionNode::DrawListInput(std::string & listValue, const ListType & listTy
 	listValue = JoinStrings(elements, ",");
 }
 
-// SectionNode 扩展方法实现
-void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
-	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
-
-	ImGui::PushItemWidth(itemWidth);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
-
-	auto DrawTooltip = [&]() {
-		if (ImGui::IsItemHovered()) {
-			ImGui::BeginTooltip();
-			ImGui::Text("Type: %s", type.TypeName.c_str());
-			switch (type.Category) {
-			case TypeCategory::NumberLimit:
-				ImGui::Text("Range: [%d, %d]",
-					type.NumberLimit.Min, type.NumberLimit.Max);
-				break;
-			case TypeCategory::StringLimit:
-				if (!type.StringLimit.ValidValues.empty()) {
-					ImGui::Text("Options: %s",
-						JoinStrings(type.StringLimit.ValidValues, ", ").c_str());
-				}
-				break;
-			case TypeCategory::List:
-				ImGui::Text("Element: %s (%d-%d items)",
-					type.ListType.ElementType.c_str(),
-					type.ListType.MinLength,
-					type.ListType.MaxLength);
-				break;
-			}
-			ImGui::EndTooltip();
-		}
-	};
-
-	switch (type.Category) {
-	case TypeCategory::NumberLimit: {
-		int numValue = atoi(value.c_str());
-		bool modified = ImGui::DragInt("##num", &numValue, 1,
-			type.NumberLimit.Min, type.NumberLimit.Max, "%d",
-			ImGuiSliderFlags_AlwaysClamp);
-
-		if (modified || numValue < type.NumberLimit.Min ||
-			numValue > type.NumberLimit.Max) {
-			numValue = std::clamp(numValue,
-				type.NumberLimit.Min, type.NumberLimit.Max);
-			value = std::to_string(numValue);
-		}
-		DrawTooltip();
-		break;
-	}
-
-	case TypeCategory::StringLimit: {
-		if (!type.StringLimit.ValidValues.empty()) {
-			int current = GetComboIndex(value, type.StringLimit.ValidValues);
-			if (ImGui::Combo("##str", &current,
-				GetComboItems(type.StringLimit.ValidValues))) {
-				value = type.StringLimit.ValidValues[current];
-			}
-		}
-		else
-			ImGui::InputText("##str", &value);
-		DrawTooltip();
-		break;
-	}
-
-	case TypeCategory::List: {
-		DrawListInput(value, type.ListType);
-		break;
-	}
-
-	default: {
-		ImGui::InputText("##value", &value);
-		break;
-	}
-	}
-
-	ImGui::PopStyleVar();
-	ImGui::PopItemWidth();
-}
-
 // 列表编辑窗口实现
 void SectionNode::OpenListEditor(std::string& listValue, const ListType& listType) {
 	static std::string editBuffer;
@@ -275,7 +272,7 @@ void SectionNode::OpenListEditor(std::string& listValue, const ListType& listTyp
 
 	if (ImGui::BeginPopupModal("List Editor", nullptr,
 		ImGuiWindowFlags_AlwaysAutoResize)) {
-		std::vector<std::string> elements = SplitString(editBuffer, ',');
+		std::vector<std::string> elements = Utils::SplitString(editBuffer, ',');
 
 		// 自动填充/截断
 		if (elements.size() < editType.MinLength)
@@ -345,18 +342,18 @@ bool SectionNode::DrawElementEditor(std::string& value, const TypeInfo& type) {
 	case TypeCategory::NumberLimit: {
 		int numValue = atoi(value.c_str());
 		if (ImGui::DragInt("##elem", &numValue, 1,
-			type.NumberLimit.Min, type.NumberLimit.Max)) {
+			std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max)) {
 			value = std::to_string(numValue);
 			modified = true;
 		}
 		break;
 	}
 	case TypeCategory::StringLimit: {
-		if (!type.StringLimit.ValidValues.empty()) {
-			int current = GetComboIndex(value, type.StringLimit.ValidValues);
+		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
+			int current = GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
 			if (ImGui::Combo("##elem", &current,
-				GetComboItems(type.StringLimit.ValidValues))) {
-				value = type.StringLimit.ValidValues[current];
+				GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
+				value = std::get<StringLimit>(type.Data).ValidValues[current];
 				modified = true;
 			}
 		}

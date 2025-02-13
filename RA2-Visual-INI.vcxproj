@@ -173,6 +173,7 @@
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LinkType.h" />

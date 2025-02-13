@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <climits>
+#include <variant>
 
 // 类型分类枚举
 enum class TypeCategory {
@@ -41,30 +42,15 @@ struct ListType {
 
 // 完整类型信息结构
 struct TypeInfo {
-	TypeCategory Category = TypeCategory::Unknown;
+	TypeCategory Category{ TypeCategory::Unknown };
 	std::string TypeName;
+	std::variant<NumberLimit, StringLimit, ListType> Data;
 
-	union {
-		NumberLimit NumberLimit;
-		StringLimit StringLimit;
-		ListType ListType;
-	};
+	TypeInfo() : Category(TypeCategory::Unknown), TypeName("") {}
+	~TypeInfo() = default;
 
-	TypeInfo() = default;
-	~TypeInfo();
-
-	TypeInfo(const TypeInfo& other) {
-		Category = other.Category;
-		TypeName = other.TypeName;
-		switch (Category) {
-		case TypeCategory::NumberLimit:
-			NumberLimit = other.NumberLimit; break;
-		case TypeCategory::StringLimit:
-			StringLimit = other.StringLimit; break;
-		case TypeCategory::List:
-			ListType = other.ListType; break;
-		default: break;
-		}
+	TypeInfo(const TypeInfo& other)
+		: Category(other.Category), TypeName(other.TypeName), Data(other.Data) {
 	}
 };
 
@@ -88,7 +74,6 @@ private:
 class TypeLoader {
 public:
 	static TypeSystem LoadFromINI(const std::string& path);
-	static std::vector<std::string> SplitString(const std::string& s, char delimiter);
 
 private:
 	enum class ParseState {

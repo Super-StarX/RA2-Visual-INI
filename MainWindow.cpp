@@ -207,20 +207,20 @@ void MainWindow::NodeEditor() {
 				if (endPin == startPin)
 					ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 				else if (endPin->Kind == startPin->Kind) {
-					showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
+					Utils::DrawTextOnCursor("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
 					ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 				}
 				//else if (endPin->Node == startPin->Node)
 				//{
-				//    showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
+				//    Utils::DrawTextOnCursor("x Cannot connect to self", ImColor(45, 32, 32, 180));
 				//    ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
 				//}
 				else if (endPin->TypeIdentifier != startPin->TypeIdentifier) {
-					showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
+					Utils::DrawTextOnCursor("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
 					ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
 				}
 				else {
-					showLabel("+ Create Link", ImColor(32, 45, 32, 180));
+					Utils::DrawTextOnCursor("+ Create Link", ImColor(32, 45, 32, 180));
 					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
 						CreateLink(startPinId, endPinId)->TypeIdentifier = startPin->GetLinkType();
 					}
@@ -232,7 +232,7 @@ void MainWindow::NodeEditor() {
 		if (ed::QueryNewNode(&pinId)) {
 			newLinkPin = FindPin(pinId);
 			if (newLinkPin)
-				showLabel("+ Create Node", ImColor(32, 45, 32, 180));
+				Utils::DrawTextOnCursor("+ Create Node", ImColor(32, 45, 32, 180));
 
 			if (ed::AcceptNewItem()) {
 				createNewNode = true;
@@ -293,7 +293,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	}
 # endif
 
-	Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
+	Utils::Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
 	m_LeftPanel.ShowLeftPanel(leftPaneWidth - 4.0f);
 

@@ -1,6 +1,6 @@
 ﻿#include "TypeLoader.h"
+#include "Utils.h"
 #include <fstream>
-#include <sstream>
 
 TypeSystem& TypeSystem::Get() {
 	static TypeSystem instance;
@@ -16,15 +16,15 @@ TypeInfo TypeSystem::GetTypeInfo(const std::string& typeName) const {
 	}
 	else if (NumberLimits.count(typeName)) {
 		info.Category = TypeCategory::NumberLimit;
-		info.NumberLimit = NumberLimits.at(typeName);
+		info.Data = NumberLimits.at(typeName);
 	}
 	else if (StringLimits.count(typeName)) {
 		info.Category = TypeCategory::StringLimit;
-		info.StringLimit = StringLimits.at(typeName);
+		info.Data = StringLimits.at(typeName);
 	}
 	else if (Lists.count(typeName)) {
 		info.Category = TypeCategory::List;
-		info.ListType = Lists.at(typeName);
+		info.Data = Lists.at(typeName);
 	}
 	else if (BasicTypes.count(typeName)) {
 		info.Category = TypeCategory::Basic;
@@ -40,16 +40,6 @@ TypeInfo TypeSystem::GetKeyType(const std::string& sectionType, const std::strin
 		}
 	}
 	return {};
-}
-
-std::vector<std::string> TypeLoader::SplitString(const std::string& s, char delimiter) {
-	std::vector<std::string> tokens;
-	std::string token;
-	std::istringstream tokenStream(s);
-	while (std::getline(tokenStream, token, delimiter)) {
-		if (!token.empty()) tokens.push_back(token);
-	}
-	return tokens;
 }
 
 TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
@@ -118,7 +108,7 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 			}
 			case ParseState::InNumberLimits: {
 				if (key == "Range") {
-					auto parts = SplitString(value, ',');
+					auto parts = Utils::SplitString(value, ',');
 					if (parts.size() == 2) {
 						ts.NumberLimits[currentMainCategory].Min = std::stoi(parts[0]);
 						ts.NumberLimits[currentMainCategory].Max = std::stoi(parts[1]);
@@ -130,7 +120,7 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 				auto& limit = ts.StringLimits[currentMainCategory];
 				if (key == "StartWith") limit.StartWith = value;
 				else if (key == "EndWith") limit.EndWith = value;
-				else if (key == "LimitIn") limit.ValidValues = SplitString(value, ',');
+				else if (key == "LimitIn") limit.ValidValues = Utils::SplitString(value, ',');
 				else if (key == "CaseSensitive") limit.CaseSensitive = (value == "true");
 				break;
 			}
@@ -138,7 +128,7 @@ TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
 				auto& list = ts.Lists[currentMainCategory];
 				if (key == "Type") list.ElementType = value;
 				else if (key == "Range") {
-					auto parts = SplitString(value, ',');
+					auto parts = Utils::SplitString(value, ',');
 					if (parts.size() == 2) {
 						list.MinLength = std::stoi(parts[0]);
 						list.MaxLength = std::stoi(parts[1]);
