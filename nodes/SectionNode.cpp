@@ -62,7 +62,7 @@ void SectionNode::Update() {
 				ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 
 				// 获取当前键的类型信息（假设已实现类型查找逻辑）
-				auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.TypeName);
+				auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.Key);
 
 				// 根据类型绘制不同控件
 				ImGui::SetNextItemWidth(120);
@@ -100,32 +100,6 @@ void SectionNode::Update() {
 	builder->End();
 }
 
-// 辅助函数实现
-std::string SectionNode::JoinStrings(const std::vector<std::string>& elements, const std::string& delim) {
-	std::string result;
-	for (size_t i = 0; i < elements.size(); ++i) {
-		if (i != 0) result += delim;
-		result += elements[i];
-	}
-	return result;
-}
-
-int SectionNode::GetComboIndex(const std::string& value, const std::vector<std::string>& options) {
-	auto it = std::find(options.begin(), options.end(), value);
-	return (it != options.end()) ? static_cast<int>(it - options.begin()) : 0;
-}
-
-const char* SectionNode::GetComboItems(const std::vector<std::string>& options) {
-	static std::string buffer;
-	buffer.clear();
-	for (auto& item : options) {
-		buffer += item;
-		buffer += '\0';
-	}
-	buffer += '\0';
-	return buffer.c_str();
-}
-
 // SectionNode 扩展方法实现
 void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
@@ -145,7 +119,7 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 			case TypeCategory::StringLimit:
 				if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
 					ImGui::Text("Options: %s",
-						JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
+						Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
 				}
 				break;
 			case TypeCategory::List:
@@ -178,9 +152,9 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 
 	case TypeCategory::StringLimit: {
 		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-			int current = GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
+			int current = Utils::GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
 			if (ImGui::Combo("##str", &current,
-				GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
+				Utils::GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
 				value = std::get<StringLimit>(type.Data).ValidValues[current];
 			}
 		}
@@ -256,7 +230,7 @@ void SectionNode::DrawListInput(std::string & listValue, const ListType & listTy
 		}
 	}
 
-	listValue = JoinStrings(elements, ",");
+	listValue = Utils::JoinStrings(elements, ",");
 }
 
 // 列表编辑窗口实现
@@ -316,7 +290,7 @@ void SectionNode::OpenListEditor(std::string& listValue, const ListType& listTyp
 		// 确认操作
 		ImGui::Separator();
 		if (ImGui::Button("OK", ImVec2(120, 0))) {
-			listValue = JoinStrings(elements, ",");
+			listValue = Utils::JoinStrings(elements, ",");
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();
@@ -324,7 +298,7 @@ void SectionNode::OpenListEditor(std::string& listValue, const ListType& listTyp
 			ImGui::CloseCurrentPopup();
 
 		if (modified)
-			editBuffer = JoinStrings(elements, ",");
+			editBuffer = Utils::JoinStrings(elements, ",");
 
 		ImGui::EndPopup();
 	}
@@ -350,9 +324,9 @@ bool SectionNode::DrawElementEditor(std::string& value, const TypeInfo& type) {
 	}
 	case TypeCategory::StringLimit: {
 		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-			int current = GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
+			int current = Utils::GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
 			if (ImGui::Combo("##elem", &current,
-				GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
+				Utils::GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
 				value = std::get<StringLimit>(type.Data).ValidValues[current];
 				modified = true;
 			}

@@ -37,3 +37,29 @@ std::vector<std::string> Utils::SplitString(const std::string& s, char delimiter
 	}
 	return tokens;
 }
+
+// 辅助函数实现
+std::string Utils::JoinStrings(const std::vector<std::string>& elements, const std::string& delim) {
+	std::string result;
+	for (size_t i = 0; i < elements.size(); ++i) {
+		if (i != 0) result += delim;
+		result += elements[i];
+	}
+	return result;
+}
+
+int Utils::GetComboIndex(const std::string& value, const std::vector<std::string>& options) {
+	auto it = std::find(options.begin(), options.end(), value);
+	return (it != options.end()) ? static_cast<int>(it - options.begin()) : 0;
+}
+
+const char* Utils::GetComboItems(const std::vector<std::string>& options) {
+	static std::string buffer;
+	buffer.clear();
+	for (auto& item : options) {
+		buffer += item;
+		buffer += '\0';
+	}
+	buffer += '\0';
+	return buffer.c_str();
+}

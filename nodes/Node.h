@@ -23,10 +23,11 @@ public:
 	}
 
 	virtual void Update() = 0;
+	virtual void Menu();
+	virtual void HoverMenu(bool isHovered);
 	ImVec2 GetPosition();
 	void SetPosition(ImVec2 pos);
 	int GetConnectedLinkCount();
-	void Menu();
 
 	MainWindow* Owner = nullptr;
 
@@ -39,6 +40,7 @@ public:
 	ImVec2 Size;
 	bool IsFolded;
 	bool IsComment;
+	std::string TypeName;
 	std::string State;
 	std::string SavedState;
 };

@@ -13,13 +13,11 @@ public:
 		bool IsInherited = false;
 		bool IsComment = false;
 		bool IsFolded = false;
-		std::string TypeName;
 	};
 
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 
-	std::string TypeName;
 	std::vector<KeyValuePair> KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
@@ -38,8 +36,4 @@ private:
 	void DrawListInput(std::string& listValue, const ListType& listType);
 	void OpenListEditor(std::string& listValue, const ListType& listType);
 	bool DrawElementEditor(std::string& value, const TypeInfo& type);
-
-	static std::string JoinStrings(const std::vector<std::string>& elements, const std::string& delim);
-	static int GetComboIndex(const std::string& value, const std::vector<std::string>& options);
-	static const char* GetComboItems(const std::vector<std::string>& options);
 };

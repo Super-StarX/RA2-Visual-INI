@@ -56,19 +56,15 @@ struct TypeInfo {
 
 class TypeSystem {
 public:
-
 	static TypeSystem& Get();
 	TypeInfo GetTypeInfo(const std::string& typeName) const;
 	TypeInfo GetKeyType(const std::string& sectionType, const std::string& key) const;
 
-private:
 	std::unordered_set<std::string> BasicTypes = { "string", "int", "float", "bool" };
 	std::unordered_map<std::string, SectionType> Sections;
 	std::unordered_map<std::string, NumberLimit> NumberLimits;
 	std::unordered_map<std::string, StringLimit> StringLimits;
 	std::unordered_map<std::string, ListType> Lists;
-
-	friend class TypeLoader;
 };
 
 class TypeLoader {
