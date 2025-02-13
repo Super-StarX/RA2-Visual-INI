@@ -67,30 +67,7 @@ Pin* MainWindow::FindPin(ed::PinId id) {
 	if (!id)
 		return nullptr;
 
-	for (auto& node : m_Nodes) {
-		for (auto& pin : node->Inputs)
-			if (pin.ID == id)
-				return &pin;
-
-		for (auto& pin : node->Outputs)
-			if (pin.ID == id)
-				return &pin;
-
-		if (node->Type == NodeType::Section) {
-			auto sectionNode = dynamic_cast<SectionNode*>(node.get());
-			for (auto& keyValue : sectionNode->KeyValues)
-				if (keyValue.OutputPin.ID == id)
-					return &keyValue.OutputPin;
-
-			if (sectionNode->OutputPin->ID == id)
-				return sectionNode->OutputPin.get();
-
-			if (sectionNode->InputPin->ID == id)
-				return sectionNode->InputPin.get();
-		}
-	}
-
-	return nullptr;
+	return m_Pins.count(id) ? m_Pins.at(id) : nullptr;
 }
 
 bool MainWindow::IsPinLinked(ed::PinId id) {
@@ -161,10 +138,10 @@ void MainWindow::OnStart() {
 	ed::SetCurrentEditor(m_Editor);
 
 	auto node1 = SpawnSectionNode("Section A");
-	node1->KeyValues.emplace_back("key", "Section B", Pin(GetNextId(), "key", "flow", PinKind::Output));
+	node1->KeyValues.emplace_back("key", "Section B", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output));
 	auto node2 = SpawnSectionNode("Section B");
-	node2->KeyValues.emplace_back("key", "value", Pin(GetNextId(), "key", "flow", PinKind::Output));
-	CreateLink(node1->KeyValues.back().OutputPin.ID, node2->InputPin->ID);
+	node2->KeyValues.emplace_back("key", "value", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output));
+	CreateLink(node1->KeyValues.back().OutputPin->ID, node2->InputPin->ID);
 
 	ed::NavigateToContent();
 

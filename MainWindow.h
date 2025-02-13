@@ -79,6 +79,7 @@ public:
 	TemplateManager m_TemplateManager;
 	std::vector<std::unique_ptr<Node>>	m_Nodes;
 	std::vector<Link>					m_Links;
+	std::map<ed::PinId, Pin*, ComparePinId> m_Pins; // 快速找pin用
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
 	bool								m_ShowPinTypeEditor{ false };

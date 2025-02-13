@@ -5,6 +5,15 @@
 #include "MainWindow.h"
 #include "utilities/widgets.h"
 
+Pin::Pin(int id, const char* name, std::string type, PinKind kind) :
+	ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(kind) {
+	MainWindow::Instance->m_Pins[ID] = this;
+}
+
+Pin::~Pin() {
+	MainWindow::Instance->m_Pins.erase(ID);
+}
+
 bool Pin::CanCreateLink(Pin* a, Pin* b) {
 	if (!a || !b || a == b || a->Kind == b->Kind || a->Node == b->Node)
 		return false;
@@ -56,12 +65,12 @@ void Pin::Menu() {
 	if (this->Node->Type == NodeType::Section) {
 		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
 		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-				   [this](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == this; });
+				   [this](const SectionNode::KeyValuePair& kv) { return kv.OutputPin.get() == this; });
 
 		if (ImGui::MenuItem("Add Key Value")) {
-			auto kv = SectionNode::KeyValuePair{ "", "", Pin(MainWindow::GetNextId(), "") };
-			kv.OutputPin.Node = sectionNode;
-			kv.OutputPin.Kind = PinKind::Output;
+			auto kv = SectionNode::KeyValuePair{ "", "", std::make_unique<Pin>(MainWindow::GetNextId(), "") };
+			kv.OutputPin->Node = sectionNode;
+			kv.OutputPin->Kind = PinKind::Output;
 
 			sectionNode->KeyValues.insert(it, kv);
 		}

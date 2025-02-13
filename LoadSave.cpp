@@ -89,10 +89,10 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			int outputPinId = kvJson["output_pin_id"].get<int>();
 
 			auto& kv = node->KeyValues.emplace_back(key, value,
-				Pin{ outputPinId, key.c_str() }
+				std::make_unique<Pin>(outputPinId, key.c_str())
 			);
-			kv.OutputPin.Node = node;
-			kv.OutputPin.Kind = PinKind::Output;
+			kv.OutputPin->Node = node;
+			kv.OutputPin->Kind = PinKind::Output;
 		}
 
 		node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
@@ -132,7 +132,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 			json kvJson;
 			kvJson["key"] = kv.Key;
 			kvJson["value"] = kv.Value;
-			kvJson["output_pin_id"] = kv.OutputPin.ID.Get();
+			kvJson["output_pin_id"] = kv.OutputPin->ID.Get();
 			keyValuesJson.push_back(kvJson);
 		}
 		nodeJson["key_values"] = keyValuesJson;
@@ -198,18 +198,18 @@ void MainWindow::ImportINI(const std::string& path) {
 
 				// 添加输出引脚
 				auto& kv = currentNode->KeyValues.emplace_back(key, value,
-					Pin{ GetNextId(), key.c_str() }
+					std::make_unique<Pin>(GetNextId(), key.c_str())
 				);
-				kv.OutputPin.Node = currentNode;
-				kv.OutputPin.Kind = PinKind::Output;
+				kv.OutputPin->Node = currentNode;
+				kv.OutputPin->Kind = PinKind::Output;
 				kv.IsComment = line.find(';') != std::string::npos;
 				// 这里还差一句把';'去掉
 
 				// 创建连线
 				if (m_SectionMap.contains(value)) {
 					auto targetNode = m_SectionMap[value];
-					if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
-						CreateLink(kv.OutputPin.ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin.GetLinkType();
+					if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
+						CreateLink(kv.OutputPin->ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin->GetLinkType();
 					}
 				}
 			}
@@ -223,8 +223,8 @@ void MainWindow::ImportINI(const std::string& path) {
 			auto& kv = currentNode->KeyValues.back(); // 假设每个 key-value 对都已添加到 KeyValues 中
 			if (m_SectionMap.contains(value)) {
 				auto targetNode = m_SectionMap[value];
-				if (Pin::CanCreateLink(&kv.OutputPin, targetNode->InputPin.get())) {
-					CreateLink(kv.OutputPin.ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin.GetLinkType();
+				if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
+					CreateLink(kv.OutputPin->ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin->GetLinkType();
 				}
 			}
 		}
@@ -260,7 +260,7 @@ void MainWindow::ExportINI(const std::string& path) {
 	// 定义处理单个键值对的 lambda
 	auto ProcessKeyValue = [&](SectionNode::KeyValuePair& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
-		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID);
+		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin->ID);
 		if (!linkedNode) {
 			output.emplace_back(kv.Key, kv.Value);
 			return;
@@ -279,7 +279,7 @@ void MainWindow::ExportINI(const std::string& path) {
 			for (auto& childKv : node->KeyValues) {
 				if (childKv.IsComment) continue;
 
-				auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin.ID);
+				auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin->ID);
 				if (!childLinkedNode) {
 					output.emplace_back(childKv.Key, childKv.Value);
 					continue;

@@ -11,9 +11,9 @@ void MainWindow::Menu() {
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
 		auto pin = FindPin(contextPinId);
 		if (pin && pin->Node->Type == NodeType::Section) {
-			auto sectionNode = static_cast<SectionNode*>(pin->Node);
+			auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
 			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-			   [pin](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == pin; });
+			   [pin](const SectionNode::KeyValuePair& kv) { return kv.OutputPin.get() == pin; });
 
 			if (it == sectionNode->KeyValues.end() || !it->IsFolded)
 				ImGui::OpenPopup("Pin Context Menu");
@@ -159,10 +159,10 @@ void MainWindow::ShowSectionEditor() {
 						}
 						else {
 							// Key doesn't exist, add new entry
-							m_SectionEditorNode->KeyValues.emplace_back(key, value, Pin(GetNextId(), key.c_str()));
+							m_SectionEditorNode->KeyValues.emplace_back(key, value, std::make_unique<Pin>(GetNextId(), key.c_str()));
 							auto& kv = m_SectionEditorNode->KeyValues.back();
-							kv.OutputPin.Node = m_SectionEditorNode;
-							kv.OutputPin.Kind = PinKind::Output;
+							kv.OutputPin->Node = m_SectionEditorNode;
+							kv.OutputPin->Kind = PinKind::Output;
 						}
 					}
 				}

@@ -22,7 +22,11 @@ void SectionNode::Update() {
 
 	ImGui::PushID(this);
 	ImGui::SetNextItemWidth(150);
-	ImGui::InputText("##SectionName", &this->Name);
+	{
+		if (ImGui::InputText("##SectionName", &this->Name)) {
+
+		}
+	}
 	ImGui::PopID();
 
 	{
@@ -48,10 +52,10 @@ void SectionNode::Update() {
 		auto& kv = this->KeyValues[i];
 		if (!kv.IsFolded) {
 			// 展开状态下的渲染
-			auto alpha = kv.OutputPin.GetAlpha(Owner->newLinkPin);
+			auto alpha = kv.OutputPin->GetAlpha(Owner->newLinkPin);
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 			ImGui::PushID(&kv);
-			builder->Output(kv.OutputPin.ID);
+			builder->Output(kv.OutputPin->ID);
 
 			const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 			if (isDisabled) {
@@ -70,7 +74,7 @@ void SectionNode::Update() {
 			}
 
 			ImGui::Spring(0);
-			kv.OutputPin.DrawPinIcon(Owner->IsPinLinked(kv.OutputPin.ID), (int)(alpha * 255));
+			kv.OutputPin->DrawPinIcon(Owner->IsPinLinked(kv.OutputPin->ID), (int)(alpha * 255));
 
 			builder->EndOutput();
 			ImGui::PopID();

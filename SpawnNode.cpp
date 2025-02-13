@@ -46,20 +46,20 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 		auto& keyvalue = newNode->KeyValues.emplace_back(
 			kv.Key,
 			kv.Value,
-			Pin(GetNextId(), "output"),
+			std::make_unique<Pin>(GetNextId(), "output"),
 			kv.IsInherited,
 			kv.IsComment,
 			kv.IsFolded
 		);
-		keyvalue.OutputPin.Kind = PinKind::Output;
-		keyvalue.OutputPin.Node = newNode;
+		keyvalue.OutputPin->Kind = PinKind::Output;
+		keyvalue.OutputPin->Node = newNode;
 
 		// 如果场内有对应的section就连上Link
 		if (m_SectionMap.contains(kv.Value)) {
 			auto targetNode = m_SectionMap[kv.Value];
-			auto& outpin = keyvalue.OutputPin;
-			if (Pin::CanCreateLink(&outpin, targetNode->InputPin.get())) {
-				CreateLink(outpin.ID, targetNode->InputPin->ID)->TypeIdentifier = outpin.GetLinkType();
+			auto outpin = keyvalue.OutputPin.get();
+			if (Pin::CanCreateLink(outpin, targetNode->InputPin.get())) {
+				CreateLink(outpin->ID, targetNode->InputPin->ID)->TypeIdentifier = outpin->GetLinkType();
 			}
 		}
 	}
