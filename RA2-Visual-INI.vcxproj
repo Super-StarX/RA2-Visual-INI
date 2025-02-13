@@ -169,6 +169,7 @@
     <ClCompile Include="PinType.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="TemplateManager.cpp" />
+    <ClCompile Include="TypeLoader.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="PinType.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
+    <ClInclude Include="TypeLoader.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />

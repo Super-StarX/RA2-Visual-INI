@@ -259,8 +259,6 @@ void MainWindow::ExportINI(const std::string& path) {
 
 	// 定义处理单个键值对的 lambda
 	auto ProcessKeyValue = [&](SectionNode::KeyValuePair& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
-		if (kv.IsComment) return;
-
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
 		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin.ID);
 		if (!linkedNode) {
@@ -305,12 +303,18 @@ void MainWindow::ExportINI(const std::string& path) {
 
 	// 主逻辑
 	for (auto& [section, node] : m_SectionMap) {
+		if (node->IsComment)
+			continue;
+
 		file << "[" << section << "]\n";
 		std::vector<std::pair<std::string, std::string>> outputEntries;
 		std::unordered_set<SectionNode*> visited;
 
-		for (auto& kv : node->KeyValues)
+		for (auto& kv : node->KeyValues) {
+			if (kv.IsComment) continue;
+
 			ProcessKeyValue(kv, outputEntries, visited, true); // true 表示根节点处理
+		}
 
 		// 写入文件（保留最后出现的重复键）
 		std::unordered_map<std::string, std::string> finalMap;

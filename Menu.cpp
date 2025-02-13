@@ -10,12 +10,14 @@ void MainWindow::Menu() {
 		ImGui::OpenPopup("Node Context Menu");
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
 		auto pin = FindPin(contextPinId);
-		auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
-		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-		   [pin](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == pin; });
+		if (pin && pin->Node->Type == NodeType::Section) {
+			auto sectionNode = static_cast<SectionNode*>(pin->Node);
+			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
+			   [pin](const SectionNode::KeyValuePair& kv) { return &kv.OutputPin == pin; });
 
-		if (it == sectionNode->KeyValues.end() || !it->IsFolded)
-			ImGui::OpenPopup("Pin Context Menu");
+			if (it == sectionNode->KeyValues.end() || !it->IsFolded)
+				ImGui::OpenPopup("Pin Context Menu");
+		}
 	}
 	else if (ed::ShowLinkContextMenu(&contextLinkId))
 		ImGui::OpenPopup("Link Context Menu");
