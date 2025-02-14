@@ -2,15 +2,6 @@
 #include "GroupNode.h"
 #include "Utils.h"
 
-static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y) {
-	ImRect result = rect;
-	result.Min.x -= x;
-	result.Min.y -= y;
-	result.Max.x += x;
-	result.Max.y += y;
-	return result;
-}
-
 void GroupNode::Update() {
 	const float commentAlpha = 0.75f;
 

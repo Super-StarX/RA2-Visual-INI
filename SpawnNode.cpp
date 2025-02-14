@@ -1,6 +1,7 @@
 ﻿#include "MainWindow.h"
 #include "nodes/Node.h"
 #include "nodes/BlueprintNode.h"
+#include "nodes/CommentNode.h"
 #include "nodes/TreeNode.h"
 #include "nodes/GroupNode.h"
 #include "nodes/SimpleNode.h"
@@ -85,8 +86,17 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 GroupNode* MainWindow::SpawnGroupNode(const std::string& section) {
 	m_Nodes.emplace_back(std::make_unique<GroupNode>(this, GetNextId(), section.c_str()));
 	auto node = m_Nodes.back().get();
-	node->Type = NodeType::Comment;
+	node->Type = NodeType::Group;
 	node->Size = ImVec2(300, 200);
 
 	return reinterpret_cast<GroupNode*>(node);
+}
+
+CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
+	m_Nodes.emplace_back(std::make_unique<CommentNode>(this, GetNextId(), section.c_str()));
+	auto node = m_Nodes.back().get();
+	node->Type = NodeType::Comment;
+	node->Size = ImVec2(300, 200);
+
+	return reinterpret_cast<CommentNode*>(node);
 }

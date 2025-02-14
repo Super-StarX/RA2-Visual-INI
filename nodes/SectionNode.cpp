@@ -174,7 +174,7 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	}
 
 	default: {
-		ImGui::SetNextItemWidth(value.size() * 10);
+		ImGui::SetNextItemWidth(value.size() * 10.f);
 		ImGui::InputText("##value", &value);
 		break;
 	}

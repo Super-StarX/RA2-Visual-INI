@@ -19,6 +19,15 @@ static inline ImVec2 ImNormalized(const ImVec2& vec) {
 	return len > 0.0f ? ImVec2(vec.x / len, vec.y / len) : ImVec2(0, 0);
 }
 
+static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y) {
+	ImRect result = rect;
+	result.Min.x -= x;
+	result.Min.y -= y;
+	result.Max.x += x;
+	result.Max.y += y;
+	return result;
+}
+
 class Utils {
 public:
 	static void DrawTextOnCursor(const char* label, ImColor color);

@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AutoLayout.cpp" />
+    <ClCompile Include="nodes\CommentNode.cpp" />
     <ClCompile Include="LinkType.cpp" />
     <ClCompile Include="LoadSave.cpp" />
     <ClCompile Include="Menu.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="nodes\CommentNode.h" />
     <ClInclude Include="LinkType.h" />
     <ClInclude Include="nodes\BaseNode.h" />
     <ClInclude Include="LeftPanelClass.h" />

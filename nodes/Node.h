@@ -10,9 +10,10 @@ enum class NodeType {
 	Blueprint,
 	Simple,
 	Tree,
-	Comment,
+	Group,
 	Houdini,
 	Section,
+	Comment,
 };
 
 class MainWindow;
