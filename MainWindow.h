@@ -12,7 +12,7 @@
 #include "TemplateManager.h"
 
 class SectionNode;
-class CommentNode;
+class GroupNode;
 
 class MainWindow : public Application {
 public:
@@ -51,7 +51,7 @@ public:
 	void BuildNodes();
 	Node* SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
 	SectionNode* SpawnSectionNode(const std::string& section = "");
-	CommentNode* SpawnCommentNode(const std::string& section = "");
+	GroupNode* SpawnGroupNode(const std::string& section = "");
 
 	void ApplyForceDirectedLayout();
 	void NodeEditor();

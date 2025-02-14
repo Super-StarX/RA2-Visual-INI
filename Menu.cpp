@@ -54,7 +54,7 @@ void MainWindow::LayerMenu() {
 	if (ImGui::MenuItem("Section"))
 		node = (Node*)SpawnSectionNode();
 	else if (ImGui::MenuItem("Group"))
-		node = (Node*)SpawnCommentNode();
+		node = (Node*)SpawnGroupNode();
 	ImGui::Separator();
 	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
 		node = SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);

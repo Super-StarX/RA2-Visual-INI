@@ -157,7 +157,7 @@
     <ClCompile Include="LeftPanelClass.cpp" />
     <ClCompile Include="Link.cpp" />
     <ClCompile Include="nodes\BlueprintNode.cpp" />
-    <ClCompile Include="nodes\CommentNode.cpp" />
+    <ClCompile Include="nodes\GroupNode.cpp" />
     <ClCompile Include="nodes\HoudiniNode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -181,7 +181,7 @@
     <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="Link.h" />
     <ClInclude Include="nodes\BlueprintNode.h" />
-    <ClInclude Include="nodes\CommentNode.h" />
+    <ClInclude Include="nodes\GroupNode.h" />
     <ClInclude Include="nodes\HoudiniNode.h" />
     <ClInclude Include="imgui-node-editor\external\ScopeGuard\ScopeGuard.h" />
     <ClInclude Include="imgui-node-editor\external\stb_image\stb_image.h" />

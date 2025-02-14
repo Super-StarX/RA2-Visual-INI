@@ -1,5 +1,5 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
-#include "CommentNode.h"
+#include "GroupNode.h"
 #include "Utils.h"
 
 static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y) {
@@ -11,7 +11,7 @@ static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y) {
 	return result;
 }
 
-void CommentNode::Update() {
+void GroupNode::Update() {
 	const float commentAlpha = 0.75f;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
