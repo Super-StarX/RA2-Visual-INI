@@ -91,6 +91,10 @@ Node* MainWindow::GetLinkedNode(ed::PinId outputPinId) {
 	return nullptr;
 }
 
+Node* MainWindow::GetHoverNode() {
+	return FindNode(ed::GetHoveredNode());
+}
+
 Link* MainWindow::CreateLink(ed::PinId startPinId, ed::PinId endPinId) {
 	auto startPin = FindPin(startPinId);
 	auto endPin = FindPin(endPinId);
@@ -138,9 +142,9 @@ void MainWindow::OnStart() {
 	ed::SetCurrentEditor(m_Editor);
 
 	auto node1 = SpawnSectionNode("Section A");
-	node1->KeyValues.emplace_back("key", "Section B", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output));
+	node1->KeyValues.emplace_back("key", "Section B", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output)).OutputPin->Node = node1;
 	auto node2 = SpawnSectionNode("Section B");
-	node2->KeyValues.emplace_back("key", "value", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output));
+	node2->KeyValues.emplace_back("key", "value", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output)).OutputPin->Node = node2;
 	CreateLink(node1->KeyValues.back().OutputPin->ID, node2->InputPin->ID);
 
 	ed::NavigateToContent();

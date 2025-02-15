@@ -45,6 +45,7 @@ public:
 	Pin* FindPin(ed::PinId id);
 	bool IsPinLinked(ed::PinId id);
 	Node* GetLinkedNode(ed::PinId outputPinId);
+	Node* GetHoverNode();
 
 	Link* CreateLink(ed::PinId startPinId, ed::PinId endPinId);
 
