@@ -39,25 +39,21 @@ void MainWindow::Menu() {
 		LayerMenu();
 	else
 		createNewNode = false;
+
 	// 悬停节点提示处理
 	static Node* lastHoveredNode = nullptr;
 	Node* hoveredNode = GetHoverNode();
-
 	if (hoveredNode) {
 		if (hoveredNode != lastHoveredNode) {
 			hoveredNode->HoverTimer = 0.0f;
 			lastHoveredNode = hoveredNode;
 		}
-
 		hoveredNode->HoverTimer += ImGui::GetIO().DeltaTime;
-
-		if (hoveredNode->HoverTimer > 0.5f) {
+		if (hoveredNode->HoverTimer > 0.5f)
 			ShowNodeTypeTooltip(hoveredNode);
-		}
 	}
-	else {
+	else
 		lastHoveredNode = nullptr;
-	}
 	ImGui::PopStyleVar();
 	ed::Resume();
 }

@@ -1,6 +1,6 @@
 ﻿#include "TypeLoader.h"
 #include "Utils.h"
-#include <fstream>
+#include <IniFile.h>
 
 TypeSystem& TypeSystem::Get() {
 	static TypeSystem instance;
@@ -35,127 +35,76 @@ TypeInfo TypeSystem::GetTypeInfo(const std::string& typeName) const {
 TypeInfo TypeSystem::GetKeyType(const std::string& sectionType, const std::string& key) const {
 	if (Sections.count(sectionType)) {
 		auto& section = Sections.at(sectionType);
-		if (section.KeyTypes.count(key)) {
-			return GetTypeInfo(section.KeyTypes.at(key));
+		if (section.contains(key)) {
+			return GetTypeInfo(section.at(key));
 		}
 	}
 	return {};
 }
 
-TypeSystem TypeLoader::LoadFromINI(const std::string& path) {
-	TypeSystem ts;
-	std::ifstream file(path);
-	std::string line;
-	std::string currentSection;
-	ParseState state = ParseState::Global;
-	std::string currentMainCategory;
+void TypeSystem::LoadFromINI(const std::string& path) {
+	IniFile ini(path);
 
-	while (std::getline(file, line)) {
-		line = line.substr(0, line.find(';'));
-		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
-		if (line.empty()) continue;
-
-		if (line[0] == '[') {
-			currentSection = line.substr(1, line.find(']') - 1);
-
-			if (currentSection == "Sections") {
-				state = ParseState::InSections;
-			}
-			else if (currentSection == "NumberLimits") {
-				state = ParseState::InNumberLimits;
-			}
-			else if (currentSection == "Limits") {
-				state = ParseState::InLimits;
-			}
-			else if (currentSection == "Lists") {
-				state = ParseState::InLists;
-			}
-			else {
-				if (state == ParseState::InSections) {
-					ts.Sections[currentSection].KeyTypes.clear();
-					currentMainCategory = currentSection;
-				}
-				else if (ts.NumberLimits.count(currentSection)) {
-					state = ParseState::InNumberLimits;
-					currentMainCategory = currentSection;
-				}
-				else if (ts.StringLimits.count(currentSection)) {
-					state = ParseState::InLimits;
-					currentMainCategory = currentSection;
-				}
-				else if (ts.Lists.count(currentSection)) {
-					state = ParseState::InLists;
-					currentMainCategory = currentSection;
-				}
-			}
-			continue;
-		}
-
-		size_t eqPos = line.find('=');
-		if (eqPos != std::string::npos) {
-			std::string key = line.substr(0, eqPos);
-			std::string value = line.substr(eqPos + 1);
-
-			switch (state) {
-			case ParseState::InSections: {
-				if (currentSection == "Sections") {
-					ts.Sections[value] = {};
-				}
-				else if (!currentMainCategory.empty()) {
-					ts.Sections[currentMainCategory].KeyTypes[key] = value;
-				}
-				break;
-			}
-			case ParseState::InNumberLimits: {
-				if (key == "Range") {
-					auto parts = Utils::SplitString(value, ',');
-					if (parts.size() == 2) {
-						ts.NumberLimits[currentMainCategory].Min = std::stoi(parts[0]);
-						ts.NumberLimits[currentMainCategory].Max = std::stoi(parts[1]);
-					}
-				}
-				break;
-			}
-			case ParseState::InLimits: {
-				auto& limit = ts.StringLimits[currentMainCategory];
-				if (key == "StartWith") limit.StartWith = value;
-				else if (key == "EndWith") limit.EndWith = value;
-				else if (key == "LimitIn") limit.ValidValues = Utils::SplitString(value, ',');
-				else if (key == "CaseSensitive") limit.CaseSensitive = (value == "true");
-				break;
-			}
-			case ParseState::InLists: {
-				auto& list = ts.Lists[currentMainCategory];
-				if (key == "Type") list.ElementType = value;
-				else if (key == "Range") {
-					auto parts = Utils::SplitString(value, ',');
-					if (parts.size() == 2) {
-						list.MinLength = std::stoi(parts[0]);
-						list.MaxLength = std::stoi(parts[1]);
-					}
-				}
-				break;
-			}
-			default: break;
-			}
-		}
-		else {
-			switch (state) {
-			case ParseState::InSections:
-				if (currentSection == "Sections") ts.Sections[line] = {};
-				break;
-			case ParseState::InNumberLimits:
-				ts.NumberLimits[line] = {};
-				break;
-			case ParseState::InLimits:
-				ts.StringLimits[line] = {};
-				break;
-			case ParseState::InLists:
-				ts.Lists[line] = {};
-				break;
-			default: break;
-			}
+	// 处理[Sections]主段（特殊处理）
+	if (ini.sections.count("Sections")) {
+		auto& regSection = ini.sections.at("Sections");
+		for (auto& [_, typeName] : regSection.section) {
+			auto a = typeName;
+			a.getFileName();
+			if (ini.sections.count(typeName.value))
+				Sections[typeName] = ini.sections.at(typeName.value);
 		}
 	}
-	return ts;
+
+	// 类型分类处理函数
+	auto processCategory = [&](const std::string& category, auto& typeMap, auto handler) {
+		if (ini.sections.count(category)) {
+			auto& mainSection = ini.sections.at(category);
+			for (auto& [name, _] : mainSection.section) {
+				typeMap[name] = {}; // 注册类型
+
+				// 处理类型定义子段
+				if (ini.sections.count(name)) {
+					auto& typeSection = ini.sections.at(name);
+					handler(typeSection, typeMap[name]);
+				}
+			}
+		}
+	};
+
+	// 处理NumberLimits类型
+	processCategory("NumberLimits", NumberLimits, [](auto& section, auto& limit) {
+		if (section.section.count("Range")) {
+			auto parts = Utils::SplitString(section.section.at("Range"), ',');
+			if (parts.size() == 2) {
+				limit.Min = std::stoi(parts[0]);
+				limit.Max = std::stoi(parts[1]);
+			}
+		}
+	});
+
+	// 处理Limits类型
+	processCategory("Limits", StringLimits, [](auto& section, auto& limit) {
+		if (section.section.count("StartWith"))
+			limit.StartWith = static_cast<std::string>(section.section.at("StartWith"));
+		if (section.section.count("EndWith"))
+			limit.EndWith = static_cast<std::string>(section.section.at("EndWith"));
+		if (section.section.count("LimitIn"))
+			limit.ValidValues = Utils::SplitString(section.section.at("LimitIn"), ',');
+		if (section.section.count("CaseSensitive"))
+			limit.CaseSensitive = (static_cast<std::string>(section.section.at("CaseSensitive")) == "true");
+	});
+
+	// 处理Lists类型
+	processCategory("Lists", Lists, [](auto& section, auto& list) {
+		if (section.section.count("Type"))
+			list.ElementType = static_cast<std::string>(section.section.at("Type"));
+		if (section.section.count("Range")) {
+			auto parts = Utils::SplitString(section.section.at("Range"), ',');
+			if (parts.size() == 2) {
+				list.MinLength = std::stoi(parts[0]);
+				list.MaxLength = std::stoi(parts[1]);
+			}
+		}
+	});
 }

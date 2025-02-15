@@ -1,5 +1,6 @@
 ﻿// TypeLoader.h
 #pragma once
+#include "IniFile.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -18,10 +19,6 @@ enum class TypeCategory {
 };
 
 // 类型定义存储
-struct SectionType {
-	std::unordered_map<std::string, std::string> KeyTypes;
-};
-
 struct NumberLimit {
 	int Min = INT_MIN;
 	int Max = INT_MAX;
@@ -56,22 +53,6 @@ struct TypeInfo {
 
 class TypeSystem {
 public:
-	static TypeSystem& Get();
-	TypeInfo GetTypeInfo(const std::string& typeName) const;
-	TypeInfo GetKeyType(const std::string& sectionType, const std::string& key) const;
-
-	std::unordered_set<std::string> BasicTypes = { "string", "int", "float", "bool" };
-	std::unordered_map<std::string, SectionType> Sections;
-	std::unordered_map<std::string, NumberLimit> NumberLimits;
-	std::unordered_map<std::string, StringLimit> StringLimits;
-	std::unordered_map<std::string, ListType> Lists;
-};
-
-class TypeLoader {
-public:
-	static TypeSystem LoadFromINI(const std::string& path);
-
-private:
 	enum class ParseState {
 		Global,
 		InSections,
@@ -79,4 +60,14 @@ private:
 		InLimits,
 		InLists
 	};
+	static TypeSystem& Get();
+	TypeInfo GetTypeInfo(const std::string& typeName) const;
+	TypeInfo GetKeyType(const std::string& sectionType, const std::string& key) const;
+	void LoadFromINI(const std::string& path);
+
+	std::unordered_set<std::string> BasicTypes = { "string", "int", "float", "bool" };
+	std::unordered_map<std::string, Section> Sections;
+	std::unordered_map<std::string, NumberLimit> NumberLimits;
+	std::unordered_map<std::string, StringLimit> StringLimits;
+	std::unordered_map<std::string, ListType> Lists;
 };
