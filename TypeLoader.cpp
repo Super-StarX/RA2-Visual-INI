@@ -48,12 +48,9 @@ void TypeSystem::LoadFromINI(const std::string& path) {
 	// 处理[Sections]主段（特殊处理）
 	if (ini.sections.count("Sections")) {
 		auto& regSection = ini.sections.at("Sections");
-		for (auto& [_, typeName] : regSection.section) {
-			auto a = typeName;
-			a.getFileName();
-			if (ini.sections.count(typeName.value))
-				Sections[typeName] = ini.sections.at(typeName.value);
-		}
+		for (auto& [typeName, _] : regSection.section)
+			if (ini.sections.count(typeName))
+				Sections[typeName] = ini.sections.at(typeName);
 	}
 
 	// 类型分类处理函数
