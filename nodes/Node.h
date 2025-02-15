@@ -41,6 +41,7 @@ public:
 	ImVec2 Size;
 	bool IsFolded;
 	bool IsComment;
+	float HoverTimer = 0.0f;
 	std::string TypeName;
 	std::string State;
 	std::string SavedState;

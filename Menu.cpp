@@ -39,6 +39,25 @@ void MainWindow::Menu() {
 		LayerMenu();
 	else
 		createNewNode = false;
+	// 悬停节点提示处理
+	static Node* lastHoveredNode = nullptr;
+	Node* hoveredNode = GetHoverNode();
+
+	if (hoveredNode) {
+		if (hoveredNode != lastHoveredNode) {
+			hoveredNode->HoverTimer = 0.0f;
+			lastHoveredNode = hoveredNode;
+		}
+
+		hoveredNode->HoverTimer += ImGui::GetIO().DeltaTime;
+
+		if (hoveredNode->HoverTimer > 0.5f) {
+			ShowNodeTypeTooltip(hoveredNode);
+		}
+	}
+	else {
+		lastHoveredNode = nullptr;
+	}
 	ImGui::PopStyleVar();
 	ed::Resume();
 }
@@ -251,4 +270,44 @@ void MainWindow::LinkMenu() {
 	if (ImGui::MenuItem("Delete"))
 		ed::DeleteLink(contextLinkId);
 	ImGui::EndPopup();
+}
+
+void MainWindow::ShowNodeTypeTooltip(Node* node) {
+	ImGui::BeginTooltip();
+
+	// 类型名称
+	ImGui::Text("Type:%s", node->TypeName.c_str());
+
+	// 类型详细信息
+	auto typeInfo = TypeSystem::Get().GetTypeInfo(node->TypeName);
+	switch (typeInfo.Category) {
+	case TypeCategory::NumberLimit:
+		ImGui::Separator();
+		ImGui::Text("Value Range:");
+		ImGui::BulletText("%d to %d",
+			std::get<NumberLimit>(typeInfo.Data).Min,
+			std::get<NumberLimit>(typeInfo.Data).Max);
+		break;
+
+	case TypeCategory::List:
+		ImGui::Separator();
+		ImGui::Text("List Properties:");
+		ImGui::BulletText("Element: %s", std::get<ListType>(typeInfo.Data).ElementType.c_str());
+		ImGui::BulletText("Length: %d-%d",
+			std::get<ListType>(typeInfo.Data).MinLength,
+			std::get<ListType>(typeInfo.Data).MaxLength);
+		break;
+
+	case TypeCategory::StringLimit:
+		if (!std::get<StringLimit>(typeInfo.Data).ValidValues.empty()) {
+			ImGui::Separator();
+			ImGui::Text("Valid Options:");
+			for (auto& val : std::get<StringLimit>(typeInfo.Data).ValidValues) {
+				ImGui::BulletText("%s", val.c_str());
+			}
+		}
+		break;
+	}
+
+	ImGui::EndTooltip();
 }

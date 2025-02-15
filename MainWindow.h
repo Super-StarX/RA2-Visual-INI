@@ -66,6 +66,7 @@ public:
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
+	void ShowNodeTypeTooltip(Node* node);
 	
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
