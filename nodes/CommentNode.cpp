@@ -9,14 +9,15 @@ void CommentNode::Update() {
 	const float frameRounding = 6.0f;       // 圆角半径
 	const ImVec4 bgColor(1.0f, 1.0f, 1.0f, 0.2f); // RGBA背景色
 	const ImVec4 borderColor(1.0f, 1.0f, 1.0f, 0.4f); // 边框颜色
+	auto builder = GetBuilder();
+	builder->Begin(this->ID);
 
 	// 设置节点样式
 	ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(bgColor));
 	ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(borderColor));
-	ed::PushStyleVar(ed::StyleVar_NodeRounding, frameRounding);
-	ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec2(8, 8));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, frameRounding);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
 
-	ed::BeginNode(ID);
 	{
 		ImGui::PushID(ID.AsPointer());
 
@@ -33,10 +34,7 @@ void CommentNode::Update() {
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2));
 				ImGui::SetNextItemWidth(-1);
 
-				char titleBuffer[256] = { 0 };
-				strncpy_s(titleBuffer, Name.c_str(), sizeof(titleBuffer));
-				if (ImGui::InputText("##Title", titleBuffer, sizeof(titleBuffer)))
-					Name = titleBuffer;
+				ImGui::InputText("##Title", &Name);
 
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
@@ -67,9 +65,9 @@ void CommentNode::Update() {
 			ImGui::PopStyleColor();
 
 			// 自动更新节点尺寸
-			const ImVec2 newSize = ImGui::GetItemRectSize() + ImVec2(16, 16);
-			if (!ImGui::IsMouseDragging(0)) // 避免拖动时冲突
-				Size = newSize;
+			//const ImVec2 newSize = ImGui::GetItemRectSize() + ImVec2(16, 16);
+			//if (!ImGui::IsMouseDragging(0)) // 避免拖动时冲突
+			//	Size = newSize;
 		}
 		ImGui::EndVertical();
 
@@ -78,11 +76,12 @@ void CommentNode::Update() {
 
 		ImGui::PopID();
 	}
-	ed::EndNode();
 
 	// 恢复样式
-	ed::PopStyleVar(2);
+	ImGui::PopStyleVar(2);
 	ed::PopStyleColor(2);
+
+	builder->End();
 
 	// 绘制调整手柄
 	if (ed::IsNodeSelected(ID)) {
