@@ -44,16 +44,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 
 	// 填充键值对
 	for (const auto& kv : keyValues) {
-		auto& keyvalue = newNode->KeyValues.emplace_back(
-			kv.Key,
-			kv.Value,
-			std::make_unique<Pin>(GetNextId(), "output"),
-			kv.IsInherited,
-			kv.IsComment,
-			kv.IsFolded
-		);
-		keyvalue.OutputPin->Kind = PinKind::Output;
-		keyvalue.OutputPin->Node = newNode;
+		auto& keyvalue = newNode->AddKeyValue(kv.Key, kv.Value, GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
 
 		// 如果场内有对应的section就连上Link
 		if (m_SectionMap.contains(kv.Value)) {

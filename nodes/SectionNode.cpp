@@ -104,6 +104,17 @@ void SectionNode::Update() {
 	builder->End();
 }
 
+KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
+	if (!pinid)
+		pinid = Owner->GetNextId();
+
+	auto& kv = KeyValues.emplace_back(KeyValue{ key, value, std::make_unique<Pin>(pinid, key.c_str()), isInherited, isComment, isFolded });
+	kv.OutputPin->Node = this;
+	kv.OutputPin->Kind = PinKind::Output;
+
+	return kv;
+}
+
 // SectionNode 扩展方法实现
 void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;

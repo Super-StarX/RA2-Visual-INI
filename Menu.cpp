@@ -13,7 +13,7 @@ void MainWindow::Menu() {
 		if (pin && pin->Node->Type == NodeType::Section) {
 			auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
 			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-			   [pin](const SectionNode::KeyValuePair& kv) { return kv.OutputPin.get() == pin; });
+			   [pin](const KeyValue& kv) { return kv.OutputPin.get() == pin; });
 
 			if (it == sectionNode->KeyValues.end() || !it->IsFolded)
 				ImGui::OpenPopup("Pin Context Menu");
@@ -172,7 +172,7 @@ void MainWindow::ShowSectionEditor() {
 
 						// Check if key already exists in KeyValues
 						auto it = std::find_if(m_SectionEditorNode->KeyValues.begin(), m_SectionEditorNode->KeyValues.end(),
-							[&key](const SectionNode::KeyValuePair& kv) { return kv.Key == key; });
+							[&key](const KeyValue& kv) { return kv.Key == key; });
 
 						if (it != m_SectionEditorNode->KeyValues.end()) {
 							// Key exists, just update the value
@@ -180,10 +180,7 @@ void MainWindow::ShowSectionEditor() {
 						}
 						else {
 							// Key doesn't exist, add new entry
-							m_SectionEditorNode->KeyValues.emplace_back(key, value, std::make_unique<Pin>(GetNextId(), key.c_str()));
-							auto& kv = m_SectionEditorNode->KeyValues.back();
-							kv.OutputPin->Node = m_SectionEditorNode;
-							kv.OutputPin->Kind = PinKind::Output;
+							m_SectionEditorNode->AddKeyValue(key, value);
 						}
 					}
 				}
@@ -200,10 +197,10 @@ void MainWindow::ShowSectionEditor() {
 				}
 
 				// Now reorder KeyValues to match the order in the textBuffer
-				std::vector<SectionNode::KeyValuePair> orderedKeyValues;
+				std::vector<KeyValue> orderedKeyValues;
 				for (const auto& key : order) {
 					auto it = std::find_if(m_SectionEditorNode->KeyValues.begin(), m_SectionEditorNode->KeyValues.end(),
-										   [&key](const SectionNode::KeyValuePair& kv) { return kv.Key == key; });
+										   [&key](const KeyValue& kv) { return kv.Key == key; });
 					if (it != m_SectionEditorNode->KeyValues.end()) {
 						orderedKeyValues.push_back(*it); // Add the element in the correct order
 					}

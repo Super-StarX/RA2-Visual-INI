@@ -88,11 +88,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			std::string value = kvJson["value"].get<std::string>();
 			int outputPinId = kvJson["output_pin_id"].get<int>();
 
-			auto& kv = node->KeyValues.emplace_back(key, value,
-				std::make_unique<Pin>(outputPinId, key.c_str())
-			);
-			kv.OutputPin->Node = node;
-			kv.OutputPin->Kind = PinKind::Output;
+			node->AddKeyValue(key, value, outputPinId);
 		}
 
 		node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
@@ -195,15 +191,11 @@ void MainWindow::ImportINI(const std::string& path) {
 			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
 				auto currentNode = m_SectionMap[currentSection];
 				currentNode->SetPosition({ 0, 0 });
+				bool isComment = line.find(';') != std::string::npos;
+				// TODO: 这里还差一句把';'去掉
 
 				// 添加输出引脚
-				auto& kv = currentNode->KeyValues.emplace_back(key, value,
-					std::make_unique<Pin>(GetNextId(), key.c_str())
-				);
-				kv.OutputPin->Node = currentNode;
-				kv.OutputPin->Kind = PinKind::Output;
-				kv.IsComment = line.find(';') != std::string::npos;
-				// 这里还差一句把';'去掉
+				auto& kv = currentNode->AddKeyValue(key, value, 0, false, isComment);
 
 				// 创建连线
 				if (m_SectionMap.contains(value)) {
@@ -258,7 +250,7 @@ void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 
 	// 定义处理单个键值对的 lambda
-	auto ProcessKeyValue = [&](SectionNode::KeyValuePair& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
+	auto ProcessKeyValue = [&](KeyValue& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
 		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin->ID);
 		if (!linkedNode) {

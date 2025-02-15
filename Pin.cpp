@@ -65,10 +65,11 @@ void Pin::Menu() {
 	if (this->Node->Type == NodeType::Section) {
 		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
 		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-				   [this](const SectionNode::KeyValuePair& kv) { return kv.OutputPin.get() == this; });
+				   [this](const KeyValue& kv) { return kv.OutputPin.get() == this; });
 
 		if (ImGui::MenuItem("Add Key Value")) {
-			auto kv = SectionNode::KeyValuePair{ "", "", std::make_unique<Pin>(MainWindow::GetNextId(), "") };
+			// 需要在中途加入，因此不能使用Add函数
+			auto kv = KeyValue{ "", "", std::make_unique<Pin>(MainWindow::GetNextId(), "") };
 			kv.OutputPin->Node = sectionNode;
 			kv.OutputPin->Kind = PinKind::Output;
 

@@ -142,9 +142,9 @@ void MainWindow::OnStart() {
 	ed::SetCurrentEditor(m_Editor);
 
 	auto node1 = SpawnSectionNode("Section A");
-	node1->KeyValues.emplace_back("key", "Section B", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output)).OutputPin->Node = node1;
+	node1->AddKeyValue("key", "Section B");
 	auto node2 = SpawnSectionNode("Section B");
-	node2->KeyValues.emplace_back("key", "value", std::make_unique<Pin>(GetNextId(), "key", "flow", PinKind::Output)).OutputPin->Node = node2;
+	node2->AddKeyValue("key", "Value");
 	CreateLink(node1->KeyValues.back().OutputPin->ID, node2->InputPin->ID);
 
 	ed::NavigateToContent();
