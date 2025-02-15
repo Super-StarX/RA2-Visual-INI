@@ -1,6 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "GroupNode.h"
 #include "Utils.h"
+#include <imgui_node_editor_internal.h>
 
 void GroupNode::Update() {
 	const float commentAlpha = 0.75f;
@@ -39,7 +40,7 @@ void GroupNode::Update() {
 
 		auto drawList = ed::GetHintBackgroundDrawList();
 
-		auto hintBounds = ImGui_GetItemRect();
+		auto hintBounds = ed::Detail::ImGui_GetItemRect();
 		auto hintFrameBounds = ImRect_Expanded(hintBounds, 8, 4);
 
 		drawList->AddRectFilled(

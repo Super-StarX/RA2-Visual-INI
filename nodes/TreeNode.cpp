@@ -1,7 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "TreeNode.h"
 #include "MainWindow.h"
-#include "Utils.h"
+#include <imgui_node_editor_internal.h>
 
 void TreeNode::Update() {
 	const float rounding = 5.0f;
@@ -33,7 +33,7 @@ void TreeNode::Update() {
 		auto& pin = this->Inputs[0];
 		ImGui::Dummy(ImVec2(0, padding));
 		ImGui::Spring(1, 0);
-		inputsRect = ImGui_GetItemRect();
+		inputsRect = ed::Detail::ImGui_GetItemRect();
 
 		ed::PushStyleVar(ed::StyleVar_PinArrowSize, 10.0f);
 		ed::PushStyleVar(ed::StyleVar_PinArrowWidth, 10.0f);
@@ -66,7 +66,7 @@ void TreeNode::Update() {
 	ImGui::TextUnformatted(this->Name.c_str());
 	ImGui::Spring(1);
 	ImGui::EndVertical();
-	auto contentRect = ImGui_GetItemRect();
+	auto contentRect = ed::Detail::ImGui_GetItemRect();
 
 	ImGui::Spring(1, padding);
 	ImGui::EndHorizontal();
@@ -80,7 +80,7 @@ void TreeNode::Update() {
 		auto& pin = this->Outputs[0];
 		ImGui::Dummy(ImVec2(0, padding));
 		ImGui::Spring(1, 0);
-		outputsRect = ImGui_GetItemRect();
+		outputsRect = ed::Detail::ImGui_GetItemRect();
 
 #if IMGUI_VERSION_NUM > 18101
 		ed::PushStyleVar(ed::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop);

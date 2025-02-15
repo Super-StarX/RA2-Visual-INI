@@ -1,5 +1,5 @@
 ﻿#include "MainWindow.h"
-#include "Utils.h"
+#include <imgui_node_editor_internal.h>
 
 float REPULSION_FORCE = 400000.0f;
 float ATTRACTION_FORCE = 0.02f;

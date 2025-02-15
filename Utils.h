@@ -6,19 +6,6 @@
 #include <vector>
 #include <sstream>
 
-static inline ImRect ImGui_GetItemRect() {
-	return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-}
-
-static inline float ImLength(const ImVec2& vec) {
-	return std::hypot(vec.x, vec.y);
-}
-
-static inline ImVec2 ImNormalized(const ImVec2& vec) {
-	float len = ImLength(vec);
-	return len > 0.0f ? ImVec2(vec.x / len, vec.y / len) : ImVec2(0, 0);
-}
-
 static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y) {
 	ImRect result = rect;
 	result.Min.x -= x;

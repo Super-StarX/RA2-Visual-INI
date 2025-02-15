@@ -1,6 +1,6 @@
 ﻿#include "HoudiniNode.h"
 #include "MainWindow.h"
-#include "Utils.h"
+#include <imgui_node_editor_internal.h>
 
 void HoudiniNode::Update() {
 	const float rounding = 10.0f;
@@ -32,7 +32,7 @@ void HoudiniNode::Update() {
 		int inputAlpha = 200;
 		for (auto& pin : this->Inputs) {
 			ImGui::Dummy(ImVec2(padding, padding));
-			inputsRect = ImGui_GetItemRect();
+			inputsRect = ed::Detail::ImGui_GetItemRect();
 			ImGui::Spring(1, 0);
 			inputsRect.Min.y -= padding;
 			inputsRect.Max.y -= padding;
@@ -78,7 +78,7 @@ void HoudiniNode::Update() {
 	ImGui::PopStyleColor();
 	ImGui::Spring(1);
 	ImGui::EndVertical();
-	auto contentRect = ImGui_GetItemRect();
+	auto contentRect = ed::Detail::ImGui_GetItemRect();
 
 	ImGui::Spring(1, padding);
 	ImGui::EndHorizontal();
@@ -91,7 +91,7 @@ void HoudiniNode::Update() {
 		int outputAlpha = 200;
 		for (auto& pin : this->Outputs) {
 			ImGui::Dummy(ImVec2(padding, padding));
-			outputsRect = ImGui_GetItemRect();
+			outputsRect = ed::Detail::ImGui_GetItemRect();
 			ImGui::Spring(1, 0);
 			outputsRect.Min.y += padding;
 			outputsRect.Max.y += padding;
