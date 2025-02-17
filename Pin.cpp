@@ -69,7 +69,7 @@ void Pin::Menu() {
 
 		if (ImGui::MenuItem("Add Key Value")) {
 			// 需要在中途加入，因此不能使用Add函数
-			auto kv = KeyValue{ "", "", std::make_unique<Pin>(MainWindow::GetNextId(), "") };
+			auto kv = KeyValue{ "key", "value", std::make_unique<Pin>(MainWindow::GetNextId(), "key") };
 			kv.OutputPin->Node = sectionNode;
 			kv.OutputPin->Kind = PinKind::Output;
 

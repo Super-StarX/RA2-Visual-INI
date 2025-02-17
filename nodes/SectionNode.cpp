@@ -100,6 +100,10 @@ void SectionNode::Update() {
 			ImGui::PopStyleVar();
 		}
 	}
+	ImVec2 buttonSize(230, 2.0f);
+	if (ImGui::Button("", buttonSize)) {
+		AddKeyValue("key", "value");
+	}
 
 	builder->End();
 }
