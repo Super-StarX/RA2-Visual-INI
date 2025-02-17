@@ -9,6 +9,7 @@ namespace ed = ax::NodeEditor;
 enum class NodeType {
 	Blueprint,
 	Simple,
+	Tag,
 	Tree,
 	Group,
 	Houdini,

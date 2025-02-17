@@ -2,6 +2,7 @@
 #include "nodes/Node.h"
 #include "nodes/BlueprintNode.h"
 #include "nodes/CommentNode.h"
+#include "nodes/TagNode.h"
 #include "nodes/TreeNode.h"
 #include "nodes/GroupNode.h"
 #include "nodes/SimpleNode.h"
@@ -90,4 +91,13 @@ CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
 	node->Size = ImVec2(300, 200);
 
 	return reinterpret_cast<CommentNode*>(node);
+}
+
+TagNode* MainWindow::SpawnTagNode(bool input, const std::string& section) {
+	m_Nodes.emplace_back(std::make_unique<TagNode>(this, GetNextId(), section.c_str(), input));
+	auto node = m_Nodes.back().get();
+	node->Type = NodeType::Tag;
+	node->Size = ImVec2(300, 200);
+
+	return reinterpret_cast<TagNode*>(node);
 }

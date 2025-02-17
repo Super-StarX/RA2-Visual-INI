@@ -70,6 +70,10 @@ void MainWindow::LayerMenu() {
 		node = (Node*)SpawnSectionNode();
 	else if (ImGui::MenuItem("Group"))
 		node = (Node*)SpawnGroupNode();
+	else if (ImGui::MenuItem("InputTag"))
+		node = (Node*)SpawnTagNode(true);
+	else if (ImGui::MenuItem("OutputTag"))
+		node = (Node*)SpawnTagNode(false);
 	else if (ImGui::MenuItem("Comment"))
 		node = (Node*)SpawnCommentNode();
 	ImGui::Separator();

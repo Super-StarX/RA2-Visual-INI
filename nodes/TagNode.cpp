@@ -1,0 +1,87 @@
+﻿#include "TagNode.h"
+#include "Pin.h"
+#include "MainWindow.h"
+#include <misc/cpp/imgui_stdlib.h>
+#include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
+#include <memory.h>
+
+namespace ed = ax::NodeEditor;
+
+std::unordered_set<std::string> TagNode::globalNames;
+TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
+	BaseNode(owner, id, name, color), isInput(input){
+	globalNames.insert(name);
+	if (isInput)
+		inputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "input");
+	else
+		outputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "output");
+}
+
+void TagNode::Update() {
+	// 冲突检测
+	bool hasInputConflict = CheckInputConflicts();
+
+	// 开始节点
+	auto builder = GetBuilder();
+	builder->Begin(this->ID);
+
+	// 绘制标题（带冲突提示）
+	if (hasInputConflict) {
+		ImGui::SameLine();
+		ImGui::Text("(Conflict!)");
+	}
+
+	// 名称输入
+	ImGui::PushItemWidth(120);
+	if (ImGui::InputText("##Name", &Name)) {
+		// 名称去重处理
+		if (globalNames.count(Name)) {
+			hasInputConflict = true;
+		}
+		else {
+			globalNames.erase(this->Name);
+			globalNames.insert(Name);
+			hasInputConflict = false;
+		}
+	}
+	ImGui::PopItemWidth();
+
+	// 输入引脚
+	if (isInput) {
+		ed::BeginPin(inputPin->ID, ed::PinKind::Input);
+		ImGui::Text("-> Input");
+		ed::EndPin();
+	}
+	else {
+		ed::BeginPin(outputPin->ID, ed::PinKind::Output);
+		ImGui::Text("Output ->");
+		ed::EndPin();
+	}
+
+	builder->End();
+
+	// 绘制冲突描边
+	if (hasInputConflict) {
+		constexpr float conflictOutlineWidth = 3.0f;
+		const ImColor conflictColor = (255, 0, 0, 255);
+		auto drawList = ed::GetNodeBackgroundDrawList(ID);
+		const ImVec2 padding(conflictOutlineWidth, conflictOutlineWidth);
+		const auto nodeRect = ed::Detail::ImGui_GetItemRect();
+		drawList->AddRect(
+			nodeRect.Min - padding, nodeRect.Max + padding,
+			conflictColor, 0.0f, 0, conflictOutlineWidth
+		);
+	}
+}
+
+bool TagNode::CheckInputConflicts() {
+	int count = 0;
+	for (auto& node : Owner->m_Nodes) {
+		if (node->Name == Name && node->Type == Type) {
+			if (++count > 1)
+				return true;
+		}
+	}
+	return false;
+}

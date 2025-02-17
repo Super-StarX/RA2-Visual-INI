@@ -169,6 +169,7 @@
     <ClCompile Include="nodes\SimpleNode.cpp" />
     <ClCompile Include="PinType.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
+    <ClCompile Include="nodes\TagNode.cpp" />
     <ClCompile Include="TemplateManager.cpp" />
     <ClCompile Include="TypeLoader.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="Pin.h" />
     <ClInclude Include="nodes\SimpleNode.h" />
     <ClInclude Include="PinType.h" />
+    <ClInclude Include="nodes\TagNode.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="TypeLoader.h" />
