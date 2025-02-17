@@ -22,9 +22,18 @@ void SectionNode::Update() {
 
 	ImGui::PushID(this);
 	ImGui::SetNextItemWidth(150);
-	{
-		if (ImGui::InputText("##SectionName", &this->Name)) {
+	if (ImGui::InputText("##SectionName", &this->Name)) {
+		for (const auto& [_, pLink] : InputPin->Links) {
+			auto pPin = Owner->FindPin(pLink->StartPinID);
+			auto pNode = pPin->Node;
+			if (pNode->Type != NodeType::Section)
+				continue;
+			auto pSNode = reinterpret_cast<SectionNode*>(pNode);
+			auto it = std::find_if(pSNode->KeyValues.begin(), pSNode->KeyValues.end(),
+				[pPin](const KeyValue& kv) { return kv.OutputPin.get() == pPin; });
 
+			if (it != pSNode->KeyValues.end())
+				it->Value = this->Name;
 		}
 	}
 	ImGui::PopID();

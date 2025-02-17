@@ -228,7 +228,7 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 
 	if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
 		for (auto& link : Owner->m_Links)
-			ed::Flow(link.ID);
+			ed::Flow(link->ID);
 
 	if (ed::HasSelectionChanged())
 		++changeCount;
@@ -250,7 +250,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 	ImGui::Spring(0.0f);
 	if (ImGui::Button("Show Flow")) {
 		for (auto& link : Owner->m_Links)
-			ed::Flow(link.ID);
+			ed::Flow(link->ID);
 	}
 	ImGui::Spring();
 	if (ImGui::Button("Edit Style"))

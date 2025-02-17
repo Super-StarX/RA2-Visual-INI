@@ -57,8 +57,8 @@ Node* MainWindow::FindNode(ed::NodeId id) {
 
 Link* MainWindow::FindLink(ed::LinkId id) {
 	for (auto& link : m_Links)
-		if (link.ID == id)
-			return &link;
+		if (link->ID == id)
+			return link.get();
 
 	return nullptr;
 }
@@ -98,10 +98,10 @@ Node* MainWindow::GetHoverNode() {
 Link* MainWindow::CreateLink(ed::PinId startPinId, ed::PinId endPinId) {
 	auto startPin = FindPin(startPinId);
 	auto endPin = FindPin(endPinId);
-	m_Links.emplace_back(Link(GetNextLinkId(), startPinId, endPinId));
-	startPin->Links[m_Links.back().ID] = &m_Links.back();
-	endPin->Links[m_Links.back().ID] = &m_Links.back();
-	return &m_Links.back();
+	auto& link = m_Links.emplace_back(std::make_unique<Link>(GetNextLinkId(), startPinId, endPinId));
+	startPin->Links[link->ID] = link.get();
+	endPin->Links[link->ID] = link.get();
+	return link.get();
 }
 
 void MainWindow::OnStart() {
@@ -244,7 +244,7 @@ void MainWindow::NodeEditor() {
 		ed::LinkId linkId = 0;
 		while (ed::QueryDeletedLink(&linkId)) {
 			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(m_Links.begin(), m_Links.end(), [linkId](auto& link) { return link.ID == linkId; });
+				auto id = std::find_if(m_Links.begin(), m_Links.end(), [linkId](auto& link) { return link->ID == linkId; });
 				if (id != m_Links.end())
 					m_Links.erase(id);
 			}
@@ -289,7 +289,7 @@ void MainWindow::OnFrame(float deltaTime) {
 		node->Update();
 
 	for (auto& link : m_Links)
-		link.Draw();
+		link->Draw();
 
 	NodeEditor();
 

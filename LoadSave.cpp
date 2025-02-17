@@ -139,8 +139,8 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	// 保存链接信息
 	for (const auto& link : m_Links) {
 		json linkJson;
-		linkJson["start_pin_id"] = link.StartPinID.Get();
-		linkJson["end_pin_id"] = link.EndPinID.Get();
+		linkJson["start_pin_id"] = link->StartPinID.Get();
+		linkJson["end_pin_id"] = link->EndPinID.Get();
 		j["links"].push_back(linkJson);
 	}
 

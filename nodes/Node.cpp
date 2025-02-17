@@ -14,10 +14,10 @@ void Node::SetPosition(ImVec2 pos) {
 int Node::GetConnectedLinkCount() {
 	int count = 0;
 	for (auto& link : Owner->m_Links) {
-		if (auto pin = Owner->FindPin(link.StartPinID)) {
+		if (auto pin = Owner->FindPin(link->StartPinID)) {
 			if (pin->Node == this) ++count;
 		}
-		if (auto pin = Owner->FindPin(link.EndPinID)) {
+		if (auto pin = Owner->FindPin(link->EndPinID)) {
 			if (pin->Node == this) ++count;
 		}
 	}
