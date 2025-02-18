@@ -11,12 +11,11 @@ public:
 
 	void Update() override;
 	// 维护全局标签注册表
-	static std::unordered_set<std::string> globalNames;
-	static std::unordered_map<std::string, Pin*> outputPins;
+	static std::unordered_set<std::string> GlobalNames;
+	static std::unordered_map<std::string, Pin*> OutputPins;
 
-	std::unique_ptr<Pin> inputPin;      // 唯一输入引脚
-	std::unique_ptr<Pin> outputPin;        // 多个输出引脚
-	bool isInput = true;
+	std::unique_ptr<Pin> InputPin;			// 唯一输入引脚
+	bool IsInput{ true };
 
 	// 引脚管理
 	void UpdatePins();

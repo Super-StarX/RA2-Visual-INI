@@ -8,14 +8,14 @@
 
 namespace ed = ax::NodeEditor;
 
-std::unordered_set<std::string> TagNode::globalNames;
+std::unordered_set<std::string> TagNode::GlobalNames;
 TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
-	BaseNode(owner, id, name, color), isInput(input){
-	globalNames.insert(name);
-	if (isInput)
-		inputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "input");
-	else
-		outputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "output");
+	BaseNode(owner, id, name, color), IsInput(input){
+	GlobalNames.insert(name);
+	
+	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output", "tag");
+	InputPin->Node = this;
+	InputPin->Kind = PinKind::Input;
 }
 
 void TagNode::Update() {
@@ -32,32 +32,30 @@ void TagNode::Update() {
 		ImGui::Text("(Conflict!)");
 	}
 
+	{
+		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
+		InputPin->DrawPinIcon(Owner->IsPinLinked(InputPin->ID), (int)(alpha * 255));
+		ed::EndPin();
+		ImGui::PopStyleVar();
+		ImGui::SameLine();
+	}
+
 	// 名称输入
 	ImGui::PushItemWidth(120);
 	if (ImGui::InputText("##Name", &Name)) {
 		// 名称去重处理
-		if (globalNames.count(Name)) {
+		if (GlobalNames.count(Name)) {
 			hasInputConflict = true;
 		}
 		else {
-			globalNames.erase(this->Name);
-			globalNames.insert(Name);
+			GlobalNames.erase(this->Name);
+			GlobalNames.insert(Name);
 			hasInputConflict = false;
 		}
 	}
 	ImGui::PopItemWidth();
-
-	// 输入引脚
-	if (isInput) {
-		ed::BeginPin(inputPin->ID, ed::PinKind::Input);
-		ImGui::Text("-> Input");
-		ed::EndPin();
-	}
-	else {
-		ed::BeginPin(outputPin->ID, ed::PinKind::Output);
-		ImGui::Text("Output ->");
-		ed::EndPin();
-	}
 
 	builder->End();
 
