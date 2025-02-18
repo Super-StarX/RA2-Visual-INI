@@ -85,8 +85,9 @@ void MainWindow::LayerMenu() {
 		BuildNodes();
 
 		createNewNode = false;
-
-		ed::SetNodePosition(node->ID, openPopupPosition);
+		
+		const ImVec2 canvasPos = ed::ScreenToCanvas(openPopupPosition);
+		ed::SetNodePosition(node->ID, canvasPos);
 
 		if (auto startPin = newNodeLinkPin) {
 			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
