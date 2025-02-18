@@ -63,6 +63,8 @@ struct KeyValue {
 
 class SectionNode : public BaseNode {
 public:
+	static std::unordered_map<std::string, SectionNode*> Map;
+
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 

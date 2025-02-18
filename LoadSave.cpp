@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "nodes/SectionNode.h"
 #include <nlohmann/json.hpp>
 
@@ -69,7 +69,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	json j = json::parse(file);
 
 	// 清除现有数据
-	m_SectionMap.clear();
+	SectionNode::Map.clear();
 	m_Links.clear();
 	
 	// 加载节点
@@ -116,7 +116,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	json j;
 
 	// 保存节点信息
-	for (const auto& [section, node] : m_SectionMap) {
+	for (const auto& [section, node] : SectionNode::Map) {
 		json nodeJson;
 		nodeJson["section"] = node->Name;
 
@@ -181,6 +181,7 @@ void MainWindow::ImportINI(const std::string& path) {
 	file.seekg(0, std::ios::beg);
 
 	// 第二次遍历：处理所有的 key-value 对并进行连线
+	auto& map = SectionNode::Map;
 	while (std::getline(file, line)) {
 		if (line.find('[') != std::string::npos) {
 			currentSection = line.substr(1, line.find(']') - 1);
@@ -189,7 +190,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			std::istringstream iss(line);
 			std::string key, value;
 			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-				auto currentNode = m_SectionMap[currentSection];
+				auto currentNode = map[currentSection];
 				currentNode->SetPosition({ 0, 0 });
 				bool isComment = line.find(';') != std::string::npos;
 				// TODO: 这里还差一句把';'去掉
@@ -198,10 +199,10 @@ void MainWindow::ImportINI(const std::string& path) {
 				auto& kv = currentNode->AddKeyValue(key, value, 0, false, isComment);
 
 				// 创建连线
-				if (m_SectionMap.contains(value)) {
-					auto targetNode = m_SectionMap[value];
+				if (map.contains(value)) {
+					auto targetNode = map[value];
 					if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
-						CreateLink(kv.OutputPin->ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin->GetLinkType();
+						CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
 					}
 				}
 			}
@@ -211,12 +212,12 @@ void MainWindow::ImportINI(const std::string& path) {
 	// 遍历所有 key-value 对进行最终连线检查
 	for (const auto& [section, pairs] : keyValuePairs) {
 		for (const auto& [key, value] : pairs) {
-			auto currentNode = m_SectionMap[section];
+			auto currentNode = map[section];
 			auto& kv = currentNode->KeyValues.back(); // 假设每个 key-value 对都已添加到 KeyValues 中
-			if (m_SectionMap.contains(value)) {
-				auto targetNode = m_SectionMap[value];
+			if (map.contains(value)) {
+				auto targetNode = map[value];
 				if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
-					CreateLink(kv.OutputPin->ID, targetNode->InputPin->ID)->TypeIdentifier = kv.OutputPin->GetLinkType();
+					CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
 				}
 			}
 		}
@@ -294,7 +295,7 @@ void MainWindow::ExportINI(const std::string& path) {
 	};
 
 	// 主逻辑
-	for (auto& [section, node] : m_SectionMap) {
+	for (auto& [section, node] : SectionNode::Map) {
 		if (node->IsComment)
 			continue;
 

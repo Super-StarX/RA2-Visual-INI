@@ -4,6 +4,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include <algorithm>
 
+std::unordered_map<std::string, SectionNode*> SectionNode::Map;
 void SectionNode::Update() {
 	auto builder = GetBuilder();
 

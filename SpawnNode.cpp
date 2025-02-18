@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "nodes/Node.h"
 #include "nodes/BlueprintNode.h"
 #include "nodes/CommentNode.h"
@@ -48,8 +48,8 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 		auto& keyvalue = newNode->AddKeyValue(kv.Key, kv.Value, GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
 
 		// 如果场内有对应的section就连上Link
-		if (m_SectionMap.contains(kv.Value)) {
-			auto targetNode = m_SectionMap[kv.Value];
+		if (SectionNode::Map.contains(kv.Value)) {
+			auto targetNode = SectionNode::Map[kv.Value];
 			auto outpin = keyvalue.OutputPin.get();
 			if (Pin::CanCreateLink(outpin, targetNode->InputPin.get())) {
 				CreateLink(outpin, targetNode->InputPin.get())->TypeIdentifier = outpin->GetLinkType();
@@ -68,10 +68,10 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
 	auto node = m_Nodes.back().get();
 	node->Type = NodeType::Section;
-	m_SectionMap[section] = reinterpret_cast<SectionNode*>(node);
+	SectionNode::Map[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
-	m_SectionMap[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input");
-	m_SectionMap[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
+	SectionNode::Map[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input");
+	SectionNode::Map[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
 	return reinterpret_cast<SectionNode*>(node);
 }
 

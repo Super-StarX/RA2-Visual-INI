@@ -1,4 +1,4 @@
-#define IMGUI_DEFINE_MATH_OPERATORS
+﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "PinType.h"
@@ -23,7 +23,7 @@ float MainWindow::rightPaneWidth = 800.0f;
 void MainWindow::ClearAll() {
 	m_Nodes.clear();
 	m_Links.clear();
-	m_SectionMap.clear();
+	SectionNode::Map.clear();
 	m_NodeSections.clear();
 }
 
