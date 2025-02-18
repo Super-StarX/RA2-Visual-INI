@@ -118,7 +118,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 	ImGui::Spacing(); ImGui::SameLine();
 	ImGui::TextUnformatted("Nodes");
 	ImGui::Indent();
-	for (auto& node : Owner->m_Nodes) {
+	for (auto& node : Node::Array) {
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
 

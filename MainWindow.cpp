@@ -21,7 +21,7 @@ float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
 
 void MainWindow::ClearAll() {
-	m_Nodes.clear();
+	Node::Array.clear();
 	m_Links.clear();
 	SectionNode::Map.clear();
 	m_NodeSections.clear();
@@ -48,7 +48,7 @@ void MainWindow::UpdateTouch() {
 }
 
 Node* MainWindow::FindNode(ed::NodeId id) {
-	for (const auto& node : m_Nodes)
+	for (const auto& node : Node::Array)
 		if (node->ID == id)
 			return node.get();
 
@@ -101,7 +101,7 @@ Node* MainWindow::GetHoverNode() {
 
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
 	auto& link = m_Links.emplace_back(
-		std::make_unique<Link>(GetNextLinkId(), startPin->ID, endPin->ID));
+		std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
 	startPin->Links[link->ID] = link.get();
 	endPin->Links[link->ID] = link.get();
 	return link.get();
@@ -238,9 +238,9 @@ void MainWindow::NodeEditor() {
 		ed::NodeId nodeId = 0;
 		while (ed::QueryDeletedNode(&nodeId)) {
 			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(m_Nodes.begin(), m_Nodes.end(), [nodeId](auto& node) { return node->ID == nodeId; });
-				if (id != m_Nodes.end())
-					m_Nodes.erase(id);
+				auto id = std::find_if(Node::Array.begin(), Node::Array.end(), [nodeId](auto& node) { return node->ID == nodeId; });
+				if (id != Node::Array.end())
+					Node::Array.erase(id);
 			}
 		}
 
@@ -288,7 +288,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	ShowSectionEditor();
 
 	ed::Begin("Node editor");
-	for (auto& node : m_Nodes)
+	for (auto& node : Node::Array)
 		node->Update();
 
 	for (auto& link : m_Links)

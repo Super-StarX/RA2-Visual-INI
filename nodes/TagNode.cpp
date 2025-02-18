@@ -1,4 +1,4 @@
-#include "TagNode.h"
+﻿#include "TagNode.h"
 #include "Pin.h"
 #include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -57,18 +57,6 @@ void TagNode::Update() {
 	}
 	ImGui::PopItemWidth();
 
-	// 输入引脚
-	if (isInput) {
-		ed::BeginPin(inputPin->ID, ed::PinKind::Input);
-		ImGui::Text("-> Input");
-		ed::EndPin();
-	}
-	else {
-		ed::BeginPin(outputPin->ID, ed::PinKind::Input);
-		ImGui::Text("Output ->");
-		ed::EndPin();
-	}
-
 	builder->End();
 
 	// 绘制冲突描边
@@ -87,8 +75,8 @@ void TagNode::Update() {
 
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
-	for (auto& node : Owner->m_Nodes) {
-		if (isInput && node->Name == Name && node->Type == Type) {
+	for (auto& node : Node::Array) {
+		if (IsInput && node->Name == Name && node->Type == Type) {
 			if (++count > 1)
 				return true;
 		}

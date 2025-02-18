@@ -232,9 +232,9 @@ void MainWindow::ImportINI(const std::string& path) {
 		std::mt19937 gen(rd());
 		std::uniform_real_distribution<> dis(-0.5f, 0.5f);
 
-		const float angleStep = 2 * 3.14159f / m_Nodes.size();
+		const float angleStep = 2 * 3.14159f / Node::Array.size();
 		float currentAngle = 0;
-		for (auto& node : m_Nodes) {
+		for (auto& node : Node::Array) {
 			ImVec2 pos = {
 				float(center.x + radius * cos(currentAngle) + dis(gen) * 50),
 				float(center.y + radius * sin(currentAngle) + dis(gen) * 50)

@@ -33,7 +33,6 @@ public:
 	static float rightPaneWidth;
 
 	static int GetNextId() { return m_NextId++; };
-	static ed::LinkId GetNextLinkId() { return ed::LinkId(GetNextId()); }
 
 	void ClearAll();
 
@@ -82,7 +81,6 @@ public:
 	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
 	LeftPanelClass m_LeftPanel;
 	TemplateManager m_TemplateManager;
-	std::vector<std::unique_ptr<Node>>	m_Nodes;
 	std::vector<std::unique_ptr<Link>>  m_Links;
 	std::map<ed::PinId, Pin*, ComparePinId> m_Pins; // 快速找pin用
 	const float							m_TouchTime = 1.0f;

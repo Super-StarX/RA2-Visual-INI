@@ -4,6 +4,7 @@
 #include "utilities/builders.h"
 
 #include <vector>
+#include <memory>
 
 namespace ed = ax::NodeEditor;
 enum class NodeType {
@@ -23,6 +24,7 @@ public:
 	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
 		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {
 	}
+	static std::vector<std::unique_ptr<Node>> Array;
 
 	virtual void Update() = 0;
 	virtual void Menu();

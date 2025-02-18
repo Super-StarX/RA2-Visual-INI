@@ -30,7 +30,7 @@ void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 }
 
 void MainWindow::BuildNodes() {
-	for (const auto& node : m_Nodes)
+	for (const auto& node : Node::Array)
 		BuildNode(node);
 }
 
@@ -40,7 +40,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 
 	// 创建节点
 	auto* newNode = SpawnSectionNode(sectionName);
-	BuildNode(m_Nodes.back());
+	BuildNode(Node::Array.back());
 	ed::SetNodePosition(newNode->ID, canvasPos);
 
 	// 填充键值对
@@ -65,8 +65,8 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 }
 
 SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
-	auto node = m_Nodes.back().get();
+	Node::Array.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
+	auto node = Node::Array.back().get();
 	node->Type = NodeType::Section;
 	SectionNode::Map[section] = reinterpret_cast<SectionNode*>(node);
 	m_NodeSections[node->ID] = section;
@@ -76,8 +76,8 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 }
 
 GroupNode* MainWindow::SpawnGroupNode(const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<GroupNode>(this, GetNextId(), section.c_str()));
-	auto node = m_Nodes.back().get();
+	Node::Array.emplace_back(std::make_unique<GroupNode>(this, GetNextId(), section.c_str()));
+	auto node = Node::Array.back().get();
 	node->Type = NodeType::Group;
 	node->Size = ImVec2(300, 200);
 
@@ -85,8 +85,8 @@ GroupNode* MainWindow::SpawnGroupNode(const std::string& section) {
 }
 
 CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<CommentNode>(this, GetNextId(), section.c_str()));
-	auto node = m_Nodes.back().get();
+	Node::Array.emplace_back(std::make_unique<CommentNode>(this, GetNextId(), section.c_str()));
+	auto node = Node::Array.back().get();
 	node->Type = NodeType::Comment;
 	node->Size = ImVec2(300, 200);
 
@@ -94,8 +94,8 @@ CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
 }
 
 TagNode* MainWindow::SpawnTagNode(bool input, const std::string& section) {
-	m_Nodes.emplace_back(std::make_unique<TagNode>(this, GetNextId(), section.c_str(), input));
-	auto node = m_Nodes.back().get();
+	Node::Array.emplace_back(std::make_unique<TagNode>(this, GetNextId(), section.c_str(), input));
+	auto node = Node::Array.back().get();
 	node->Type = NodeType::Tag;
 	node->Size = ImVec2(300, 200);
 

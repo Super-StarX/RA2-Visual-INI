@@ -50,13 +50,13 @@ public:
 void MainWindow::ApplyForceDirectedLayout() {
 	// 初始化空间网格
 	SpatialGrid grid(150.0f); // 根据节点平均大小调整网格尺寸
-	for (auto& node : m_Nodes)
+	for (auto& node : Node::Array)
 		grid.Insert(node.get());
 
 	// 初始化物理状态
 	std::unordered_map<Node*, ImVec2> velocities;
 	std::unordered_map<Node*, ImVec2> accelerations;
-	for (auto& node : m_Nodes) {
+	for (auto& node : Node::Array) {
 		velocities[node.get()] = ImVec2(0, 0);
 		accelerations[node.get()] = ImVec2(0, 0);
 	}
@@ -73,7 +73,7 @@ void MainWindow::ApplyForceDirectedLayout() {
 			acc = ImVec2(0, 0);
 
 		// 节点间斥力（使用空间网格优化）
-		for (auto& node : m_Nodes) {
+		for (auto& node : Node::Array) {
 			auto nearbyNodes = grid.GetNearbyNodes(node.get());
 
 			const ImVec2 pos1 = node->GetPosition();
@@ -143,13 +143,13 @@ void MainWindow::ApplyForceDirectedLayout() {
 		// 每5次迭代更新一次网格（平衡精度和性能）
 		if (iter % 5 == 0) {
 			grid.Clear();
-			for (auto& node : m_Nodes)
+			for (auto& node : Node::Array)
 				grid.Insert(node.get());
 		}
 	}
 
 	// 最终对齐（保持原逻辑）
-	for (auto& node : m_Nodes) {
+	for (auto& node : Node::Array) {
 		ImVec2 pos = node->GetPosition();
 		pos.x = std::round(pos.x / 10) * 10;
 		pos.y = std::round(pos.y / 10) * 10;

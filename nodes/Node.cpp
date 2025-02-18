@@ -3,6 +3,7 @@
 #include "TypeLoader.h"
 #include "Utils.h"
 
+std::vector<std::unique_ptr<Node>> Node::Array;
 ImVec2 Node::GetPosition() {
 	return ed::GetNodePosition(ID);
 }
