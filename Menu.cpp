@@ -90,17 +90,22 @@ void MainWindow::LayerMenu() {
 		ed::SetNodePosition(node->ID, canvasPos);
 
 		if (auto startPin = newNodeLinkPin) {
-			auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
-
-			for (auto& pin : pins) {
-				if (Pin::CanCreateLink(startPin, &pin)) {
-					auto endPin = &pin;
-					if (startPin->Kind == PinKind::Input)
-						std::swap(startPin, endPin);
-
-					CreateLink(startPin->ID, endPin->ID)->TypeIdentifier = startPin->GetLinkType();
-
-					break;
+			if (startPin->Node->Type == NodeType::Section) {
+				auto sectionNode = reinterpret_cast<SectionNode*>(node);
+				auto& pin = startPin->Kind == PinKind::Input ? sectionNode->OutputPin : sectionNode->InputPin;
+				if (Pin::CanCreateLink(startPin, pin.get()))
+					CreateLink(startPin->ID, pin->ID)->TypeIdentifier = startPin->GetLinkType();
+			}
+			else {
+				auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
+				for (auto& pin : pins) {
+					if (Pin::CanCreateLink(startPin, &pin)) {
+						auto endPin = &pin;
+						if (startPin->Kind == PinKind::Input)
+							std::swap(startPin, endPin);
+						CreateLink(startPin->ID, endPin->ID)->TypeIdentifier = startPin->GetLinkType();
+						break;
+					}
 				}
 			}
 		}
