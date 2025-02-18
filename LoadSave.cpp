@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "nodes/SectionNode.h"
 #include <nlohmann/json.hpp>
 
@@ -104,7 +104,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		auto endPin = FindPin(endPinId);
 
 		if (startPin && endPin) {
-			CreateLink(startPinId, endPinId);
+			CreateLink(startPin, endPin);
 		}
 	}
 	

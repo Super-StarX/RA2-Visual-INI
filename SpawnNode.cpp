@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "nodes/Node.h"
 #include "nodes/BlueprintNode.h"
 #include "nodes/CommentNode.h"
@@ -52,7 +52,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 			auto targetNode = m_SectionMap[kv.Value];
 			auto outpin = keyvalue.OutputPin.get();
 			if (Pin::CanCreateLink(outpin, targetNode->InputPin.get())) {
-				CreateLink(outpin->ID, targetNode->InputPin->ID)->TypeIdentifier = outpin->GetLinkType();
+				CreateLink(outpin, targetNode->InputPin.get())->TypeIdentifier = outpin->GetLinkType();
 			}
 		}
 	}

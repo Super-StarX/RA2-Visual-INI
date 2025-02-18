@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -48,7 +48,7 @@ public:
 	Node* GetLinkedNode(ed::PinId outputPinId);
 	Node* GetHoverNode();
 
-	Link* CreateLink(ed::PinId startPinId, ed::PinId endPinId);
+	Link* CreateLink(Pin* startPin, Pin* endPin);
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();

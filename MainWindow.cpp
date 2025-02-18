@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
 #include "PinType.h"
@@ -84,9 +84,13 @@ Node* MainWindow::GetLinkedNode(ed::PinId outputPinId) {
 	if (!outputPinId)
 		return nullptr;
 
-	if (auto pin = FindPin(outputPinId))
-		if (auto endpin = FindPin(pin->Links.begin()->second->EndPinID))
-			return endpin->Node;
+	auto pin = FindPin(outputPinId);
+	if(!pin || pin->Links.empty())
+		return nullptr;
+
+	auto begin = pin->Links.begin();
+	if (auto endpin = FindPin(begin->second->EndPinID))
+		return endpin->Node;
 
 	return nullptr;
 }
@@ -95,10 +99,9 @@ Node* MainWindow::GetHoverNode() {
 	return FindNode(ed::GetHoveredNode());
 }
 
-Link* MainWindow::CreateLink(ed::PinId startPinId, ed::PinId endPinId) {
-	auto startPin = FindPin(startPinId);
-	auto endPin = FindPin(endPinId);
-	auto& link = m_Links.emplace_back(std::make_unique<Link>(GetNextLinkId(), startPinId, endPinId));
+Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
+	auto& link = m_Links.emplace_back(
+		std::make_unique<Link>(GetNextLinkId(), startPin->ID, endPin->ID));
 	startPin->Links[link->ID] = link.get();
 	endPin->Links[link->ID] = link.get();
 	return link.get();
@@ -146,7 +149,7 @@ void MainWindow::OnStart() {
 	node1->AddKeyValue("key", "Section B");
 	auto node2 = SpawnSectionNode("Section B");
 	node2->AddKeyValue("key", "Value");
-	CreateLink(node1->KeyValues.back().OutputPin->ID, node2->InputPin->ID);
+	CreateLink(node1->KeyValues.back().OutputPin.get(), node2->InputPin.get());
 
 	ed::NavigateToContent();
 
@@ -204,7 +207,7 @@ void MainWindow::NodeEditor() {
 				else {
 					Utils::DrawTextOnCursor("+ Create Link", ImColor(32, 45, 32, 180));
 					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-						CreateLink(startPinId, endPinId)->TypeIdentifier = startPin->GetLinkType();
+						CreateLink(startPin, endPin)->TypeIdentifier = startPin->GetLinkType();
 					}
 				}
 			}
