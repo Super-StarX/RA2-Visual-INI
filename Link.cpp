@@ -2,6 +2,8 @@
 #include "LinkType.h"
 #include "MainWindow.h"
 
+std::vector<std::unique_ptr<Link>> Link::Array;
+
 Link::~Link() {
 	if (auto pin = MainWindow::Instance->FindPin(StartPinID))
 		pin->Links.erase(ID);

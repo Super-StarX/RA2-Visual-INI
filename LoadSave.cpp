@@ -70,7 +70,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 
 	// 清除现有数据
 	SectionNode::Map.clear();
-	m_Links.clear();
+	Link::Array.clear();
 	
 	// 加载节点
 	for (const auto& nodeJson : j["nodes"]) {
@@ -137,7 +137,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	}
 
 	// 保存链接信息
-	for (const auto& link : m_Links) {
+	for (const auto& link : Link::Array) {
 		json linkJson;
 		linkJson["start_pin_id"] = link->StartPinID.Get();
 		linkJson["end_pin_id"] = link->EndPinID.Get();

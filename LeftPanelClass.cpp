@@ -227,7 +227,7 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::Unindent();
 
 	if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
-		for (auto& link : Owner->m_Links)
+		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
 
 	if (ed::HasSelectionChanged())
@@ -249,7 +249,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 		ed::NavigateToContent();
 	ImGui::Spring(0.0f);
 	if (ImGui::Button("Show Flow")) {
-		for (auto& link : Owner->m_Links)
+		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
 	}
 	ImGui::Spring();
@@ -278,7 +278,7 @@ void LeftPanelClass::ShowLeftPanel(float paneWidth) {
 	if (ImGui::Button("Save INI"))
 		ShowINIFileDialog(true);
 	ImGui::EndHorizontal();
-	
+
 	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
 	if (ImGui::Button("Load Project"))
 		ShowProjFileDialog(false);

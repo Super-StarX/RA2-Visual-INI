@@ -22,7 +22,7 @@ float MainWindow::rightPaneWidth = 800.0f;
 
 void MainWindow::ClearAll() {
 	Node::Array.clear();
-	m_Links.clear();
+	Link::Array.clear();
 	SectionNode::Map.clear();
 }
 
@@ -55,7 +55,7 @@ Node* MainWindow::FindNode(ed::NodeId id) {
 }
 
 Link* MainWindow::FindLink(ed::LinkId id) {
-	for (auto& link : m_Links)
+	for (auto& link : Link::Array)
 		if (link->ID == id)
 			return link.get();
 
@@ -99,7 +99,7 @@ Node* MainWindow::GetHoverNode() {
 }
 
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
-	auto& link = m_Links.emplace_back(
+	auto& link = Link::Array.emplace_back(
 		std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
 	startPin->Links[link->ID] = link.get();
 	endPin->Links[link->ID] = link.get();
@@ -246,9 +246,9 @@ void MainWindow::NodeEditor() {
 		ed::LinkId linkId = 0;
 		while (ed::QueryDeletedLink(&linkId)) {
 			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(m_Links.begin(), m_Links.end(), [linkId](auto& link) { return link->ID == linkId; });
-				if (id != m_Links.end())
-					m_Links.erase(id);
+				auto id = std::find_if(Link::Array.begin(), Link::Array.end(), [linkId](auto& link) { return link->ID == linkId; });
+				if (id != Link::Array.end())
+					Link::Array.erase(id);
 			}
 		}
 	}
@@ -290,7 +290,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	for (auto& node : Node::Array)
 		node->Update();
 
-	for (auto& link : m_Links)
+	for (auto& link : Link::Array)
 		link->Draw();
 
 	NodeEditor();

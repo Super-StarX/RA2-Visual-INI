@@ -1,9 +1,11 @@
 ﻿#include "Node.h"
+#include "Link.h"
 #include "MainWindow.h"
 #include "TypeLoader.h"
 #include "Utils.h"
 
 std::vector<std::unique_ptr<Node>> Node::Array;
+
 ImVec2 Node::GetPosition() {
 	return ed::GetNodePosition(ID);
 }
@@ -14,7 +16,7 @@ void Node::SetPosition(ImVec2 pos) {
 
 int Node::GetConnectedLinkCount() {
 	int count = 0;
-	for (auto& link : Owner->m_Links) {
+	for (auto& link : Link::Array) {
 		if (auto pin = Owner->FindPin(link->StartPinID)) {
 			if (pin->Node == this) ++count;
 		}
