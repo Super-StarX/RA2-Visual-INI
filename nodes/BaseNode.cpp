@@ -23,7 +23,7 @@ void BaseNode::UpdateInput(Pin& input) {
 	float alpha = input.GetAlpha(Owner->newLinkPin);
 	builder->Input(input.ID);
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-	input.DrawPinIcon(Owner->IsPinLinked(input.ID), (int)(alpha * 255));
+	input.DrawPinIcon(input.IsLinked(), (int)(alpha * 255));
 	ImGui::Spring(0);
 	if (!input.Name.empty()) {
 		ImGui::TextUnformatted(input.Name.c_str());
@@ -68,7 +68,7 @@ void BaseNode::UpdateOutput(Pin& output) {
 		ImGui::TextUnformatted(output.Name.c_str());
 	}
 	ImGui::Spring(0);
-	output.DrawPinIcon(Owner->IsPinLinked(output.ID), (int)(alpha * 255));
+	output.DrawPinIcon(output.IsLinked(), (int)(alpha * 255));
 	ImGui::PopStyleVar();
 	builder->EndOutput();
 }

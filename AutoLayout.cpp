@@ -105,8 +105,8 @@ void MainWindow::ApplyForceDirectedLayout() {
 
 		// 连接引力
 		for (auto& link : Link::Array) {
-			auto startPin = FindPin(link->StartPinID);
-			auto endPin = FindPin(link->EndPinID);
+			auto startPin = Pin::FindPin(link->StartPinID);
+			auto endPin = Pin::FindPin(link->EndPinID);
 			if (!startPin || !endPin) continue;
 
 			Node* startNode = startPin->Node;

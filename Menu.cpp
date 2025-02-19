@@ -9,7 +9,7 @@ void MainWindow::Menu() {
 	if (ed::ShowNodeContextMenu(&contextNodeId))
 		ImGui::OpenPopup("Node Context Menu");
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
-		auto pin = FindPin(contextPinId);
+		auto pin = Pin::FindPin(contextPinId);
 		if (pin && pin->Node->Type == NodeType::Section) {
 			auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
 			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
@@ -42,8 +42,7 @@ void MainWindow::Menu() {
 
 	// 悬停节点提示处理
 	static Node* lastHoveredNode = nullptr;
-	Node* hoveredNode = GetHoverNode();
-	if (hoveredNode) {
+	if (auto hoveredNode = Node::GetHoverNode()) {
 		if (hoveredNode != lastHoveredNode) {
 			hoveredNode->HoverTimer = 0.0f;
 			lastHoveredNode = hoveredNode;
@@ -117,7 +116,7 @@ void MainWindow::LayerMenu() {
 }
 
 void MainWindow::NodeMenu() {
-	auto node = FindNode(contextNodeId);
+	auto node = Node::FindNode(contextNodeId);
 
 	ImGui::TextUnformatted("Node Context Menu");
 	ImGui::Separator();
@@ -233,7 +232,7 @@ void MainWindow::ShowSectionEditor() {
 }
 
 void MainWindow::PinMenu() {
-	auto pin = FindPin(contextPinId);
+	auto pin = Pin::FindPin(contextPinId);
 
 	ImGui::TextUnformatted("Pin Context Menu");
 	ImGui::Separator();
@@ -263,7 +262,7 @@ void MainWindow::ShowPinTypeEditor() {
 }
 
 void MainWindow::LinkMenu() {
-	auto link = FindLink(contextLinkId);
+	auto link = Link::FindLink(contextLinkId);
 
 	ImGui::TextUnformatted("Link Context Menu");
 	ImGui::Separator();

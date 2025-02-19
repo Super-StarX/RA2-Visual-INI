@@ -5,11 +5,19 @@
 std::vector<std::unique_ptr<Link>> Link::Array;
 
 Link::~Link() {
-	if (auto pin = MainWindow::Instance->FindPin(StartPinID))
+	if (auto pin = Pin::FindPin(StartPinID))
 		pin->Links.erase(ID);
 
-	if (auto pin = MainWindow::Instance->FindPin(EndPinID))
+	if (auto pin = Pin::FindPin(EndPinID))
 		pin->Links.erase(ID);
+}
+
+Link* Link::FindLink(ed::LinkId id) {
+	for (auto& link : Link::Array)
+		if (link->ID == id)
+			return link.get();
+
+	return nullptr;
 }
 
 void Link::Draw() const {

@@ -32,7 +32,7 @@ void BlueprintNode::Update() {
 				ImGui::TextUnformatted(output.Name.c_str());
 				ImGui::Spring(0);
 			}
-			output.DrawPinIcon(Owner->IsPinLinked(output.ID), (int)(alpha * 255));
+			output.DrawPinIcon(output.IsLinked(), (int)(alpha * 255));
 			ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.x / 2);
 			ImGui::EndHorizontal();
 			ImGui::PopStyleVar();

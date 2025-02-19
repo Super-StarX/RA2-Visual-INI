@@ -5,13 +5,22 @@
 #include "MainWindow.h"
 #include "utilities/widgets.h"
 
+std::map<ed::PinId, Pin*, ComparePinId> Pin::m_Pins;
+
 Pin::Pin(int id, const char* name, std::string type, PinKind kind) :
 	ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(kind) {
-	MainWindow::Instance->m_Pins[ID] = this;
+	m_Pins[ID] = this;
 }
 
 Pin::~Pin() {
-	MainWindow::Instance->m_Pins.erase(ID);
+	m_Pins.erase(ID);
+}
+
+Pin* Pin::FindPin(ed::PinId id) {
+	if (!id)
+		return nullptr;
+
+	return m_Pins.count(id) ? m_Pins.at(id) : nullptr;
 }
 
 bool Pin::CanCreateLink(Pin* a, Pin* b) {
@@ -19,6 +28,21 @@ bool Pin::CanCreateLink(Pin* a, Pin* b) {
 		return false;
 
 	return true;
+}
+
+bool Pin::IsLinked() const {
+	return !Links.empty();
+}
+
+Node* Pin::GetLinkedNode() const {
+	if (Links.empty())
+		return nullptr;
+
+	auto begin = Links.begin();
+	if (auto endpin = FindPin(begin->second->EndPinID))
+		return endpin->Node;
+
+	return nullptr;
 }
 
 ImColor Pin::GetIconColor() const {

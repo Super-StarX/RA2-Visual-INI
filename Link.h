@@ -10,10 +10,10 @@ public:
 	static std::vector<std::unique_ptr<Link>> Array;
 
 	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-		ID(id), StartPinID(startPinId), EndPinID(endPinId) {
-	}
-
+		ID(id), StartPinID(startPinId), EndPinID(endPinId) {}
 	~Link();
+
+	static Link* FindLink(ed::LinkId id);
 
 	void Draw() const;
 	void Menu();

@@ -36,7 +36,7 @@ void TagNode::Update() {
 		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-		InputPin->DrawPinIcon(Owner->IsPinLinked(InputPin->ID), (int)(alpha * 255));
+		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
 		ed::EndPin();
 		ImGui::PopStyleVar();
 		ImGui::SameLine();

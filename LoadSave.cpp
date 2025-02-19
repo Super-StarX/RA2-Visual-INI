@@ -100,8 +100,8 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		int startPinId = linkJson["start_pin_id"].get<int>();
 		int endPinId = linkJson["end_pin_id"].get<int>();
 
-		auto startPin = FindPin(startPinId);
-		auto endPin = FindPin(endPinId);
+		auto startPin = Pin::FindPin(startPinId);
+		auto endPin = Pin::FindPin(endPinId);
 
 		if (startPin && endPin) {
 			CreateLink(startPin, endPin);
@@ -253,7 +253,7 @@ void MainWindow::ExportINI(const std::string& path) {
 	// 定义处理单个键值对的 lambda
 	auto ProcessKeyValue = [&](KeyValue& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
 		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
-		auto linkedNode = (SectionNode*)GetLinkedNode(kv.OutputPin->ID);
+		auto linkedNode = (SectionNode*)kv.OutputPin->GetLinkedNode();
 		if (!linkedNode) {
 			output.emplace_back(kv.Key, kv.Value);
 			return;
@@ -272,7 +272,7 @@ void MainWindow::ExportINI(const std::string& path) {
 			for (auto& childKv : node->KeyValues) {
 				if (childKv.IsComment) continue;
 
-				auto childLinkedNode = (SectionNode*)GetLinkedNode(childKv.OutputPin->ID);
+				auto childLinkedNode = (SectionNode*)childKv.OutputPin->GetLinkedNode();
 				if (!childLinkedNode) {
 					output.emplace_back(childKv.Key, childKv.Value);
 					continue;

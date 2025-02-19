@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Pin.h"
 #include "Link.h"
 #include "utilities/builders.h"
@@ -21,16 +21,19 @@ enum class NodeType {
 class MainWindow;
 class Node {
 public:
-	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
-		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {
-	}
 	static std::vector<std::unique_ptr<Node>> Array;
+
+	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
+		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
+
+	static Node* FindNode(ed::NodeId id);
+	static Node* GetHoverNode();
 
 	virtual void Update() = 0;
 	virtual void Menu();
 	virtual void HoverMenu(bool isHovered);
-	ImVec2 GetPosition();
-	void SetPosition(ImVec2 pos);
+	ImVec2 GetPosition() const;
+	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
 
 	MainWindow* Owner = nullptr;

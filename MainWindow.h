@@ -40,13 +40,6 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
-	Node* FindNode(ed::NodeId id);
-	Link* FindLink(ed::LinkId id);
-	Pin* FindPin(ed::PinId id);
-	bool IsPinLinked(ed::PinId id);
-	Node* GetLinkedNode(ed::PinId outputPinId);
-	Node* GetHoverNode();
-
 	Link* CreateLink(Pin* startPin, Pin* endPin);
 
 	void BuildNode(const std::unique_ptr<Node>& node);
@@ -80,7 +73,6 @@ public:
 
 	LeftPanelClass m_LeftPanel;
 	TemplateManager m_TemplateManager;
-	std::map<ed::PinId, Pin*, ComparePinId> m_Pins; // 快速找pin用
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
 	bool								m_ShowPinTypeEditor{ false };

@@ -16,7 +16,7 @@ void SectionNode::Update() {
 		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-		InputPin->DrawPinIcon(Owner->IsPinLinked(InputPin->ID), (int)(alpha * 255));
+		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
 		ed::EndPin();
 		ImGui::PopStyleVar();
 	}
@@ -25,7 +25,7 @@ void SectionNode::Update() {
 	ImGui::SetNextItemWidth(150);
 	if (ImGui::InputText("##SectionName", &this->Name)) {
 		for (const auto& [_, pLink] : InputPin->Links) {
-			auto pPin = Owner->FindPin(pLink->StartPinID);
+			auto pPin = Pin::FindPin(pLink->StartPinID);
 			auto pNode = pPin->Node;
 			if (pNode->Type != NodeType::Section)
 				continue;
@@ -43,7 +43,7 @@ void SectionNode::Update() {
 		auto alpha = OutputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(OutputPin->ID, ed::PinKind::Output);
-		OutputPin->DrawPinIcon(Owner->IsPinLinked(OutputPin->ID), (int)(alpha * 255));
+		OutputPin->DrawPinIcon(OutputPin->IsLinked(), (int)(alpha * 255));
 		ed::EndPin();
 		ImGui::PopStyleVar();
 	}
@@ -84,7 +84,7 @@ void SectionNode::Update() {
 			}
 
 			ImGui::Spring(0);
-			kv.OutputPin->DrawPinIcon(Owner->IsPinLinked(kv.OutputPin->ID), (int)(alpha * 255));
+			kv.OutputPin->DrawPinIcon(kv.OutputPin->IsLinked(), (int)(alpha * 255));
 
 			builder->EndOutput();
 			ImGui::PopID();

@@ -46,58 +46,6 @@ void MainWindow::UpdateTouch() {
 	}
 }
 
-Node* MainWindow::FindNode(ed::NodeId id) {
-	for (const auto& node : Node::Array)
-		if (node->ID == id)
-			return node.get();
-
-	return nullptr;
-}
-
-Link* MainWindow::FindLink(ed::LinkId id) {
-	for (auto& link : Link::Array)
-		if (link->ID == id)
-			return link.get();
-
-	return nullptr;
-}
-
-Pin* MainWindow::FindPin(ed::PinId id) {
-	if (!id)
-		return nullptr;
-
-	return m_Pins.count(id) ? m_Pins.at(id) : nullptr;
-}
-
-bool MainWindow::IsPinLinked(ed::PinId id) {
-	if (!id)
-		return false;
-
-	if (auto pin = FindPin(id))
-		return !pin->Links.empty();
-
-	return false;
-}
-
-Node* MainWindow::GetLinkedNode(ed::PinId outputPinId) {
-	if (!outputPinId)
-		return nullptr;
-
-	auto pin = FindPin(outputPinId);
-	if(!pin || pin->Links.empty())
-		return nullptr;
-
-	auto begin = pin->Links.begin();
-	if (auto endpin = FindPin(begin->second->EndPinID))
-		return endpin->Node;
-
-	return nullptr;
-}
-
-Node* MainWindow::GetHoverNode() {
-	return FindNode(ed::GetHoveredNode());
-}
-
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
 	auto& link = Link::Array.emplace_back(
 		std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
@@ -113,10 +61,8 @@ void MainWindow::OnStart() {
 
 	config.UserPointer = this;
 
-	config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t {
-		auto self = static_cast<MainWindow*>(userPointer);
-
-		auto node = self->FindNode(nodeId);
+	config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void*) -> size_t {
+		auto node = Node::FindNode(nodeId);
 		if (!node)
 			return 0;
 
@@ -128,7 +74,7 @@ void MainWindow::OnStart() {
 	config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool {
 		auto self = static_cast<MainWindow*>(userPointer);
 
-		auto node = self->FindNode(nodeId);
+		auto node = Node::FindNode(nodeId);
 		if (!node)
 			return false;
 
@@ -177,8 +123,8 @@ void MainWindow::NodeEditor() {
 	if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
 		ed::PinId startPinId = 0, endPinId = 0;
 		if (ed::QueryNewLink(&startPinId, &endPinId)) {
-			auto startPin = FindPin(startPinId);
-			auto endPin = FindPin(endPinId);
+			auto startPin = Pin::FindPin(startPinId);
+			auto endPin = Pin::FindPin(endPinId);
 
 			newLinkPin = startPin ? startPin : endPin;
 
@@ -214,13 +160,13 @@ void MainWindow::NodeEditor() {
 
 		ed::PinId pinId = 0;
 		if (ed::QueryNewNode(&pinId)) {
-			newLinkPin = FindPin(pinId);
+			newLinkPin = Pin::FindPin(pinId);
 			if (newLinkPin)
 				Utils::DrawTextOnCursor("+ Create Node", ImColor(32, 45, 32, 180));
 
 			if (ed::AcceptNewItem()) {
 				createNewNode = true;
-				newNodeLinkPin = FindPin(pinId);
+				newNodeLinkPin = Pin::FindPin(pinId);
 				newLinkPin = nullptr;
 				ed::Suspend();
 				ImGui::OpenPopup("Create New Node");
