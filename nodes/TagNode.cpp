@@ -13,7 +13,7 @@ TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColo
 	BaseNode(owner, id, name, color), IsInput(input){
 	GlobalNames.insert(name);
 	
-	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output", "tag");
+	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output");
 	InputPin->Node = this;
 	InputPin->Kind = PinKind::Input;
 }
@@ -24,11 +24,15 @@ void TagNode::Update() {
 
 	// 开始节点
 	auto builder = GetBuilder();
+
+	if (hasInputConflict)
+		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 0, 0, 1));
+
 	builder->Begin(this->ID);
 
-	// 绘制标题（带冲突提示）
 	if (hasInputConflict) {
-		ImGui::SameLine();
+		ed::PopStyleColor();
+		// 绘制标题（带冲突提示）
 		ImGui::Text("(Conflict!)");
 	}
 
@@ -36,7 +40,7 @@ void TagNode::Update() {
 		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
+		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255), IsInput);
 		ed::EndPin();
 		ImGui::PopStyleVar();
 		ImGui::SameLine();
@@ -76,8 +80,10 @@ void TagNode::Update() {
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
 	for (auto& node : Node::Array)
-		if (IsInput && node->Name == Name && node->Type == Type)
-			if (++count > 1)
-				return true;
+		if (IsInput && node->Type == NodeType::Tag)
+			if (auto tagNode = reinterpret_cast<TagNode*>(node.get()))
+				if (tagNode->IsInput && tagNode->Name == Name)
+					if (++count > 1)
+						return true;
 	return false;
 }

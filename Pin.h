@@ -40,7 +40,7 @@ public:
 	ImColor GetIconColor() const;
 	std::string GetLinkType() const;
 	float GetAlpha(Pin* newLinkPin);
-	void DrawPinIcon(bool connected, int alpha) const;
+	void DrawPinIcon(bool connected, int alpha, bool isReverse = false) const;
 	void Menu();
 
 	ed::PinId   ID;

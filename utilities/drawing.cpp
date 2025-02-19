@@ -2,7 +2,7 @@
 # include "drawing.h"
 # include <imgui_internal.h>
 
-void ax::Drawing::DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b, IconType type, bool filled, ImU32 color, ImU32 innerColor)
+void ax::Drawing::DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b, IconType type, bool filled, ImU32 color, ImU32 innerColor, bool isReverse)
 {
           auto rect           = ImRect(a, b);
           auto rect_x         = rect.Min.x;
@@ -15,9 +15,8 @@ void ax::Drawing::DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& 
     const auto outline_scale  = rect_w / 24.0f;
     const auto extra_segments = static_cast<int>(2 * outline_scale); // for full circle
 
-    if (type == IconType::Flow)
-    {
-        const auto origin_scale = rect_w / 24.0f;
+	if (type == IconType::Flow) {
+		const auto origin_scale = rect_w / 24.0f;
 
         const auto offset_x  = 1.0f * origin_scale;
         const auto offset_y  = 0.0f * origin_scale;
@@ -43,37 +42,46 @@ void ax::Drawing::DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& 
         //const auto angle = AX_PI * 0.5f * 0.5f * 0.5f;
 
         const auto tip_top    = ImVec2(canvas_x + canvas_w * 0.5f, top);
-        const auto tip_right  = ImVec2(right, center_y);
-        const auto tip_bottom = ImVec2(canvas_x + canvas_w * 0.5f, bottom);
+		const auto tip_left   = ImVec2(left, center_y);
+		const auto tip_right  = ImVec2(right, center_y);
+		const auto tip_bottom = ImVec2(canvas_x + canvas_w * 0.5f, bottom);
 
-        drawList->PathLineTo(ImVec2(left, top) + ImVec2(0, rounding));
-        drawList->PathBezierCubicCurveTo(
-            ImVec2(left, top),
-            ImVec2(left, top),
-            ImVec2(left, top) + ImVec2(rounding, 0));
-        drawList->PathLineTo(tip_top);
-        drawList->PathLineTo(tip_top + (tip_right - tip_top) * tip_round);
-        drawList->PathBezierCubicCurveTo(
-            tip_right,
-            tip_right,
-            tip_bottom + (tip_right - tip_bottom) * tip_round);
-        drawList->PathLineTo(tip_bottom);
-        drawList->PathLineTo(ImVec2(left, bottom) + ImVec2(rounding, 0));
-        drawList->PathBezierCubicCurveTo(
-            ImVec2(left, bottom),
-            ImVec2(left, bottom),
-            ImVec2(left, bottom) - ImVec2(0, rounding));
+		if (!isReverse) {
+			drawList->PathLineTo(ImVec2(left, top) + ImVec2(0, rounding));
+			drawList->PathBezierCubicCurveTo(
+				ImVec2(left, top),
+				ImVec2(left, top),
+				ImVec2(left, top) + ImVec2(rounding, 0));
+			drawList->PathLineTo(tip_top);
+			drawList->PathLineTo(tip_top + (tip_right - tip_top) * tip_round);
+			drawList->PathBezierCubicCurveTo(
+				tip_right,
+				tip_right,
+				tip_bottom + (tip_right - tip_bottom) * tip_round);
+			drawList->PathLineTo(tip_bottom);
+			drawList->PathLineTo(ImVec2(left, bottom) + ImVec2(rounding, 0));
+			drawList->PathBezierCubicCurveTo(
+				ImVec2(left, bottom),
+				ImVec2(left, bottom),
+				ImVec2(left, bottom) - ImVec2(0, rounding));
+		}
+		else {
+			drawList->PathLineTo(tip_left);
+			drawList->PathLineTo(tip_top);
+			drawList->PathLineTo(ImVec2(right, top));
+			drawList->PathLineTo(ImVec2(right, bottom));
+			drawList->PathLineTo(tip_bottom);
+		}
 
-        if (!filled)
-        {
-            if (innerColor & 0xFF000000)
-                drawList->AddConvexPolyFilled(drawList->_Path.Data, drawList->_Path.Size, innerColor);
+		if (!filled) {
+			if (innerColor & 0xFF000000)
+				drawList->AddConvexPolyFilled(drawList->_Path.Data, drawList->_Path.Size, innerColor);
 
-            drawList->PathStroke(color, true, 2.0f * outline_scale);
-        }
-        else
-            drawList->PathFillConvex(color);
-    }
+			drawList->PathStroke(color, true, 2.0f * outline_scale);
+		}
+		else
+			drawList->PathFillConvex(color);
+	}
     else
     {
         auto triangleStart = rect_center_x + 0.32f * rect_w;

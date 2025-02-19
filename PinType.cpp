@@ -190,7 +190,7 @@ PinTypeManager::PinTypeManager() {
 	AddType({ "object",  "Object",  ImColor(51, 150, 215),  1 });
 	AddType({ "function","Function",ImColor(218, 0, 183),   1 });
 	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   2 });
-	AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
+	//AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
 }
 
 void PinTypeManager::AddCustomType(const PinTypeInfo& type) {

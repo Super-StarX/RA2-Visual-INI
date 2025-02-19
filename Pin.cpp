@@ -121,12 +121,12 @@ float Pin::GetAlpha(Pin* newLinkPin) {
 	return alpha;
 }
 
-void Pin::DrawPinIcon(bool connected, int alpha) const {
+void Pin::DrawPinIcon(bool connected, int alpha, bool isReverse) const {
 	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
 
 	using namespace ax::Widgets;
 	ImColor color = typeInfo->Color;
 	color.Value.w = alpha / 255.0f;
 
-	Icon(ImVec2(IconSize, IconSize), IconType(typeInfo->IconType), connected, color, ImColor(32, 32, 32, alpha));
+	Icon(ImVec2(IconSize, IconSize), IconType(typeInfo->IconType), connected, color, ImColor(32, 32, 32, alpha), isReverse);
 };
