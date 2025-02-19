@@ -24,7 +24,6 @@ void MainWindow::ClearAll() {
 	Node::Array.clear();
 	m_Links.clear();
 	SectionNode::Map.clear();
-	m_NodeSections.clear();
 }
 
 float MainWindow::GetTouchProgress(ed::NodeId id) {

@@ -78,7 +78,6 @@ public:
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
 
-	std::unordered_map<ed::NodeId, std::string, std::hash<ed::NodeId>, std::equal_to<ed::NodeId>> m_NodeSections;
 	LeftPanelClass m_LeftPanel;
 	TemplateManager m_TemplateManager;
 	std::vector<std::unique_ptr<Link>>  m_Links;

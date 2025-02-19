@@ -75,11 +75,9 @@ void TagNode::Update() {
 
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
-	for (auto& node : Node::Array) {
-		if (IsInput && node->Name == Name && node->Type == Type) {
+	for (auto& node : Node::Array)
+		if (IsInput && node->Name == Name && node->Type == Type)
 			if (++count > 1)
 				return true;
-		}
-	}
 	return false;
 }
