@@ -6,7 +6,7 @@
 
 std::vector<std::unique_ptr<Node>> Node::Array;
 
-Node* Node::FindNode(ed::NodeId id) {
+Node* Node::Get(ed::NodeId id) {
 	for (const auto& node : Node::Array)
 		if (node->ID == id)
 			return node.get();
@@ -25,10 +25,10 @@ void Node::SetPosition(ImVec2 pos) const {
 int Node::GetConnectedLinkCount() {
 	int count = 0;
 	for (auto& link : Link::Array) {
-		if (auto pin = Pin::FindPin(link->StartPinID)) {
+		if (auto pin = Pin::Get(link->StartPinID)) {
 			if (pin->Node == this) ++count;
 		}
-		if (auto pin = Pin::FindPin(link->EndPinID)) {
+		if (auto pin = Pin::Get(link->EndPinID)) {
 			if (pin->Node == this) ++count;
 		}
 	}

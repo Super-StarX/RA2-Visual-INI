@@ -63,7 +63,7 @@ void MainWindow::OnStart() {
 	config.UserPointer = this;
 
 	config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void*) -> size_t {
-		auto node = Node::FindNode(nodeId);
+		auto node = Node::Get(nodeId);
 		if (!node)
 			return 0;
 
@@ -75,7 +75,7 @@ void MainWindow::OnStart() {
 	config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool {
 		auto self = static_cast<MainWindow*>(userPointer);
 
-		auto node = Node::FindNode(nodeId);
+		auto node = Node::Get(nodeId);
 		if (!node)
 			return false;
 

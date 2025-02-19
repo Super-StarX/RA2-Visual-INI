@@ -13,7 +13,7 @@ void MainWindow::Menu() {
 	if (ed::ShowNodeContextMenu(&contextNodeId))
 		ImGui::OpenPopup("Node Context Menu");
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
-		auto pin = Pin::FindPin(contextPinId);
+		auto pin = Pin::Get(contextPinId);
 		if (pin && pin->Node->Type == NodeType::Section) {
 			auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
 			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
@@ -46,7 +46,7 @@ void MainWindow::Menu() {
 
 	// 悬停节点提示处理
 	static Node* lastHoveredNode = nullptr;
-	if (auto hoveredNode = Node::FindNode(ed::GetHoveredNode())) {
+	if (auto hoveredNode = Node::Get(ed::GetHoveredNode())) {
 		if (hoveredNode != lastHoveredNode) {
 			hoveredNode->HoverTimer = 0.0f;
 			lastHoveredNode = hoveredNode;
@@ -120,7 +120,7 @@ void MainWindow::LayerMenu() {
 }
 
 void MainWindow::NodeMenu() {
-	auto node = Node::FindNode(contextNodeId);
+	auto node = Node::Get(contextNodeId);
 
 	ImGui::TextUnformatted("Node Context Menu");
 	ImGui::Separator();
@@ -151,8 +151,8 @@ void MainWindow::NodeEditor() {
 	if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
 		ed::PinId startPinId = 0, endPinId = 0;
 		if (ed::QueryNewLink(&startPinId, &endPinId)) {
-			auto startPin = Pin::FindPin(startPinId);
-			auto endPin = Pin::FindPin(endPinId);
+			auto startPin = Pin::Get(startPinId);
+			auto endPin = Pin::Get(endPinId);
 
 			newLinkPin = startPin ? startPin : endPin;
 
@@ -188,13 +188,13 @@ void MainWindow::NodeEditor() {
 
 		ed::PinId pinId = 0;
 		if (ed::QueryNewNode(&pinId)) {
-			newLinkPin = Pin::FindPin(pinId);
+			newLinkPin = Pin::Get(pinId);
 			if (newLinkPin)
 				Utils::DrawTextOnCursor("+ Create Node", ImColor(32, 45, 32, 180));
 
 			if (ed::AcceptNewItem()) {
 				createNewNode = true;
-				newNodeLinkPin = Pin::FindPin(pinId);
+				newNodeLinkPin = Pin::Get(pinId);
 				newLinkPin = nullptr;
 				ed::Suspend();
 				ImGui::OpenPopup("Create New Node");
@@ -326,7 +326,7 @@ void MainWindow::ShowSectionEditor() {
 }
 
 void MainWindow::PinMenu() {
-	auto pin = Pin::FindPin(contextPinId);
+	auto pin = Pin::Get(contextPinId);
 
 	ImGui::TextUnformatted("Pin Context Menu");
 	ImGui::Separator();
@@ -356,7 +356,7 @@ void MainWindow::ShowPinTypeEditor() {
 }
 
 void MainWindow::LinkMenu() {
-	auto link = Link::FindLink(contextLinkId);
+	auto link = Link::Get(contextLinkId);
 
 	ImGui::TextUnformatted("Link Context Menu");
 	ImGui::Separator();

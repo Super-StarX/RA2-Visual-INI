@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "utilities/builders.h"
 
 #include <string>
@@ -32,7 +32,7 @@ public:
 	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
 	~Pin();
 
-	static Pin* FindPin(ed::PinId id);
+	static Pin* Get(ed::PinId id);
 	static bool CanCreateLink(Pin* a, Pin* b);
 
 	bool IsLinked() const;

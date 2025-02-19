@@ -26,7 +26,7 @@ public:
 	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
 		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
 
-	static Node* FindNode(ed::NodeId id);
+	static Node* Get(ed::NodeId id);
 
 	virtual void Update() = 0;
 	virtual void Menu();

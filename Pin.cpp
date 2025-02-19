@@ -16,7 +16,7 @@ Pin::~Pin() {
 	Array.erase(ID);
 }
 
-Pin* Pin::FindPin(ed::PinId id) {
+Pin* Pin::Get(ed::PinId id) {
 	if (!id)
 		return nullptr;
 
@@ -39,7 +39,7 @@ Node* Pin::GetLinkedNode() const {
 		return nullptr;
 
 	auto begin = Links.begin();
-	if (auto endpin = FindPin(begin->second->EndPinID))
+	if (auto endpin = Get(begin->second->EndPinID))
 		return endpin->Node;
 
 	return nullptr;

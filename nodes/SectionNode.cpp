@@ -25,7 +25,7 @@ void SectionNode::Update() {
 	ImGui::SetNextItemWidth(150);
 	if (ImGui::InputText("##SectionName", &this->Name)) {
 		for (const auto& [_, pLink] : InputPin->Links) {
-			auto pPin = Pin::FindPin(pLink->StartPinID);
+			auto pPin = Pin::Get(pLink->StartPinID);
 			auto pNode = pPin->Node;
 			if (pNode->Type != NodeType::Section)
 				continue;

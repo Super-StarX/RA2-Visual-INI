@@ -13,7 +13,7 @@ public:
 		ID(id), StartPinID(startPinId), EndPinID(endPinId) {}
 	~Link();
 
-	static Link* FindLink(ed::LinkId id);
+	static Link* Get(ed::LinkId id);
 
 	void Draw() const;
 	void Menu();

@@ -5,14 +5,14 @@
 std::vector<std::unique_ptr<Link>> Link::Array;
 
 Link::~Link() {
-	if (auto pin = Pin::FindPin(StartPinID))
+	if (auto pin = Pin::Get(StartPinID))
 		pin->Links.erase(ID);
 
-	if (auto pin = Pin::FindPin(EndPinID))
+	if (auto pin = Pin::Get(EndPinID))
 		pin->Links.erase(ID);
 }
 
-Link* Link::FindLink(ed::LinkId id) {
+Link* Link::Get(ed::LinkId id) {
 	for (auto& link : Link::Array)
 		if (link->ID == id)
 			return link.get();

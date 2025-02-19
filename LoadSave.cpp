@@ -100,8 +100,8 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		int startPinId = linkJson["start_pin_id"].get<int>();
 		int endPinId = linkJson["end_pin_id"].get<int>();
 
-		auto startPin = Pin::FindPin(startPinId);
-		auto endPin = Pin::FindPin(endPinId);
+		auto startPin = Pin::Get(startPinId);
+		auto endPin = Pin::Get(endPinId);
 
 		if (startPin && endPin) {
 			CreateLink(startPin, endPin);
