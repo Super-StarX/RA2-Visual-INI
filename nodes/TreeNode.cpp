@@ -48,8 +48,7 @@ void TreeNode::Update() {
 		ed::EndPin();
 		ed::PopStyleVar(3);
 
-		if (Owner->newLinkPin && !Pin::CanCreateLink(Owner->newLinkPin, &pin) && &pin != Owner->newLinkPin)
-			inputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
+		inputAlpha = pin.GetAlpha();
 	}
 	else
 		ImGui::Dummy(ImVec2(0, padding));
@@ -93,8 +92,7 @@ void TreeNode::Update() {
 		ed::EndPin();
 		ed::PopStyleVar();
 
-		if (Owner->newLinkPin && !Pin::CanCreateLink(Owner->newLinkPin, &pin) && &pin != Owner->newLinkPin)
-			outputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
+		outputAlpha = pin.GetAlpha();
 	}
 	else
 		ImGui::Dummy(ImVec2(0, padding));

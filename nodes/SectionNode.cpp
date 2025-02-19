@@ -13,7 +13,7 @@ void SectionNode::Update() {
 	ImGui::Spring(0);
 
 	{
-		auto alpha = InputPin->GetAlpha(Owner->newLinkPin);
+		auto alpha = InputPin->GetAlpha();
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
 		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
@@ -40,7 +40,7 @@ void SectionNode::Update() {
 	ImGui::PopID();
 
 	{
-		auto alpha = OutputPin->GetAlpha(Owner->newLinkPin);
+		auto alpha = OutputPin->GetAlpha();
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ed::BeginPin(OutputPin->ID, ed::PinKind::Output);
 		OutputPin->DrawPinIcon(OutputPin->IsLinked(), (int)(alpha * 255));
@@ -62,7 +62,7 @@ void SectionNode::Update() {
 		auto& kv = this->KeyValues[i];
 		if (!kv.IsFolded) {
 			// 展开状态下的渲染
-			auto alpha = kv.OutputPin->GetAlpha(Owner->newLinkPin);
+			auto alpha = kv.OutputPin->GetAlpha();
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 			ImGui::PushID(&kv);
 			builder->Output(kv.OutputPin->ID);
@@ -120,7 +120,7 @@ void SectionNode::Update() {
 
 KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
 	if (!pinid)
-		pinid = Owner->GetNextId();
+		pinid = MainWindow::GetNextId();
 
 	auto& kv = KeyValues.emplace_back(KeyValue{ key, value, std::make_unique<Pin>(pinid, key.c_str()), isInherited, isComment, isFolded });
 	kv.OutputPin->Node = this;

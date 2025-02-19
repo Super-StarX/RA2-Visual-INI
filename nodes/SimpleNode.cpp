@@ -4,7 +4,7 @@
 void SimpleNode::Update() {
 	auto builder = GetBuilder();
 
-	auto newLinkPin = Owner->newLinkPin;
+	auto newLinkPin = MainWindow::newLinkPin;
 
 	bool hasOutputDelegates = false;
 	for (auto& output : this->Outputs)

@@ -20,7 +20,7 @@ BaseNode::~BaseNode() {
 
 void BaseNode::UpdateInput(Pin& input) {
 	auto builder = GetBuilder();
-	float alpha = input.GetAlpha(Owner->newLinkPin);
+	float alpha = input.GetAlpha();
 	builder->Input(input.ID);
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 	input.DrawPinIcon(input.IsLinked(), (int)(alpha * 255));
@@ -39,7 +39,7 @@ void BaseNode::UpdateInput(Pin& input) {
 
 void BaseNode::UpdateOutput(Pin& output) {
 	auto builder = GetBuilder();
-	auto newLinkPin = Owner->newLinkPin;
+	auto newLinkPin = MainWindow::newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
 	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
 		alpha = alpha * (48.0f / 255.0f);

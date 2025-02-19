@@ -20,11 +20,7 @@ class MainWindow : public Application {
 public:
 	using Application::Application;
 	static MainWindow* Instance;
-	static int m_NextId;
-
-	static ed::NodeId contextNodeId;
-	static ed::LinkId contextLinkId;
-	static ed::PinId  contextPinId;
+	
 	static bool createNewNode;
 	static Pin* newNodeLinkPin;
 	static Pin* newLinkPin;
@@ -32,9 +28,8 @@ public:
 	static float leftPaneWidth;
 	static float rightPaneWidth;
 
-	static int GetNextId() { return m_NextId++; };
-
-	void ClearAll();
+	static int GetNextId();
+	static void ClearAll();
 
 	float GetTouchProgress(ed::NodeId id);
 	void TouchNode(ed::NodeId id);

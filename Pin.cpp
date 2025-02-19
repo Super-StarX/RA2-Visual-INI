@@ -5,22 +5,22 @@
 #include "MainWindow.h"
 #include "utilities/widgets.h"
 
-std::map<ed::PinId, Pin*, ComparePinId> Pin::m_Pins;
+std::map<ed::PinId, Pin*, ComparePinId> Pin::Array;
 
 Pin::Pin(int id, const char* name, std::string type, PinKind kind) :
 	ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(kind) {
-	m_Pins[ID] = this;
+	Array[ID] = this;
 }
 
 Pin::~Pin() {
-	m_Pins.erase(ID);
+	Array.erase(ID);
 }
 
 Pin* Pin::FindPin(ed::PinId id) {
 	if (!id)
 		return nullptr;
 
-	return m_Pins.count(id) ? m_Pins.at(id) : nullptr;
+	return Array.count(id) ? Array.at(id) : nullptr;
 }
 
 bool Pin::CanCreateLink(Pin* a, Pin* b) {
@@ -114,9 +114,9 @@ void Pin::Menu() {
 	}
 }
 
-float Pin::GetAlpha(Pin* newLinkPin) {
+float Pin::GetAlpha() {
 	auto alpha = ImGui::GetStyle().Alpha;
-	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, this) && this != newLinkPin)
+	if (MainWindow::newLinkPin && !Pin::CanCreateLink(MainWindow::newLinkPin, this) && this != MainWindow::newLinkPin)
 		alpha *= 48.0f / 255.0f;
 	return alpha;
 }

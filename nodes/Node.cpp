@@ -14,10 +14,6 @@ Node* Node::FindNode(ed::NodeId id) {
 	return nullptr;
 }
 
-Node* Node::GetHoverNode() {
-	return FindNode(ed::GetHoveredNode());
-}
-
 ImVec2 Node::GetPosition() const {
 	return ed::GetNodePosition(ID);
 }

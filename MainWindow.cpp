@@ -9,16 +9,17 @@
 
 static ed::EditorContext* m_Editor = nullptr;
 MainWindow* MainWindow::Instance = nullptr;
-int MainWindow::m_NextId = 1;
-ed::NodeId MainWindow::contextNodeId = 0;
-ed::LinkId MainWindow::contextLinkId = 0;
-ed::PinId  MainWindow::contextPinId = 0;
 bool MainWindow::createNewNode = false;
 Pin* MainWindow::newNodeLinkPin = nullptr;
 Pin* MainWindow::newLinkPin = nullptr;
 
 float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
+
+int MainWindow::GetNextId() { 
+	static int m_NextId = 1; 
+	return m_NextId++; 
+}
 
 void MainWindow::ClearAll() {
 	Node::Array.clear();
@@ -110,96 +111,6 @@ void MainWindow::OnStop() {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
 	}
-}
-
-void MainWindow::NodeEditor() {
-	auto cursorTopLeft = ImGui::GetCursorScreenPos();
-
-	if (createNewNode) {
-		ImGui::SetCursorScreenPos(cursorTopLeft);
-		return;
-	}
-
-	if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f)) {
-		ed::PinId startPinId = 0, endPinId = 0;
-		if (ed::QueryNewLink(&startPinId, &endPinId)) {
-			auto startPin = Pin::FindPin(startPinId);
-			auto endPin = Pin::FindPin(endPinId);
-
-			newLinkPin = startPin ? startPin : endPin;
-
-			if (startPin->Kind == PinKind::Input) {
-				std::swap(startPin, endPin);
-				std::swap(startPinId, endPinId);
-			}
-
-			if (startPin && endPin) {
-				if (endPin == startPin)
-					ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-				else if (endPin->Kind == startPin->Kind) {
-					Utils::DrawTextOnCursor("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
-					ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
-				}
-				//else if (endPin->Node == startPin->Node)
-				//{
-				//    Utils::DrawTextOnCursor("x Cannot connect to self", ImColor(45, 32, 32, 180));
-				//    ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
-				//}
-				else if (endPin->TypeIdentifier != startPin->TypeIdentifier) {
-					Utils::DrawTextOnCursor("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
-					ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
-				}
-				else {
-					Utils::DrawTextOnCursor("+ Create Link", ImColor(32, 45, 32, 180));
-					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-						CreateLink(startPin, endPin)->TypeIdentifier = startPin->GetLinkType();
-					}
-				}
-			}
-		}
-
-		ed::PinId pinId = 0;
-		if (ed::QueryNewNode(&pinId)) {
-			newLinkPin = Pin::FindPin(pinId);
-			if (newLinkPin)
-				Utils::DrawTextOnCursor("+ Create Node", ImColor(32, 45, 32, 180));
-
-			if (ed::AcceptNewItem()) {
-				createNewNode = true;
-				newNodeLinkPin = Pin::FindPin(pinId);
-				newLinkPin = nullptr;
-				ed::Suspend();
-				ImGui::OpenPopup("Create New Node");
-				ed::Resume();
-			}
-		}
-	}
-	else
-		newLinkPin = nullptr;
-
-	ed::EndCreate();
-
-	if (ed::BeginDelete()) {
-		ed::NodeId nodeId = 0;
-		while (ed::QueryDeletedNode(&nodeId)) {
-			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(Node::Array.begin(), Node::Array.end(), [nodeId](auto& node) { return node->ID == nodeId; });
-				if (id != Node::Array.end())
-					Node::Array.erase(id);
-			}
-		}
-
-		ed::LinkId linkId = 0;
-		while (ed::QueryDeletedLink(&linkId)) {
-			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(Link::Array.begin(), Link::Array.end(), [linkId](auto& link) { return link->ID == linkId; });
-				if (id != Link::Array.end())
-					Link::Array.erase(id);
-			}
-		}
-	}
-	ed::EndDelete();
-	ImGui::SetCursorScreenPos(cursorTopLeft);
 }
 
 void MainWindow::OnFrame(float deltaTime) {

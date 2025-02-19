@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "utilities/builders.h"
 
 #include <string>
@@ -27,7 +27,7 @@ class Link;
 class Pin {
 public:
 	constexpr static float IconSize = 24.f;
-	static std::map<ed::PinId, Pin*, ComparePinId> m_Pins; // 快速找pin用
+	static std::map<ed::PinId, Pin*, ComparePinId> Array; // 快速找pin用
 
 	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
 	~Pin();
@@ -39,7 +39,7 @@ public:
 	Node* GetLinkedNode() const;
 	ImColor GetIconColor() const;
 	std::string GetLinkType() const;
-	float GetAlpha(Pin* newLinkPin);
+	float GetAlpha();
 	void DrawPinIcon(bool connected, int alpha, bool isReverse = false) const;
 	void Menu();
 

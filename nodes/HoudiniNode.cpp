@@ -59,8 +59,7 @@ void HoudiniNode::Update() {
 			drawList->AddRect(inputsRect.GetTL(), inputsRect.GetBR(),
 				IM_COL32((int)(255 * pinBackground.x), (int)(255 * pinBackground.y), (int)(255 * pinBackground.z), inputAlpha), 4.0f, allRoundCornersFlags);
 
-			if (Owner->newLinkPin && !Pin::CanCreateLink(Owner->newLinkPin, &pin) && &pin != Owner->newLinkPin)
-				inputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
+			inputAlpha = pin.GetAlpha();
 		}
 
 		//ImGui::Spring(1, 0);
@@ -118,9 +117,7 @@ void HoudiniNode::Update() {
 			drawList->AddRect(outputsRect.GetTL(), outputsRect.GetBR(),
 				IM_COL32((int)(255 * pinBackground.x), (int)(255 * pinBackground.y), (int)(255 * pinBackground.z), outputAlpha), 4.0f, allRoundCornersFlags);
 
-
-			if (Owner->newLinkPin && !Pin::CanCreateLink(Owner->newLinkPin, &pin) && &pin != Owner->newLinkPin)
-				outputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
+			outputAlpha = pin.GetAlpha();
 		}
 
 		ImGui::EndHorizontal();

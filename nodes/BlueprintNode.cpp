@@ -22,7 +22,7 @@ void BlueprintNode::Update() {
 			if (output.TypeIdentifier != "delegate")
 				continue;
 
-			float alpha = output.GetAlpha(Owner->newLinkPin);
+			float alpha = output.GetAlpha();
 			ed::BeginPin(output.ID, ed::PinKind::Output);
 			ed::PinPivotAlignment(ImVec2(1.0f, 0.5f));
 			ed::PinPivotSize(ImVec2(0, 0));

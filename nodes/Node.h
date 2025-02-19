@@ -27,7 +27,6 @@ public:
 		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
 
 	static Node* FindNode(ed::NodeId id);
-	static Node* GetHoverNode();
 
 	virtual void Update() = 0;
 	virtual void Menu();
