@@ -41,7 +41,7 @@ void BaseNode::UpdateOutput(Pin& output) {
 	auto builder = GetBuilder();
 	auto newLinkPin = MainWindow::newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
-	if (newLinkPin && !Pin::CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
+	if (newLinkPin && !newLinkPin->CanCreateLink(&output) && &output != newLinkPin)
 		alpha = alpha * (48.0f / 255.0f);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);

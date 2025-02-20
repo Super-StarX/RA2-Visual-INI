@@ -33,8 +33,8 @@ public:
 	~Pin();
 
 	static Pin* Get(ed::PinId id);
-	static bool CanCreateLink(Pin* a, Pin* b);
 
+	bool CanCreateLink(Pin* b);
 	bool IsLinked() const;
 	Node* GetLinkedNode() const;
 	ImColor GetIconColor() const;

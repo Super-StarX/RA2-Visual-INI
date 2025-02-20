@@ -201,7 +201,7 @@ void MainWindow::ImportINI(const std::string& path) {
 				// 创建连线
 				if (map.contains(value)) {
 					auto targetNode = map[value];
-					if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
+					if (targetNode->InputPin->CanCreateLink(kv.OutputPin.get())) {
 						CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
 					}
 				}
@@ -216,7 +216,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			auto& kv = currentNode->KeyValues.back(); // 假设每个 key-value 对都已添加到 KeyValues 中
 			if (map.contains(value)) {
 				auto targetNode = map[value];
-				if (Pin::CanCreateLink(kv.OutputPin.get(), targetNode->InputPin.get())) {
+				if (targetNode->InputPin->CanCreateLink(kv.OutputPin.get())) {
 					CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
 				}
 			}

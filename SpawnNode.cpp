@@ -51,7 +51,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 		if (SectionNode::Map.contains(kv.Value)) {
 			auto targetNode = SectionNode::Map[kv.Value];
 			auto outpin = keyvalue.OutputPin.get();
-			if (Pin::CanCreateLink(outpin, targetNode->InputPin.get())) {
+			if (targetNode->InputPin->CanCreateLink(outpin)) {
 				CreateLink(outpin, targetNode->InputPin.get())->TypeIdentifier = outpin->GetLinkType();
 			}
 		}

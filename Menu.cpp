@@ -98,13 +98,13 @@ void MainWindow::LayerMenu() {
 				auto pin = startPin->Kind == PinKind::Input ? sectionNode->OutputPin.get() : sectionNode->InputPin.get();
 				if (startPin->Kind == PinKind::Input)
 					std::swap(startPin, pin);
-				if (Pin::CanCreateLink(startPin, pin))
+				if (startPin->CanCreateLink(pin))
 					CreateLink(startPin, pin)->TypeIdentifier = startPin->GetLinkType();
 			}
 			else {
 				auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
 				for (auto& pin : pins) {
-					if (Pin::CanCreateLink(startPin, &pin)) {
+					if (startPin->CanCreateLink(&pin)) {
 						auto endPin = &pin;
 						if (startPin->Kind == PinKind::Input)
 							std::swap(startPin, endPin);

@@ -23,11 +23,8 @@ Pin* Pin::Get(ed::PinId id) {
 	return Array.count(id) ? Array.at(id) : nullptr;
 }
 
-bool Pin::CanCreateLink(Pin* a, Pin* b) {
-	if (!a || !b || a == b || a->Kind == b->Kind || a->Node == b->Node)
-		return false;
-
-	return true;
+bool Pin::CanCreateLink(Pin* b) {
+	return b && b != this && b->Kind != Kind && b->Node != Node;
 }
 
 bool Pin::IsLinked() const {
@@ -35,7 +32,7 @@ bool Pin::IsLinked() const {
 }
 
 Node* Pin::GetLinkedNode() const {
-	if (Links.empty())
+	if (!IsLinked())
 		return nullptr;
 
 	auto begin = Links.begin();
@@ -116,7 +113,7 @@ void Pin::Menu() {
 
 float Pin::GetAlpha() {
 	auto alpha = ImGui::GetStyle().Alpha;
-	if (MainWindow::newLinkPin && !Pin::CanCreateLink(MainWindow::newLinkPin, this) && this != MainWindow::newLinkPin)
+	if (MainWindow::newLinkPin && !this->CanCreateLink(MainWindow::newLinkPin) && this != MainWindow::newLinkPin)
 		alpha *= 48.0f / 255.0f;
 	return alpha;
 }
