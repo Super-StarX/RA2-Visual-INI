@@ -250,48 +250,39 @@ void MainWindow::ImportINI(const std::string& path) {
 void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 
-	// 定义处理单个键值对的 lambda
-	auto ProcessKeyValue = [&](KeyValue& kv, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited, bool isRootProcessing) {
-		// 这里两处(SectionNode*)会导致如果有非Section的Node会在node->KeyValues处弹框, 待修复
-		auto linkedNode = (SectionNode*)kv.OutputPin->GetLinkedNode();
-		if (!linkedNode) {
-			output.emplace_back(kv.Key, kv.Value);
+	// 递归处理继承节点
+	// 处理流程：
+	// 遍历全部键值对
+	// 1. 注释直接忽略
+	// 2. 未链接节点的输出
+	// 3. 未继承的，输出key=链接的节点名（目前节点名与value名同步，似乎没必要单独判断，不过还是保留了）
+	// 4. 继承的，递归调用函数
+	std::function<void(SectionNode*, std::vector<std::pair<std::string, std::string>>&, std::unordered_set<SectionNode*>&)> Collect =
+		[&](SectionNode* node, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited) {
+		
+		if (!node || visited.count(node)) 
 			return;
-		}
 
-		if (!kv.IsInherited) {
-			output.emplace_back(kv.Key, linkedNode->Name);
-			return;
-		}
+		visited.insert(node);
 
-		// 递归处理继承节点
-		std::function<void(SectionNode*)> Collect = [&](SectionNode* node) {
-			if (!node || visited.count(node)) return;
-			visited.insert(node);
+		for (auto& kv : node->KeyValues) {
+			if (kv.IsComment)
+				continue;
 
-			for (auto& childKv : node->KeyValues) {
-				if (childKv.IsComment) continue;
-
-				auto childLinkedNode = (SectionNode*)childKv.OutputPin->GetLinkedNode();
-				if (!childLinkedNode) {
-					output.emplace_back(childKv.Key, childKv.Value);
-					continue;
-				}
-
-				if (childKv.IsInherited)
-					Collect(childLinkedNode);
-				else
-					output.emplace_back(childKv.Key, childLinkedNode->Name);
+			auto linkedNode = kv.OutputPin->GetLinkedSection();
+			if (!linkedNode) {
+				output.emplace_back(kv.Key, kv.Value);
+				continue;
 			}
-		};
 
-		// 根节点的继承需要新建 visited 集合
-		if (isRootProcessing) {
-			std::unordered_set<SectionNode*> newVisited;
-			Collect(linkedNode);
+			if (!kv.IsInherited) {
+				output.emplace_back(kv.Key, linkedNode->Name);
+				continue;
+			}
+
+			// 继承的情况，递归调用
+			Collect(linkedNode, output, visited);
 		}
-		else
-			Collect(linkedNode);
 	};
 
 	// 主逻辑
@@ -303,18 +294,21 @@ void MainWindow::ExportINI(const std::string& path) {
 		std::vector<std::pair<std::string, std::string>> outputEntries;
 		std::unordered_set<SectionNode*> visited;
 
-		for (auto& kv : node->KeyValues) {
-			if (kv.IsComment) continue;
-
-			ProcessKeyValue(kv, outputEntries, visited, true); // true 表示根节点处理
-		}
+		Collect(node, outputEntries, visited);
 
 		// 写入文件（保留最后出现的重复键）
-		std::unordered_map<std::string, std::string> finalMap;
-		for (auto& entry : outputEntries)
-			finalMap[entry.first] = entry.second; // 自动覆盖重复键
-		for (auto& [key, val] : finalMap)
-			file << key << "=" << val << "\n";
+		std::unordered_map<std::string, size_t> finalMap;
+
+		for (size_t i = 0; i < outputEntries.size(); i++)
+			finalMap[outputEntries[i].first] = i; // 自动覆盖重复键
+
+		std::vector<std::pair<std::string, size_t>> vec(finalMap.begin(), finalMap.end());
+		std::sort(vec.begin(), vec.end(), [](const std::pair<std::string, size_t>& a, const std::pair<std::string, size_t>& b) {
+			return a.second < b.second;
+		});
+
+		for (auto& [key, val] : vec)
+			file << key << "=" << outputEntries[val].second << "\n";
 
 		file << "\n";
 	}

@@ -42,6 +42,14 @@ Node* Pin::GetLinkedNode() const {
 	return nullptr;
 }
 
+SectionNode* Pin::GetLinkedSection() const {
+	if (auto pNode = GetLinkedNode())
+		if (pNode->Type == NodeType::Section)
+			return reinterpret_cast<SectionNode*>(pNode);
+
+	return nullptr;
+}
+
 ImColor Pin::GetIconColor() const {
 	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
 	if (!typeInfo) return ImColor(255, 255, 255);

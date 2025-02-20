@@ -23,6 +23,7 @@ struct ComparePinId {
 };
 
 class Node;
+class SectionNode;
 class Link;
 class Pin {
 public:
@@ -37,6 +38,7 @@ public:
 	bool CanCreateLink(Pin* b);
 	bool IsLinked() const;
 	Node* GetLinkedNode() const;
+	SectionNode* GetLinkedSection() const;
 	ImColor GetIconColor() const;
 	std::string GetLinkType() const;
 	float GetAlpha();
