@@ -11,6 +11,8 @@
 // 类型分类枚举
 enum class TypeCategory {
 	Unknown,
+	Bool,
+	Color,
 	Basic,
 	Section,
 	NumberLimit,

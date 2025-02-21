@@ -11,7 +11,15 @@ TypeInfo TypeSystem::GetTypeInfo(const std::string& typeName) const {
 	TypeInfo info;
 	info.TypeName = typeName;
 
-	if (Sections.count(typeName)) {
+	std::unordered_map<std::string, TypeCategory> BasicTypes = {
+		{"bool", TypeCategory::Bool},
+		{"ColorStruct", TypeCategory::Color},
+	};
+
+	if (BasicTypes.contains(typeName)) {
+		info.Category = BasicTypes.at(typeName);
+	}
+	else if (Sections.count(typeName)) {
 		info.Category = TypeCategory::Section;
 	}
 	else if (NumberLimits.count(typeName)) {

@@ -134,38 +134,10 @@ KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& va
 	return kv;
 }
 
-// SectionNode 扩展方法实现
 void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
-
 	ImGui::PushItemWidth(itemWidth);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
-
-	auto DrawTooltip = [&]() {
-		if (ImGui::IsItemHovered()) {
-			ImGui::BeginTooltip();
-			ImGui::Text("Type: %s", type.TypeName.c_str());
-			switch (type.Category) {
-			case TypeCategory::NumberLimit:
-				ImGui::Text("Range: [%d, %d]",
-					std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
-				break;
-			case TypeCategory::StringLimit:
-				if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-					ImGui::Text("Options: %s",
-						Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
-				}
-				break;
-			case TypeCategory::List:
-				ImGui::Text("Element: %s (%d-%d items)",
-					std::get<ListType>(type.Data).ElementType.c_str(),
-					std::get<ListType>(type.Data).MinLength,
-					std::get<ListType>(type.Data).MaxLength);
-				break;
-			}
-			ImGui::EndTooltip();
-		}
-	};
 
 	switch (type.Category) {
 	case TypeCategory::NumberLimit: {
@@ -173,17 +145,14 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 		bool modified = ImGui::DragInt("##num", &numValue, 1,
 			std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max, "%d",
 			ImGuiSliderFlags_AlwaysClamp);
-
 		if (modified || numValue < std::get<NumberLimit>(type.Data).Min ||
 			numValue > std::get<NumberLimit>(type.Data).Max) {
 			numValue = std::clamp(numValue,
 				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
 			value = std::to_string(numValue);
 		}
-		DrawTooltip();
 		break;
 	}
-
 	case TypeCategory::StringLimit: {
 		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
 			int current = Utils::GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
@@ -194,15 +163,34 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 		}
 		else
 			ImGui::InputText("##str", &value);
-		DrawTooltip();
 		break;
 	}
-
 	case TypeCategory::List: {
 		DrawListInput(value, std::get<ListType>(type.Data));
 		break;
 	}
+	case TypeCategory::Bool: {
+		// 解析字符串为布尔值
+		bool boolValue = (value == "true");
+		if (ImGui::Checkbox("##bool", &boolValue))
+			value = boolValue ? "true" : "false"; // 更新字符串值
+		break;
+	}
+	case TypeCategory::Color: {
+		// 解析字符串为颜色值
+		ImVec4 color;
+		if (sscanf_s(value.c_str(), "%f,%f,%f", &color.x, &color.y, &color.z) != 3) {
+			color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // 默认白色
+		}
 
+		if (ImGui::ColorEdit3("##color", &color.x)) {
+			// 将颜色值保存回字符串
+			char buffer[64];
+			snprintf(buffer, sizeof(buffer), "%.3f,%.3f,%.3f", color.x, color.y, color.z);
+			value = buffer;
+		}
+		break;
+	}
 	default: {
 		ImGui::SetNextItemWidth(value.size() * 10.f);
 		ImGui::InputText("##value", &value);
