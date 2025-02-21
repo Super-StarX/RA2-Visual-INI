@@ -68,6 +68,10 @@ public:
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 
+	void FoldedKeyValues(size_t& i);
+
+	void UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder);
+
 	std::vector<KeyValue> KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;

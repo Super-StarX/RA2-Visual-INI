@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -49,13 +49,14 @@ public:
 	void NodeEditor();
 
 	void Menu();
+	void ToolTip();
 	void LayerMenu();
 	void NodeMenu();
 	void PinMenu();
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
-	void ShowNodeTypeTooltip(Node* node);
+
 	
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);

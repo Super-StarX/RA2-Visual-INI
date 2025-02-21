@@ -61,54 +61,11 @@ void SectionNode::Update() {
 
 		auto& kv = this->KeyValues[i];
 		if (!kv.IsFolded) {
-			// 展开状态下的渲染
-			auto alpha = kv.OutputPin->GetAlpha();
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-			ImGui::PushID(&kv);
-			builder->Output(kv.OutputPin->ID);
-
-			const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
-			if (isDisabled) {
-				ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
-			}
-			else {
-				ImGui::SetNextItemWidth(80);
-				ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
-
-				// 获取当前键的类型信息（假设已实现类型查找逻辑）
-				auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.Key);
-
-				// 根据类型绘制不同控件
-				ImGui::SetNextItemWidth(120);
-				DrawValueWidget(kv.Value, typeInfo);
-			}
-
-			ImGui::Spring(0);
-			kv.OutputPin->DrawPinIcon(kv.OutputPin->IsLinked(), (int)(alpha * 255));
-
-			builder->EndOutput();
-			ImGui::PopID();
-			ImGui::PopStyleVar();
+			UnFoldedKeyValues(kv, builder); // 展开状态下的渲染
 			i++;
 		}
-		else {
-			// 检测连续折叠的区域
-			size_t foldStart = i;
-			while (i < this->KeyValues.size() && this->KeyValues[i].IsFolded)
-				i++;
-
-			// 绘制合并的折叠线
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			ImVec2 buttonSize(230, 2.0f);
-			ImGui::PushID(static_cast<int>(foldStart)); // 确保唯一ID
-			if (ImGui::Button("", buttonSize)) {
-				// 展开所有连续折叠的项
-				for (size_t j = foldStart; j < i; j++)
-					this->KeyValues[j].IsFolded = false;
-			}
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-		}
+		else
+			FoldedKeyValues(i); // 检测连续折叠的区域
 	}
 	ImVec2 buttonSize(230, 2.0f);
 	if (ImGui::Button("", buttonSize)) {
@@ -116,6 +73,54 @@ void SectionNode::Update() {
 	}
 
 	builder->End();
+}
+
+void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder) {
+	auto alpha = kv.OutputPin->GetAlpha();
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+	ImGui::PushID(&kv);
+	builder->Output(kv.OutputPin->ID);
+
+	const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
+	if (isDisabled) {
+		ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
+	}
+	else {
+		ImGui::SetNextItemWidth(80);
+		ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
+
+		// 获取当前键的类型信息（假设已实现类型查找逻辑）
+		auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.Key);
+
+		// 根据类型绘制不同控件
+		ImGui::SetNextItemWidth(120);
+		DrawValueWidget(kv.Value, typeInfo);
+	}
+
+	ImGui::Spring(0);
+	kv.OutputPin->DrawPinIcon(kv.OutputPin->IsLinked(), (int)(alpha * 255));
+
+	builder->EndOutput();
+	ImGui::PopID();
+	ImGui::PopStyleVar();
+}
+
+void SectionNode::FoldedKeyValues(size_t& i) {
+	size_t foldStart = i;
+	while (i < this->KeyValues.size() && this->KeyValues[i].IsFolded)
+		i++;
+
+	// 绘制合并的折叠线
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+	ImVec2 buttonSize(230, 2.0f);
+	ImGui::PushID(static_cast<int>(foldStart)); // 确保唯一ID
+	if (ImGui::Button("", buttonSize)) {
+		// 展开所有连续折叠的项
+		for (size_t j = foldStart; j < i; j++)
+			this->KeyValues[j].IsFolded = false;
+	}
+	ImGui::PopID();
+	ImGui::PopStyleVar();
 }
 
 KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {

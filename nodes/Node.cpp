@@ -75,6 +75,46 @@ void Node::Menu() {
 	}
 }
 
+void Node::Tooltip() {
+	ImGui::BeginTooltip();
+
+	// 类型名称
+	ImGui::Text("Type:%s", TypeName.c_str());
+
+	// 类型详细信息
+	auto typeInfo = TypeSystem::Get().GetTypeInfo(TypeName);
+	switch (typeInfo.Category) {
+	case TypeCategory::NumberLimit:
+		ImGui::Separator();
+		ImGui::Text("Value Range:");
+		ImGui::BulletText("%d to %d",
+			std::get<NumberLimit>(typeInfo.Data).Min,
+			std::get<NumberLimit>(typeInfo.Data).Max);
+		break;
+
+	case TypeCategory::List:
+		ImGui::Separator();
+		ImGui::Text("List Properties:");
+		ImGui::BulletText("Element: %s", std::get<ListType>(typeInfo.Data).ElementType.c_str());
+		ImGui::BulletText("Length: %d-%d",
+			std::get<ListType>(typeInfo.Data).MinLength,
+			std::get<ListType>(typeInfo.Data).MaxLength);
+		break;
+
+	case TypeCategory::StringLimit:
+		if (!std::get<StringLimit>(typeInfo.Data).ValidValues.empty()) {
+			ImGui::Separator();
+			ImGui::Text("Valid Options:");
+			for (auto& val : std::get<StringLimit>(typeInfo.Data).ValidValues) {
+				ImGui::BulletText("%s", val.c_str());
+			}
+		}
+		break;
+	}
+
+	ImGui::EndTooltip();
+}
+
 void Node::HoverMenu(bool isHovered) {
 	// 显示类型提示
 	static float hoverTime = 0.0f;

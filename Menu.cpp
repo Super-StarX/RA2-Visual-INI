@@ -44,19 +44,7 @@ void MainWindow::Menu() {
 	else
 		createNewNode = false;
 
-	// 悬停节点提示处理
-	static Node* lastHoveredNode = nullptr;
-	if (auto hoveredNode = Node::Get(ed::GetHoveredNode())) {
-		if (hoveredNode != lastHoveredNode) {
-			hoveredNode->HoverTimer = 0.0f;
-			lastHoveredNode = hoveredNode;
-		}
-		hoveredNode->HoverTimer += ImGui::GetIO().DeltaTime;
-		if (hoveredNode->HoverTimer > 0.5f)
-			ShowNodeTypeTooltip(hoveredNode);
-	}
-	else
-		lastHoveredNode = nullptr;
+	ToolTip();
 	ImGui::PopStyleVar();
 	ed::Resume();
 }
@@ -370,42 +358,44 @@ void MainWindow::LinkMenu() {
 	ImGui::EndPopup();
 }
 
-void MainWindow::ShowNodeTypeTooltip(Node* node) {
-	ImGui::BeginTooltip();
+void MainWindow::ToolTip() {
+	// 悬停节点提示处理
+	static Node* lastHoveredNode = nullptr;
+	static Pin* lastHoveredPin = nullptr;
 
-	// 类型名称
-	ImGui::Text("Type:%s", node->TypeName.c_str());
-
-	// 类型详细信息
-	auto typeInfo = TypeSystem::Get().GetTypeInfo(node->TypeName);
-	switch (typeInfo.Category) {
-	case TypeCategory::NumberLimit:
-		ImGui::Separator();
-		ImGui::Text("Value Range:");
-		ImGui::BulletText("%d to %d",
-			std::get<NumberLimit>(typeInfo.Data).Min,
-			std::get<NumberLimit>(typeInfo.Data).Max);
-		break;
-
-	case TypeCategory::List:
-		ImGui::Separator();
-		ImGui::Text("List Properties:");
-		ImGui::BulletText("Element: %s", std::get<ListType>(typeInfo.Data).ElementType.c_str());
-		ImGui::BulletText("Length: %d-%d",
-			std::get<ListType>(typeInfo.Data).MinLength,
-			std::get<ListType>(typeInfo.Data).MaxLength);
-		break;
-
-	case TypeCategory::StringLimit:
-		if (!std::get<StringLimit>(typeInfo.Data).ValidValues.empty()) {
-			ImGui::Separator();
-			ImGui::Text("Valid Options:");
-			for (auto& val : std::get<StringLimit>(typeInfo.Data).ValidValues) {
-				ImGui::BulletText("%s", val.c_str());
+	// 判断是否悬浮在 Pin 上
+	if (auto hoveredPinId = ed::GetHoveredPin()) {
+		auto hoveredPin = Pin::Get(hoveredPinId);
+		if (hoveredPin && hoveredPin != lastHoveredPin) {
+			hoveredPin->HoverTimer = 0.0f;
+			lastHoveredPin = hoveredPin;
+			lastHoveredNode = nullptr;
+		}
+		if (hoveredPin) {
+			hoveredPin->HoverTimer += ImGui::GetIO().DeltaTime;
+			if (hoveredPin->HoverTimer > 0.5f) {
+				hoveredPin->Tooltip();
 			}
 		}
-		break;
 	}
-
-	ImGui::EndTooltip();
+	// 如果没有悬浮在 Pin 上，再判断是否悬浮在 Node 上
+	else if (auto hoveredNodeId = ed::GetHoveredNode()) {
+		auto hoveredNode = Node::Get(hoveredNodeId);
+		if (hoveredNode && hoveredNode != lastHoveredNode) {
+			hoveredNode->HoverTimer = 0.0f;
+			lastHoveredNode = hoveredNode;
+			lastHoveredPin = nullptr;
+		}
+		if (hoveredNode) {
+			hoveredNode->HoverTimer += ImGui::GetIO().DeltaTime;
+			if (hoveredNode->HoverTimer > 0.5f) {
+				hoveredNode->Tooltip();
+			}
+		}
+	}
+	// 如果既没有悬浮在 Pin 上，也没有悬浮在 Node 上
+	else {
+		lastHoveredNode = nullptr;
+		lastHoveredPin = nullptr;
+	}
 }

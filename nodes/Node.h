@@ -30,6 +30,7 @@ public:
 
 	virtual void Update() = 0;
 	virtual void Menu();
+	virtual void Tooltip();
 	virtual void HoverMenu(bool isHovered);
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;

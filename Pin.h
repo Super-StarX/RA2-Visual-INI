@@ -44,6 +44,7 @@ public:
 	float GetAlpha();
 	void DrawPinIcon(bool connected, int alpha, bool isReverse = false) const;
 	void Menu();
+	void Tooltip();
 
 	ed::PinId   ID;
 	::Node* Node;
@@ -51,4 +52,5 @@ public:
 	std::string Name;
 	std::string TypeIdentifier;
 	PinKind     Kind;
+	float HoverTimer = 0.0f;
 };
