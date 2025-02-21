@@ -106,19 +106,33 @@ void LeftPanelClass::DrawIcon(ImDrawList* drawList, ImTextureID* icon) {
 void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes) {
 	auto& io = ImGui::GetIO();
 
+	// 绘制标题栏
 	int saveIconWidth = Owner->GetTextureWidth(m_SaveIcon);
 	int saveIconHeight = Owner->GetTextureWidth(m_SaveIcon);
 	int restoreIconWidth = Owner->GetTextureWidth(m_RestoreIcon);
-	int restoreIconHeight = Owner->GetTextureWidth(m_RestoreIcon);
+	int restoreIconHeight = 9; // Owner->GetTextureWidth(m_RestoreIcon);
 
 	ImGui::GetWindowDrawList()->AddRectFilled(
 		ImGui::GetCursorScreenPos(),
 		ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
 		ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]), ImGui::GetTextLineHeight() * 0.25f);
 	ImGui::Spacing(); ImGui::SameLine();
-	ImGui::TextUnformatted("Nodes");
+	ImGui::TextUnformatted("Sections");
 	ImGui::Indent();
-	for (auto& node : Node::Array) {
+
+	// 搜索框逻辑
+	static char searchText[256] = ""; // 用于存储用户输入的搜索文本
+	ImGui::SetNextItemWidth(paneWidth - ImGui::GetStyle().FramePadding.x * 2);
+	ImGui::InputTextWithHint("##search", "Search sections...", searchText, IM_ARRAYSIZE(searchText));
+
+	// 筛选节点列表
+	std::vector<Node*> filteredNodes;
+	for (auto& node : Node::Array)
+		if (strstr(node->Name.c_str(), searchText) != nullptr || strlen(searchText) == 0)
+			filteredNodes.push_back(node.get()); // 如果节点名称包含搜索文本，或者搜索文本为空，则添加到筛选列表
+	
+	// 绘制筛选后的节点列表
+	for (auto& node : filteredNodes) {
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
 
@@ -130,9 +144,6 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		}
 
 		bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node->ID) != selectedNodes.end();
-# if IMGUI_VERSION_NUM >= 18967
-		ImGui::SetNextItemAllowOverlap();
-# endif
 		if (ImGui::Selectable((node->Name + "##" + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer()))).c_str(), &isSelected)) {
 			if (io.KeyCtrl) {
 				if (isSelected)
@@ -150,19 +161,14 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 
 		auto id = std::string("(") + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer())) + ")";
 		auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
-		auto iconPanelPos = start + ImVec2(
-			paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1,
-			(ImGui::GetTextLineHeight() - saveIconHeight) / 2);
-		auto textPos = ImVec2(iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y);
+		int iconPanelX = paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1;
+		auto iconPanelPos = start + ImVec2(iconPanelX, (ImGui::GetTextLineHeight() - saveIconHeight) / 2);
+		auto textPos = ImVec2(iconPanelX - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y);
 		ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
 
 		auto drawList = ImGui::GetWindowDrawList();
 		ImGui::SetCursorScreenPos(iconPanelPos);
-# if IMGUI_VERSION_NUM < 18967
 		ImGui::SetItemAllowOverlap();
-# else
-		ImGui::SetNextItemAllowOverlap();
-# endif
 		if (node->SavedState.empty()) {
 			if (ImGui::InvisibleButton("save", ImVec2((float)saveIconWidth, (float)saveIconHeight)))
 				node->SavedState = node->State;
@@ -175,11 +181,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		}
 
 		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-# if IMGUI_VERSION_NUM < 18967
 		ImGui::SetItemAllowOverlap();
-# else
-		ImGui::SetNextItemAllowOverlap();
-# endif
 		if (!node->SavedState.empty()) {
 			if (ImGui::InvisibleButton("restore", ImVec2((float)restoreIconWidth, (float)restoreIconHeight))) {
 				node->State = node->SavedState;
@@ -195,9 +197,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		}
 
 		ImGui::SameLine(0, 0);
-# if IMGUI_VERSION_NUM < 18967
 		ImGui::SetItemAllowOverlap();
-# endif
 		ImGui::Dummy(ImVec2(0, (float)restoreIconHeight));
 
 		ImGui::PopID();
@@ -206,7 +206,6 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 }
 
 void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<ed::NodeId>& selectedNodes, int linkCount, std::vector<ed::LinkId>& selectedLinks) {
-	static int changeCount = 0;
 
 	ImGui::GetWindowDrawList()->AddRectFilled(
 		ImGui::GetCursorScreenPos(),
@@ -215,12 +214,6 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::Spacing(); ImGui::SameLine();
 	ImGui::TextUnformatted("Selection");
 
-	ImGui::BeginHorizontal("Selection Stats", ImVec2(paneWidth, 0));
-	ImGui::Text("Changed %d time%s", changeCount, changeCount > 1 ? "s" : "");
-	ImGui::Spring();
-	if (ImGui::Button("Deselect All"))
-		ed::ClearSelection();
-	ImGui::EndHorizontal();
 	ImGui::Indent();
 	for (int i = 0; i < nodeCount; ++i) ImGui::Text("Node (%p)", selectedNodes[i].AsPointer());
 	for (int i = 0; i < linkCount; ++i) ImGui::Text("Link (%p)", selectedLinks[i].AsPointer());
@@ -229,9 +222,6 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
 		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
-
-	if (ed::HasSelectionChanged())
-		++changeCount;
 
 	ImGui::EndChild();
 }

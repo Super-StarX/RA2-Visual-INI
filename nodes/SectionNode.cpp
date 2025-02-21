@@ -1,4 +1,4 @@
-﻿#include "SectionNode.h"
+#include "SectionNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -67,7 +67,7 @@ void SectionNode::Update() {
 		else
 			FoldedKeyValues(i); // 检测连续折叠的区域
 	}
-	ImVec2 buttonSize(230, 2.0f);
+	ImVec2 buttonSize(230, 4.0f);
 	if (ImGui::Button("", buttonSize)) {
 		AddKeyValue("key", "value");
 	}
