@@ -94,17 +94,10 @@ void Pin::Menu() {
 
 	if (this->Node->Type == NodeType::Section) {
 		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
-		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-				   [this](const KeyValue& kv) { return kv.OutputPin.get() == this; });
 
-		if (ImGui::MenuItem("Add Key Value")) {
-			// 需要在中途加入，因此不能使用Add函数
-			auto kv = KeyValue{ "key", "value", std::make_unique<Pin>(MainWindow::GetNextId(), "key") };
-			kv.OutputPin->Node = sectionNode;
-			kv.OutputPin->Kind = PinKind::Output;
-
-			sectionNode->KeyValues.insert(it, kv);
-		}
+		auto it = sectionNode->FindPin(*this);
+		if (ImGui::MenuItem("Add Key Value"))
+			sectionNode->KeyValues.insert(it, KeyValue(sectionNode)); // 需要在中途加入，因此不能使用Add函数
 
 		if (ImGui::MenuItem("Delete"))
 			sectionNode->KeyValues.erase(it);
@@ -123,34 +116,30 @@ void Pin::Menu() {
 void Pin::Tooltip() {
 	if (!Node) return;
 	if (Node->Type == NodeType::Section) {
-		auto sectionNode = reinterpret_cast<SectionNode*>(Node);
-		auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-			[this](const KeyValue& kv) { return kv.OutputPin.get() == this; });
-		if (it != sectionNode->KeyValues.end()) {
-			ImGui::BeginTooltip();
+		auto pKv = reinterpret_cast<KeyValue*>(this);
+		ImGui::BeginTooltip();
 			
-			auto type = TypeSystem::Get().GetKeyType(sectionNode->TypeName, it->Key);
-			ImGui::Text("Type: %s", type.TypeName.c_str());
-			switch (type.Category) {
-			case TypeCategory::NumberLimit:
-				ImGui::Text("Range: [%d, %d]",
-					std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
-				break;
-			case TypeCategory::StringLimit:
-				if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-					ImGui::Text("Options: %s",
-						Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
-				}
-				break;
-			case TypeCategory::List:
-				ImGui::Text("Element: %s (%d-%d items)",
-					std::get<ListType>(type.Data).ElementType.c_str(),
-					std::get<ListType>(type.Data).MinLength,
-					std::get<ListType>(type.Data).MaxLength);
-				break;
+		auto type = TypeSystem::Get().GetKeyType(Node->TypeName, pKv->Key);
+		ImGui::Text("Type: %s", type.TypeName.c_str());
+		switch (type.Category) {
+		case TypeCategory::NumberLimit:
+			ImGui::Text("Range: [%d, %d]",
+				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
+			break;
+		case TypeCategory::StringLimit:
+			if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
+				ImGui::Text("Options: %s",
+					Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
 			}
-			ImGui::EndTooltip();
+			break;
+		case TypeCategory::List:
+			ImGui::Text("Element: %s (%d-%d items)",
+				std::get<ListType>(type.Data).ElementType.c_str(),
+				std::get<ListType>(type.Data).MinLength,
+				std::get<ListType>(type.Data).MaxLength);
+			break;
 		}
+		ImGui::EndTooltip();
 	}
 }
 

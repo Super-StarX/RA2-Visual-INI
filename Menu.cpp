@@ -15,11 +15,8 @@ void MainWindow::Menu() {
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
 		auto pin = Pin::Get(contextPinId);
 		if (pin && pin->Node->Type == NodeType::Section) {
-			auto sectionNode = reinterpret_cast<SectionNode*>(pin->Node);
-			auto it = std::find_if(sectionNode->KeyValues.begin(), sectionNode->KeyValues.end(),
-			   [pin](const KeyValue& kv) { return kv.OutputPin.get() == pin; });
-
-			if (it == sectionNode->KeyValues.end() || !it->IsFolded)
+			auto kv = reinterpret_cast<KeyValue*>(pin);
+			if (kv->IsFolded)
 				ImGui::OpenPopup("Pin Context Menu");
 		}
 	}
@@ -144,7 +141,7 @@ void MainWindow::NodeEditor() {
 
 			newLinkPin = startPin ? startPin : endPin;
 
-			if (startPin->Kind == PinKind::Input) {
+			if (startPin && startPin->Kind == PinKind::Input) {
 				std::swap(startPin, endPin);
 				std::swap(startPinId, endPinId);
 			}
@@ -260,9 +257,7 @@ void MainWindow::ShowSectionEditor() {
 						order.push_back(key); // Record the order of keys
 
 						// Check if key already exists in KeyValues
-						auto it = std::find_if(m_SectionEditorNode->KeyValues.begin(), m_SectionEditorNode->KeyValues.end(),
-							[&key](const KeyValue& kv) { return kv.Key == key; });
-
+						auto it = m_SectionEditorNode->FindPin(key);
 						if (it != m_SectionEditorNode->KeyValues.end()) {
 							// Key exists, just update the value
 							it->Value = value;
@@ -288,8 +283,7 @@ void MainWindow::ShowSectionEditor() {
 				// Now reorder KeyValues to match the order in the textBuffer
 				std::vector<KeyValue> orderedKeyValues;
 				for (const auto& key : order) {
-					auto it = std::find_if(m_SectionEditorNode->KeyValues.begin(), m_SectionEditorNode->KeyValues.end(),
-										   [&key](const KeyValue& kv) { return kv.Key == key; });
+					auto it = m_SectionEditorNode->FindPin(key);
 					if (it != m_SectionEditorNode->KeyValues.end()) {
 						orderedKeyValues.push_back(*it); // Add the element in the correct order
 					}

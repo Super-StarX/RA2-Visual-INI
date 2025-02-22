@@ -128,7 +128,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 			json kvJson;
 			kvJson["key"] = kv.Key;
 			kvJson["value"] = kv.Value;
-			kvJson["output_pin_id"] = kv.OutputPin->ID.Get();
+			kvJson["output_pin_id"] = kv.ID.Get();
 			keyValuesJson.push_back(kvJson);
 		}
 		nodeJson["key_values"] = keyValuesJson;
@@ -201,8 +201,8 @@ void MainWindow::ImportINI(const std::string& path) {
 				// 创建连线
 				if (map.contains(value)) {
 					auto targetNode = map[value];
-					if (targetNode->InputPin->CanCreateLink(kv.OutputPin.get())) {
-						CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
+					if (targetNode->InputPin->CanCreateLink(&kv)) {
+						CreateLink(&kv, targetNode->InputPin.get())->TypeIdentifier = kv.GetLinkType();
 					}
 				}
 			}
@@ -216,8 +216,8 @@ void MainWindow::ImportINI(const std::string& path) {
 			auto& kv = currentNode->KeyValues.back(); // 假设每个 key-value 对都已添加到 KeyValues 中
 			if (map.contains(value)) {
 				auto targetNode = map[value];
-				if (targetNode->InputPin->CanCreateLink(kv.OutputPin.get())) {
-					CreateLink(kv.OutputPin.get(), targetNode->InputPin.get())->TypeIdentifier = kv.OutputPin->GetLinkType();
+				if (targetNode->InputPin->CanCreateLink(&kv)) {
+					CreateLink(&kv, targetNode->InputPin.get())->TypeIdentifier = kv.GetLinkType();
 				}
 			}
 		}
@@ -269,7 +269,7 @@ void MainWindow::ExportINI(const std::string& path) {
 			if (kv.IsComment)
 				continue;
 
-			auto linkedNode = kv.OutputPin->GetLinkedSection();
+			auto linkedNode = kv.GetLinkedSection();
 			if (!linkedNode) {
 				output.emplace_back(kv.Key, kv.Value);
 				continue;

@@ -5,6 +5,13 @@
 #include <algorithm>
 
 std::unordered_map<std::string, SectionNode*> SectionNode::Map;
+
+KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
+	Pin(MainWindow::GetNextId(), key.c_str(), "flow", PinKind::Output),
+	Key(key) ,Value(value){
+	Node = node;
+}
+
 void SectionNode::Update() {
 	auto builder = GetBuilder();
 
@@ -27,14 +34,10 @@ void SectionNode::Update() {
 		for (const auto& [_, pLink] : InputPin->Links) {
 			auto pPin = Pin::Get(pLink->StartPinID);
 			auto pNode = pPin->Node;
-			if (pNode->Type != NodeType::Section)
-				continue;
-			auto pSNode = reinterpret_cast<SectionNode*>(pNode);
-			auto it = std::find_if(pSNode->KeyValues.begin(), pSNode->KeyValues.end(),
-				[pPin](const KeyValue& kv) { return kv.OutputPin.get() == pPin; });
-
-			if (it != pSNode->KeyValues.end())
-				it->Value = this->Name;
+			if (pNode->Type == NodeType::Section) {
+				auto kv = reinterpret_cast<KeyValue*>(pPin);
+				kv->Value = this->Name;
+			}
 		}
 	}
 	ImGui::PopID();
@@ -75,11 +78,31 @@ void SectionNode::Update() {
 	builder->End();
 }
 
+std::vector<KeyValue>::iterator SectionNode::FindPin(const Pin& key) {
+	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const KeyValue& kv) { return kv.ID == key.ID; });
+}
+
+std::vector<KeyValue>::iterator SectionNode::FindPin(const std::string& key) {
+	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const KeyValue& kv) { return kv.Key == key; });
+}
+
+KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
+	if (!pinid)
+		pinid = MainWindow::GetNextId();
+
+	auto& kv = KeyValues.emplace_back(this, key, value);
+	kv.IsInherited = isInherited;
+	kv.IsComment = isComment;
+	kv.IsFolded = isFolded;
+
+	return kv;
+}
+
 void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder) {
-	auto alpha = kv.OutputPin->GetAlpha();
+	auto alpha = kv.GetAlpha();
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 	ImGui::PushID(&kv);
-	builder->Output(kv.OutputPin->ID);
+	builder->Output(kv.ID);
 
 	const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 	if (isDisabled) {
@@ -98,7 +121,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 	}
 
 	ImGui::Spring(0);
-	kv.OutputPin->DrawPinIcon(kv.OutputPin->IsLinked(), (int)(alpha * 255));
+	kv.DrawPinIcon(kv.IsLinked(), (int)(alpha * 255));
 
 	builder->EndOutput();
 	ImGui::PopID();
@@ -121,17 +144,6 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 	}
 	ImGui::PopID();
 	ImGui::PopStyleVar();
-}
-
-KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
-	if (!pinid)
-		pinid = MainWindow::GetNextId();
-
-	auto& kv = KeyValues.emplace_back(KeyValue{ key, value, std::make_unique<Pin>(pinid, key.c_str()), isInherited, isComment, isFolded });
-	kv.OutputPin->Node = this;
-	kv.OutputPin->Kind = PinKind::Output;
-
-	return kv;
 }
 
 void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {

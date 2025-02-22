@@ -45,15 +45,13 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 
 	// 填充键值对
 	for (const auto& kv : keyValues) {
-		auto& keyvalue = newNode->AddKeyValue(kv.Key, kv.Value, GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
+		auto& newkv = newNode->AddKeyValue(kv.Key, kv.Value, GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
 
 		// 如果场内有对应的section就连上Link
 		if (SectionNode::Map.contains(kv.Value)) {
 			auto targetNode = SectionNode::Map[kv.Value];
-			auto outpin = keyvalue.OutputPin.get();
-			if (targetNode->InputPin->CanCreateLink(outpin)) {
-				CreateLink(outpin, targetNode->InputPin.get())->TypeIdentifier = outpin->GetLinkType();
-			}
+			if (targetNode->InputPin->CanCreateLink(&newkv))
+				CreateLink(&newkv, targetNode->InputPin.get())->TypeIdentifier = newkv.GetLinkType();
 		}
 	}
 

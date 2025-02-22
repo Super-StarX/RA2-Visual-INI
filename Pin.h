@@ -28,7 +28,7 @@ class Link;
 class Pin {
 public:
 	constexpr static float IconSize = 24.f;
-	static std::map<ed::PinId, Pin*, ComparePinId> Array; // 快速找pin用
+	static std::map<ed::PinId, Pin*, ComparePinId> Array;
 
 	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
 	~Pin();

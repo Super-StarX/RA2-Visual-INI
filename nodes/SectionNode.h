@@ -3,62 +3,18 @@
 #include "BaseNode.h"
 #include "TypeLoader.h"
 #include <memory>
+#include <string>
 
-struct KeyValue {
+class SectionNode;
+class KeyValue : public Pin {
+public:
+	KeyValue(SectionNode* node, std::string key = "key", std::string value = "value");
+
 	std::string Key;
 	std::string Value;
-	std::unique_ptr<Pin> OutputPin;
 	bool IsInherited = false;
 	bool IsComment = false;
 	bool IsFolded = false;
-
-	KeyValue(const std::string& key, const std::string& value, std::unique_ptr<Pin>&& outputPin, bool isInherited = false, bool isComment = false, bool isFolded = false)
-		: Key(key),
-		Value(value),
-		OutputPin(std::move(outputPin)),
-		IsInherited(isInherited),
-		IsComment(isComment),
-		IsFolded(isFolded) {}
-
-	KeyValue(KeyValue&& other) noexcept
-		: Key(std::move(other.Key)),
-		Value(std::move(other.Value)),
-		OutputPin(std::move(other.OutputPin)),
-		IsInherited(other.IsInherited),
-		IsComment(other.IsComment),
-		IsFolded(other.IsFolded) {}
-
-	KeyValue(const KeyValue& other)
-		: Key(other.Key),
-		Value(other.Value),
-		OutputPin(other.OutputPin ? std::make_unique<Pin>(*other.OutputPin) : nullptr),
-		IsInherited(other.IsInherited),
-		IsComment(other.IsComment),
-		IsFolded(other.IsFolded) {}
-
-	KeyValue& operator=(KeyValue&& other) noexcept {
-		if (this != &other) {
-			Key = std::move(other.Key);
-			Value = std::move(other.Value);
-			OutputPin = std::move(other.OutputPin);
-			IsInherited = other.IsInherited;
-			IsComment = other.IsComment;
-			IsFolded = other.IsFolded;
-		}
-		return *this;
-	}
-
-	KeyValue& operator=(const KeyValue& other) {
-		if (this != &other) {
-			Key = other.Key;
-			Value = other.Value;
-			OutputPin = other.OutputPin ? std::make_unique<Pin>(*other.OutputPin) : nullptr;
-			IsInherited = other.IsInherited;
-			IsComment = other.IsComment;
-			IsFolded = other.IsFolded;
-		}
-		return *this;
-	}
 };
 
 class SectionNode : public BaseNode {
@@ -68,15 +24,15 @@ public:
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 
+	std::vector<KeyValue>::iterator FindPin(const Pin& key);
+	std::vector<KeyValue>::iterator FindPin(const std::string& key);
+	KeyValue& AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 	void FoldedKeyValues(size_t& i);
-
 	void UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder);
 
 	std::vector<KeyValue> KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
-
-	KeyValue& AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 
 private:
 	TypeInfo GetKeyTypeInfo(const std::string& sectionType, const std::string& key) const {
