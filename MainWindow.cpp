@@ -48,6 +48,7 @@ void MainWindow::UpdateTouch() {
 }
 
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
+	startPin->Links.clear();
 	auto& link = Link::Array.emplace_back(
 		std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
 	startPin->Links[link->ID] = link.get();
