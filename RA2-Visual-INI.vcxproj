@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Action.cpp" />
     <ClCompile Include="AutoLayout.cpp" />
     <ClCompile Include="nodes\CommentNode.cpp" />
     <ClCompile Include="LinkType.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Action.h" />
     <ClInclude Include="nodes\CommentNode.h" />
     <ClInclude Include="LinkType.h" />
     <ClInclude Include="nodes\BaseNode.h" />

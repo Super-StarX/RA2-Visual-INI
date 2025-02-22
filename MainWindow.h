@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <map>
 
+#include "Action.h"
 #include "nodes/Node.h"
 #include "LeftPanelClass.h"
 #include "TemplateManager.h"
@@ -57,6 +58,9 @@ public:
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
 
+	void Copy();
+	void Paste();
+	void Duplicate();
 	
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
@@ -67,6 +71,7 @@ public:
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
 
+	ClipboardData clipboard;
 	LeftPanelClass m_LeftPanel;
 	TemplateManager m_TemplateManager;
 	const float							m_TouchTime = 1.0f;
