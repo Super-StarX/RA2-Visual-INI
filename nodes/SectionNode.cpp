@@ -1,4 +1,4 @@
-#include "SectionNode.h"
+﻿#include "SectionNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -63,8 +63,8 @@ void SectionNode::Update() {
 			break;
 
 		auto& kv = this->KeyValues[i];
-		if (!kv.IsFolded) {
-			UnFoldedKeyValues(kv, builder); // 展开状态下的渲染
+		if (!kv->IsFolded) {
+			UnFoldedKeyValues(*kv, builder); // 展开状态下的渲染
 			i++;
 		}
 		else
@@ -78,24 +78,24 @@ void SectionNode::Update() {
 	builder->End();
 }
 
-std::vector<KeyValue>::iterator SectionNode::FindPin(const Pin& key) {
-	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const KeyValue& kv) { return kv.ID == key.ID; });
+std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {
+	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const std::unique_ptr<KeyValue>& kv) { return kv->ID == key.ID; });
 }
 
-std::vector<KeyValue>::iterator SectionNode::FindPin(const std::string& key) {
-	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const KeyValue& kv) { return kv.Key == key; });
+std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const std::string& key) {
+	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const std::unique_ptr<KeyValue>& kv) { return kv->Key == key; });
 }
 
-KeyValue& SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
+KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
 	if (!pinid)
 		pinid = MainWindow::GetNextId();
 
-	auto& kv = KeyValues.emplace_back(this, key, value);
-	kv.IsInherited = isInherited;
-	kv.IsComment = isComment;
-	kv.IsFolded = isFolded;
+	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value));
+	kv->IsInherited = isInherited;
+	kv->IsComment = isComment;
+	kv->IsFolded = isFolded;
 
-	return kv;
+	return kv.get();
 }
 
 void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder) {
@@ -130,7 +130,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 
 void SectionNode::FoldedKeyValues(size_t& i) {
 	size_t foldStart = i;
-	while (i < this->KeyValues.size() && this->KeyValues[i].IsFolded)
+	while (i < this->KeyValues.size() && this->KeyValues[i]->IsFolded)
 		i++;
 
 	// 绘制合并的折叠线
@@ -140,7 +140,7 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 	if (ImGui::Button("", buttonSize)) {
 		// 展开所有连续折叠的项
 		for (size_t j = foldStart; j < i; j++)
-			this->KeyValues[j].IsFolded = false;
+			this->KeyValues[j]->IsFolded = false;
 	}
 	ImGui::PopID();
 	ImGui::PopStyleVar();

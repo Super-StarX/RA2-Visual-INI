@@ -222,14 +222,12 @@ void MainWindow::ShowSectionEditor() {
 	static std::string titleBuffer; // 临时缓冲区
 
 	// 将编辑器内容加载到缓冲区
-	if (titleBuffer.empty()) {
+	if (titleBuffer.empty())
 		titleBuffer = m_SectionEditorNode->Name;
-	}
 
-	if (textBuffer.empty()) {
+	if (textBuffer.empty())
 		for (auto& output : m_SectionEditorNode->KeyValues)
-			textBuffer += output.Key + "=" + output.Value + "\n";
-	}
+			textBuffer += output->Key + "=" + output->Value + "\n";
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Section Editor", &m_ShowSectionEditor, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -258,35 +256,30 @@ void MainWindow::ShowSectionEditor() {
 
 						// Check if key already exists in KeyValues
 						auto it = m_SectionEditorNode->FindPin(key);
-						if (it != m_SectionEditorNode->KeyValues.end()) {
+						if (it != m_SectionEditorNode->KeyValues.end())
 							// Key exists, just update the value
-							it->Value = value;
-						}
-						else {
+							(*it)->Value = value;
+						else
 							// Key doesn't exist, add new entry
 							m_SectionEditorNode->AddKeyValue(key, value);
-						}
 					}
 				}
 
 				// Second, remove any keys that are not present in textBuffer
 				auto it = m_SectionEditorNode->KeyValues.begin();
 				while (it != m_SectionEditorNode->KeyValues.end()) {
-					if (seenKeys.find(it->Key) == seenKeys.end()) {
+					if (seenKeys.find(it->get()->Key) == seenKeys.end())
 						it = m_SectionEditorNode->KeyValues.erase(it); // Remove key if not found in textBuffer
-					}
-					else {
+					else
 						++it;
-					}
 				}
 
 				// Now reorder KeyValues to match the order in the textBuffer
-				std::vector<KeyValue> orderedKeyValues;
+				std::vector<std::unique_ptr<KeyValue>> orderedKeyValues;
 				for (const auto& key : order) {
 					auto it = m_SectionEditorNode->FindPin(key);
-					if (it != m_SectionEditorNode->KeyValues.end()) {
-						orderedKeyValues.push_back(*it); // Add the element in the correct order
-					}
+					if (it != m_SectionEditorNode->KeyValues.end())
+						orderedKeyValues.push_back(std::make_unique<KeyValue>(*it->get())); // Add the element in the correct order
 				}
 
 				// Update KeyValues to match the order

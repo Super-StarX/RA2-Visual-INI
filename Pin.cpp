@@ -94,22 +94,23 @@ void Pin::Menu() {
 
 	if (this->Node->Type == NodeType::Section) {
 		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
+		auto kv = reinterpret_cast<KeyValue*>(this);
 
 		auto it = sectionNode->FindPin(*this);
 		if (ImGui::MenuItem("Add Key Value"))
-			sectionNode->KeyValues.insert(it, KeyValue(sectionNode)); // 需要在中途加入，因此不能使用Add函数
+			sectionNode->KeyValues.insert(it, std::make_unique<KeyValue>(sectionNode)); // 需要在中途加入，因此不能使用Add函数
 
 		if (ImGui::MenuItem("Delete"))
 			sectionNode->KeyValues.erase(it);
 
 		if (ImGui::MenuItem("Fold"))
-			it->IsFolded = true;
+			kv->IsFolded = true;
 
-		if (ImGui::MenuItem(it->IsComment ? "Uncomment" : "Set Comment"))
-			it->IsComment = !it->IsComment;
+		if (ImGui::MenuItem(kv->IsComment ? "Uncomment" : "Set Comment"))
+			kv->IsComment = !kv->IsComment;
 
-		if (ImGui::MenuItem(it->IsInherited ? "Cancel Inherited" : "Set Inherited"))
-			it->IsInherited = !it->IsInherited;
+		if (ImGui::MenuItem(kv->IsInherited ? "Cancel Inherited" : "Set Inherited"))
+			kv->IsInherited = !kv->IsInherited;
 	}
 }
 

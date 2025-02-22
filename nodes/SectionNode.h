@@ -20,17 +20,18 @@ public:
 class SectionNode : public BaseNode {
 public:
 	static std::unordered_map<std::string, SectionNode*> Map;
+	using vector_kv = std::vector<std::unique_ptr<KeyValue>>;
 
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 
-	std::vector<KeyValue>::iterator FindPin(const Pin& key);
-	std::vector<KeyValue>::iterator FindPin(const std::string& key);
-	KeyValue& AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
+	vector_kv::iterator FindPin(const Pin& key);
+	vector_kv::iterator FindPin(const std::string& key);
+	KeyValue* AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 	void FoldedKeyValues(size_t& i);
 	void UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder);
 
-	std::vector<KeyValue> KeyValues;
+	vector_kv KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
 

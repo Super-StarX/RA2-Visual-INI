@@ -96,7 +96,7 @@ void MainWindow::OnStart() {
 	node1->AddKeyValue("key", "Section B");
 	auto node2 = SpawnSectionNode("Section B");
 	node2->AddKeyValue("key", "Value");
-	CreateLink(&node1->KeyValues.back(), node2->InputPin.get());
+	CreateLink(node1->KeyValues.back().get(), node2->InputPin.get());
 
 	ed::NavigateToContent();
 
