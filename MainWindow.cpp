@@ -47,24 +47,6 @@ void MainWindow::UpdateTouch() {
 	}
 }
 
-Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
-	if (!startPin || !endPin)
-		return nullptr;
-
-	// 删除所有起始点的链接
-	Link::Array.erase(std::remove_if(Link::Array.begin(), Link::Array.end(), 
-		[startPin](auto& link) { return link->StartPinID == startPin->ID; }), Link::Array.end());
-	startPin->Links.clear();
-
-	// 生成新的链接
-	auto& link = Link::Array.emplace_back(std::make_unique<Link>(MainWindow::GetNextId(), startPin->ID, endPin->ID));
-	if (endPin->Node)
-		startPin->SetValue(endPin->Node->Name);
-	startPin->Links[link->ID] = link.get();
-	endPin->Links[link->ID] = link.get();
-	return link.get();
-}
-
 void MainWindow::OnStart() {
 	ed::Config config;
 
@@ -105,7 +87,8 @@ void MainWindow::OnStart() {
 	node1->AddKeyValue("key", "Section B");
 	auto node2 = SpawnSectionNode("Section B");
 	node2->AddKeyValue("key", "Value");
-	CreateLink(node1->KeyValues.back().get(), node2->InputPin.get());
+	auto back = node1->KeyValues.back().get();
+	back->LinkTo(node2->InputPin.get());
 
 	ed::NavigateToContent();
 

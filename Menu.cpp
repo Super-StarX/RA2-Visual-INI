@@ -84,7 +84,7 @@ void MainWindow::LayerMenu() {
 				if (startPin->Kind == PinKind::Input)
 					std::swap(startPin, pin);
 				if (startPin->CanCreateLink(pin))
-					CreateLink(startPin, pin)->TypeIdentifier = startPin->GetLinkType();
+					startPin->LinkTo(pin)->TypeIdentifier = startPin->GetLinkType();
 			}
 			else {
 				auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
@@ -93,7 +93,7 @@ void MainWindow::LayerMenu() {
 						auto endPin = &pin;
 						if (startPin->Kind == PinKind::Input)
 							std::swap(startPin, endPin);
-						CreateLink(startPin, endPin)->TypeIdentifier = startPin->GetLinkType();
+						startPin->LinkTo(endPin)->TypeIdentifier = startPin->GetLinkType();
 						break;
 					}
 				}
@@ -164,9 +164,8 @@ void MainWindow::NodeEditor() {
 				}
 				else {
 					Utils::DrawTextOnCursor("+ Create Link", ImColor(32, 45, 32, 180));
-					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f)) {
-						CreateLink(startPin, endPin)->TypeIdentifier = startPin->GetLinkType();
-					}
+					if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
+						startPin->LinkTo(endPin)->TypeIdentifier = startPin->GetLinkType();
 				}
 			}
 		}

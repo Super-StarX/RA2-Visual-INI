@@ -99,11 +99,9 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	for (const auto& linkJson : j["links"]) {
 		int startPinId = linkJson["start_pin_id"].get<int>();
 		int endPinId = linkJson["end_pin_id"].get<int>();
-
-		auto startPin = Pin::Get(startPinId);
-		auto endPin = Pin::Get(endPinId);
-		if (startPin && endPin)
-			CreateLink(startPin, endPin);
+		
+		if (auto startPin = Pin::Get(startPinId))
+			startPin->LinkTo(Pin::Get(endPinId));
 	}
 }
 
@@ -199,7 +197,8 @@ void MainWindow::ImportINI(const std::string& path) {
 				if (map.contains(value)) {
 					auto targetNode = map[value];
 					if (targetNode->InputPin->CanCreateLink(kv)) {
-						CreateLink(kv, targetNode->InputPin.get())->TypeIdentifier = kv->GetLinkType();
+						auto link = kv->LinkTo(targetNode->InputPin.get());
+						link->TypeIdentifier = kv->GetLinkType();
 					}
 				}
 			}
@@ -213,8 +212,10 @@ void MainWindow::ImportINI(const std::string& path) {
 			if (map.contains(value)) {
 				auto targetNode = map[value];
 				auto kv = currentNode->KeyValues.back().get(); // 假设每个 key-value 对都已添加到 KeyValues 中
-				if (targetNode->InputPin->CanCreateLink(kv))
-					CreateLink(kv, targetNode->InputPin.get())->TypeIdentifier = kv->GetLinkType();
+				if (targetNode->InputPin->CanCreateLink(kv)){
+					auto link = kv->LinkTo(targetNode->InputPin.get());
+					link->TypeIdentifier = kv->GetLinkType();
+				}
 			}
 		}
 	}

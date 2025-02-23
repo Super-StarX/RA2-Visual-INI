@@ -18,6 +18,7 @@ enum class NodeType {
 	Comment,
 };
 
+class KeyValue;
 class MainWindow;
 class Node {
 public:
@@ -33,6 +34,7 @@ public:
 	virtual void Tooltip();
 	virtual void HoverMenu(bool isHovered);
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
+	virtual KeyValue* ConvertToKeyValue(Pin* pin) { return nullptr; };
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();

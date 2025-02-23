@@ -36,10 +36,11 @@ public:
 	static Pin* Get(ed::PinId id);
 
 	void UpdateLink(std::string value);
-	virtual void SetValue(std::string str) {};
+	virtual void SetValue(std::string str) { Name = str; }
 
 	bool CanCreateLink(Pin* b);
 	bool IsLinked() const;
+	Link* LinkTo(Pin* pin);
 	Node* GetLinkedNode() const;
 	SectionNode* GetLinkedSection() const;
 	ImColor GetIconColor() const;

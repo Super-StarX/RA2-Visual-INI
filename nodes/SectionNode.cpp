@@ -15,8 +15,8 @@ KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
 void SectionNode::Update() {
 	auto builder = GetBuilder();
 
-	builder->Begin(this->ID);
-	builder->Header(this->Color);
+	builder->Begin(ID);
+	builder->Header(Color);
 	ImGui::Spring(0);
 
 	{
@@ -30,13 +30,13 @@ void SectionNode::Update() {
 
 	ImGui::PushID(this);
 	ImGui::SetNextItemWidth(150);
-	if (ImGui::InputText("##SectionName", &this->Name)) {
+	if (ImGui::InputText("##SectionName", &Name)) {
 		for (const auto& [_, pLink] : InputPin->Links) {
 			auto pPin = Pin::Get(pLink->StartPinID);
 			auto pNode = pPin->Node;
 			if (pNode->Type == NodeType::Section) {
-				auto kv = reinterpret_cast<KeyValue*>(pPin);
-				kv->Value = this->Name;
+				if (auto kv = reinterpret_cast<KeyValue*>(pPin))
+					kv->SetValue(Name)
 			}
 		}
 	}
@@ -79,10 +79,13 @@ void SectionNode::Update() {
 }
 
 Pin* SectionNode::GetFirstCompatiblePin(Pin* pin) {
-	if (pin->Kind == PinKind::Input)
-		return OutputPin.get();
-	else
-		return InputPin.get();
+	return pin->Kind == PinKind::Input ? OutputPin.get() : InputPin.get();
+}
+
+KeyValue* SectionNode::ConvertToKeyValue(Pin* pin) {
+	if (pin == InputPin.get() || pin == OutputPin.get())
+		return nullptr;
+	return reinterpret_cast<KeyValue*>(pin);
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {

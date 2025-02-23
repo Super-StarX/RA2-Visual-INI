@@ -43,7 +43,7 @@ void Pin::UpdateLink(std::string value) {
 	}
 	for (auto& pNode : Node::Array)
 		if (pNode->Name == value)
-			MainWindow::CreateLink(this, pNode->GetFirstCompatiblePin(this));
+			this->LinkTo(pNode->GetFirstCompatiblePin(this));
 }
 
 bool Pin::CanCreateLink(Pin* b) {
@@ -52,6 +52,24 @@ bool Pin::CanCreateLink(Pin* b) {
 
 bool Pin::IsLinked() const {
 	return !Links.empty();
+}
+
+Link* Pin::LinkTo(Pin* pin) {
+	if (!pin)
+		return nullptr;
+
+	// 删除所有起始点的链接
+	Link::Array.erase(std::remove_if(Link::Array.begin(), Link::Array.end(),
+		[this](auto& link) { return link->StartPinID == this->ID; }), Link::Array.end());
+	this->Links.clear();
+
+	// 生成新的链接
+	auto& link = Link::Array.emplace_back(std::make_unique<Link>(MainWindow::GetNextId(), this->ID, pin->ID));
+	if (pin->Node)
+		this->SetValue(pin->Node->Name);
+	this->Links[link->ID] = link.get();
+	pin->Links[link->ID] = link.get();
+	return link.get();
 }
 
 Node* Pin::GetLinkedNode() const {
