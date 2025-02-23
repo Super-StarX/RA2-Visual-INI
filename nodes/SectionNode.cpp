@@ -8,7 +8,7 @@ std::unordered_map<std::string, SectionNode*> SectionNode::Map;
 
 KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
 	Pin(MainWindow::GetNextId(), key.c_str(), "flow", PinKind::Output),
-	Key(key), Value(value){
+	Key(key), Value(value) {
 	Node = node;
 }
 
@@ -97,10 +97,16 @@ void SectionNode::Update() {
 		else
 			FoldedKeyValues(i); // 检测连续折叠的区域
 	}
+
+	ImGui::PushID(this);
+	ImGui::Spring(1);
+	ImGui::Dummy(ImVec2(0, 1));
+	ImGui::Spring(0);
 	ImVec2 buttonSize(230, 4.0f);
-	if (ImGui::Button("", buttonSize)) {
+	if (ImGui::Button("##AddKeyValue", buttonSize)) {
 		AddKeyValue("key", "value");
 	}
+	ImGui::PopID();
 
 	builder->End();
 }
@@ -147,8 +153,9 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 		auto typeInfo = GetKeyTypeInfo(this->TypeName, kv.Key);
 
 		// 根据类型绘制不同控件
-		ImGui::SetNextItemWidth(120);
+		ImGui::PushItemWidth(120);
 		DrawValueWidget(kv, typeInfo);
+		ImGui::PopItemWidth();
 	}
 
 	ImGui::Spring(0);
@@ -179,9 +186,9 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 
 void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 	std::string& value = kv.Value;
-	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
-	ImGui::PushItemWidth(itemWidth);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
+	//const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
+	//ImGui::PushItemWidth(itemWidth);
+	//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
 
 	switch (type.Category) {
 	case TypeCategory::NumberLimit: {
@@ -223,14 +230,59 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 	case TypeCategory::Color: {
 		// 解析字符串为颜色值
 		ImVec4 color;
-		if (sscanf_s(value.c_str(), "%f,%f,%f", &color.x, &color.y, &color.z) != 3) {
+		int iR, iG, iB;
+		if (sscanf_s(value.c_str(), "%d,%d,%d", &iR, &iG, &iB) == 3) {
+			color = ImVec4(iR / 255.f, iG / 255.f, iB / 255.f, 1.0f);
+		}
+		else {
+			iR = iG = iB = 255;
 			color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // 默认白色
 		}
 
-		if (ImGui::ColorEdit3("##color", &color.x)) {
-			// 将颜色值保存回字符串
-			char buffer[64];
-			snprintf(buffer, sizeof(buffer), "%.3f,%.3f,%.3f", color.x, color.y, color.z);
+		std::string R = std::to_string(iR);
+		std::string G = std::to_string(iG);
+		std::string B = std::to_string(iB);
+
+		bool valueChanged = false;
+		ImGui::PushItemWidth(40);
+		if (ImGui::InputText("##ColorR", &R))
+			valueChanged = true;
+		if (ImGui::InputText("##ColorG", &G))
+			valueChanged = true;
+		if (ImGui::InputText("##ColorB", &B))
+			valueChanged = true;
+
+		ImGui::PopItemWidth();
+
+		if (ImGui::ColorButton("##ColorButton", color, ImGuiColorEditFlags_NoAlpha)) {
+			//ImGui::OpenPopup("KVColorPicker");
+		}
+		/*
+		if (ImGui::BeginPopup("KVColorPicker")) {
+			if (ImGui::ColorPicker3("##picker", &color.x))
+				;
+
+			ImGui::EndPopup();
+		}
+		*/
+
+		if (valueChanged) {	// 将颜色值保存回字符串
+			char buffer[32];
+			auto convert = [&](const std::string& s) {
+				try {
+					int i = std::stoi(s);
+					return std::clamp(i, 0, 255);
+				}
+				catch (std::exception&) {
+					return 255;
+				}
+			};
+
+			iR = convert(R);
+			iG = convert(G);
+			iB = convert(B);
+
+			snprintf(buffer, sizeof(buffer), "%d,%d,%d", iR, iG, iB);
 			value = buffer;
 		}
 		break;
@@ -243,12 +295,12 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 	}
 	}
 
-	ImGui::PopStyleVar();
-	ImGui::PopItemWidth();
+	//ImGui::PopStyleVar();
+	//ImGui::PopItemWidth();
 }
 
 // 列表控件绘制
-void SectionNode::DrawListInput(std::string & listValue, const ListType & listType) {
+void SectionNode::DrawListInput(std::string& listValue, const ListType& listType) {
 	std::vector<std::string> elements = Utils::SplitString(listValue, ',');
 
 	// 自动调整元素数量

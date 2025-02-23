@@ -29,11 +29,10 @@ class Pin {
 public:
 	constexpr static float IconSize = 24.f;
 	static std::map<ed::PinId, Pin*, ComparePinId> Array;
+	static Pin* Get(ed::PinId id);
 
 	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
-	~Pin();
-
-	static Pin* Get(ed::PinId id);
+	virtual ~Pin();
 
 	virtual void SetValue(std::string str) { Name = str; }
 	virtual void Tooltip();
