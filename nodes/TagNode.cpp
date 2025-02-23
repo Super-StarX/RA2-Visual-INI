@@ -80,8 +80,8 @@ void TagNode::Update() {
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
 	for (auto& node : Node::Array)
-		if (IsInput && node->Type == NodeType::Tag)
-			if (auto tagNode = reinterpret_cast<TagNode*>(node.get()))
+		if (IsInput)
+			if (auto tagNode = dynamic_cast<TagNode*>(node.get()))
 				if (tagNode->IsInput && tagNode->Name == Name)
 					if (++count > 1)
 						return true;

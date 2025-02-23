@@ -35,9 +35,10 @@ public:
 
 	static Pin* Get(ed::PinId id);
 
-	void UpdateLink(std::string value);
 	virtual void SetValue(std::string str) { Name = str; }
+	virtual void Tooltip();
 
+	void UpdateOutputLink(std::string value);
 	bool CanCreateLink(Pin* b);
 	bool IsLinked() const;
 	Link* LinkTo(Pin* pin);
@@ -48,7 +49,6 @@ public:
 	float GetAlpha();
 	void DrawPinIcon(bool connected, int alpha, bool isReverse = false) const;
 	void Menu();
-	void Tooltip();
 
 	ed::PinId   ID;
 	::Node* Node;

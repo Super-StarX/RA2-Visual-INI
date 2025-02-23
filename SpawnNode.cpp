@@ -20,8 +20,7 @@ void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 		output.Kind = PinKind::Output;
 	}
 
-	if (node->Type == NodeType::Section) {
-		auto sectionNode = reinterpret_cast<SectionNode*>(node.get());
+	if (auto sectionNode = dynamic_cast<SectionNode*>(node.get())) {
 		sectionNode->InputPin->Node = sectionNode;
 		sectionNode->InputPin->Kind = PinKind::Input;
 		sectionNode->OutputPin->Node = sectionNode;
@@ -64,11 +63,10 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 
 SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 	Node::Array.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
-	auto node = Node::Array.back().get();
+	auto node = reinterpret_cast<SectionNode*>(Node::Array.back().get());
 	node->Type = NodeType::Section;
-	SectionNode::Map[section] = reinterpret_cast<SectionNode*>(node);
-	SectionNode::Map[section]->InputPin = std::make_unique<Pin>(GetNextId(), "input");
-	SectionNode::Map[section]->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
+	node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
+	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
 	return reinterpret_cast<SectionNode*>(node);
 }
 

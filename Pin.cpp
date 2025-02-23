@@ -24,7 +24,14 @@ Pin* Pin::Get(ed::PinId id) {
 	return Array.count(id) ? Array.at(id) : nullptr;
 }
 
-void Pin::UpdateLink(std::string value) {
+void Pin::Tooltip() {
+	ImGui::Text("Pin %d", ID);
+	ImGui::Text("Type: %s", TypeIdentifier.c_str());
+	ImGui::Text("Node: %s", Node ? Node->Name.c_str() : "None");
+	ImGui::Text("Links: %d", Links.size());
+}
+
+void Pin::UpdateOutputLink(std::string value) {
 	// 值变化后,判断自己连着的node的名字是否还是自己的值
 	// 如果不是的话,就断开当前链接,并遍历node::array寻找是否有新的node可以链接
 	if (!Node || Kind != PinKind::Output)
@@ -85,8 +92,7 @@ Node* Pin::GetLinkedNode() const {
 
 SectionNode* Pin::GetLinkedSection() const {
 	if (auto pNode = GetLinkedNode())
-		if (pNode->Type == NodeType::Section)
-			return reinterpret_cast<SectionNode*>(pNode);
+		return dynamic_cast<SectionNode*>(pNode);
 
 	return nullptr;
 }
@@ -132,8 +138,7 @@ void Pin::Menu() {
 		ImGui::EndMenu();
 	}
 
-	if (this->Node->Type == NodeType::Section) {
-		auto sectionNode = reinterpret_cast<SectionNode*>(this->Node);
+	if (auto sectionNode = dynamic_cast<SectionNode*>(this->Node)) {
 		auto kv = reinterpret_cast<KeyValue*>(this);
 
 		auto it = sectionNode->FindPin(*this);
@@ -151,36 +156,6 @@ void Pin::Menu() {
 
 		if (ImGui::MenuItem(kv->IsInherited ? "Cancel Inherited" : "Set Inherited"))
 			kv->IsInherited = !kv->IsInherited;
-	}
-}
-
-void Pin::Tooltip() {
-	if (!Node) return;
-	if (Node->Type == NodeType::Section) {
-		auto pKv = reinterpret_cast<KeyValue*>(this);
-		ImGui::BeginTooltip();
-			
-		auto type = TypeSystem::Get().GetKeyType(Node->TypeName, pKv->Key);
-		ImGui::Text("Type: %s", type.TypeName.c_str());
-		switch (type.Category) {
-		case TypeCategory::NumberLimit:
-			ImGui::Text("Range: [%d, %d]",
-				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
-			break;
-		case TypeCategory::StringLimit:
-			if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-				ImGui::Text("Options: %s",
-					Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
-			}
-			break;
-		case TypeCategory::List:
-			ImGui::Text("Element: %s (%d-%d items)",
-				std::get<ListType>(type.Data).ElementType.c_str(),
-				std::get<ListType>(type.Data).MinLength,
-				std::get<ListType>(type.Data).MaxLength);
-			break;
-		}
-		ImGui::EndTooltip();
 	}
 }
 

@@ -11,6 +11,7 @@ public:
 	KeyValue(SectionNode* node, std::string key = "key", std::string value = "value");
 
 	virtual void SetValue(std::string str) { Value = str; }
+	virtual void ToolTip();
 
 	std::string Key;
 	std::string Value;
@@ -27,7 +28,6 @@ public:
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
-	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);

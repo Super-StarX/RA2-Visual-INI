@@ -14,11 +14,9 @@ void MainWindow::Menu() {
 		ImGui::OpenPopup("Node Context Menu");
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
 		auto pin = Pin::Get(contextPinId);
-		if (pin && pin->Node->Type == NodeType::Section) {
-			auto kv = reinterpret_cast<KeyValue*>(pin);
+		if (auto kv = dynamic_cast<KeyValue*>(pin))
 			if (kv->IsFolded)
 				ImGui::OpenPopup("Pin Context Menu");
-		}
 	}
 	else if (ed::ShowLinkContextMenu(&contextLinkId))
 		ImGui::OpenPopup("Link Context Menu");
@@ -78,8 +76,7 @@ void MainWindow::LayerMenu() {
 		ed::SetNodePosition(node->ID, canvasPos);
 
 		if (auto startPin = newNodeLinkPin) {
-			if (startPin->Node->Type == NodeType::Section) {
-				auto sectionNode = reinterpret_cast<SectionNode*>(node);
+			if (auto sectionNode = dynamic_cast<SectionNode*>(node)) {
 				auto pin = startPin->Kind == PinKind::Input ? sectionNode->OutputPin.get() : sectionNode->InputPin.get();
 				if (startPin->Kind == PinKind::Input)
 					std::swap(startPin, pin);

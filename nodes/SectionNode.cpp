@@ -12,6 +12,36 @@ KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
 	Node = node;
 }
 
+void KeyValue::ToolTip() {
+	if (!Node) return;
+
+	if (auto pKv = dynamic_cast<KeyValue*>(this)) {
+		ImGui::BeginTooltip();
+
+		auto type = TypeSystem::Get().GetKeyType(Node->TypeName, pKv->Key);
+		ImGui::Text("Type: %s", type.TypeName.c_str());
+		switch (type.Category) {
+		case TypeCategory::NumberLimit:
+			ImGui::Text("Range: [%d, %d]",
+				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
+			break;
+		case TypeCategory::StringLimit:
+			if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
+				ImGui::Text("Options: %s",
+					Utils::JoinStrings(std::get<StringLimit>(type.Data).ValidValues, ", ").c_str());
+			}
+			break;
+		case TypeCategory::List:
+			ImGui::Text("Element: %s (%d-%d items)",
+				std::get<ListType>(type.Data).ElementType.c_str(),
+				std::get<ListType>(type.Data).MinLength,
+				std::get<ListType>(type.Data).MaxLength);
+			break;
+		}
+		ImGui::EndTooltip();
+	}
+}
+
 void SectionNode::Update() {
 	auto builder = GetBuilder();
 
@@ -33,11 +63,8 @@ void SectionNode::Update() {
 	if (ImGui::InputText("##SectionName", &Name)) {
 		for (const auto& [_, pLink] : InputPin->Links) {
 			auto pPin = Pin::Get(pLink->StartPinID);
-			auto pNode = pPin->Node;
-			if (pNode->Type == NodeType::Section) {
-				if (auto kv = reinterpret_cast<KeyValue*>(pPin))
-					kv->SetValue(Name)
-			}
+			if (auto kv = dynamic_cast<KeyValue*>(pPin))
+				kv->SetValue(Name);
 		}
 	}
 	ImGui::PopID();
@@ -80,12 +107,6 @@ void SectionNode::Update() {
 
 Pin* SectionNode::GetFirstCompatiblePin(Pin* pin) {
 	return pin->Kind == PinKind::Input ? OutputPin.get() : InputPin.get();
-}
-
-KeyValue* SectionNode::ConvertToKeyValue(Pin* pin) {
-	if (pin == InputPin.get() || pin == OutputPin.get())
-		return nullptr;
-	return reinterpret_cast<KeyValue*>(pin);
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {
@@ -217,7 +238,7 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 	default: {
 		ImGui::SetNextItemWidth(value.size() * 10.f);
 		if (ImGui::InputText("##value", &value))
-			kv.UpdateLink(kv.Value);
+			kv.UpdateOutputLink(kv.Value);
 		break;
 	}
 	}
