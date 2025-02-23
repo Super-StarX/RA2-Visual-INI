@@ -39,16 +39,16 @@ public:
 	MainWindow* Owner = nullptr;
 
 	ed::NodeId ID;
-	std::string Name;
+	std::string Name{""};
 	std::vector<Pin> Inputs;
 	std::vector<Pin> Outputs;
-	ImColor Color;
-	NodeType Type;
+	ImColor Color{};
+	NodeType Type{ NodeType::Section };
 	ImVec2 Size;
-	bool IsFolded;
-	bool IsComment;
+	bool IsFolded{false};
+	bool IsComment{false};
 	float HoverTimer = 0.0f;
-	std::string TypeName;
+	std::string TypeName{};
 	std::string State;
 	std::string SavedState;
 };

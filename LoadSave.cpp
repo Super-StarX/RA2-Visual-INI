@@ -102,12 +102,9 @@ void MainWindow::LoadProject(const std::string& filePath) {
 
 		auto startPin = Pin::Get(startPinId);
 		auto endPin = Pin::Get(endPinId);
-
-		if (startPin && endPin) {
+		if (startPin && endPin)
 			CreateLink(startPin, endPin);
-		}
 	}
-	
 }
 
 //把注释取消，就会开局弹框，我不理解
@@ -216,9 +213,8 @@ void MainWindow::ImportINI(const std::string& path) {
 			if (map.contains(value)) {
 				auto targetNode = map[value];
 				auto kv = currentNode->KeyValues.back().get(); // 假设每个 key-value 对都已添加到 KeyValues 中
-				if (targetNode->InputPin->CanCreateLink(kv)) {
+				if (targetNode->InputPin->CanCreateLink(kv))
 					CreateLink(kv, targetNode->InputPin.get())->TypeIdentifier = kv->GetLinkType();
-				}
 			}
 		}
 	}

@@ -16,9 +16,9 @@ Pin* MainWindow::newLinkPin = nullptr;
 float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
 
-int MainWindow::GetNextId() { 
-	static int m_NextId = 1; 
-	return m_NextId++; 
+int MainWindow::GetNextId() {
+	static int m_NextId = 1;
+	return m_NextId++;
 }
 
 void MainWindow::ClearAll() {
@@ -36,7 +36,7 @@ float MainWindow::GetTouchProgress(ed::NodeId id) {
 }
 
 void MainWindow::TouchNode(ed::NodeId id) {
-	m_NodeTouchTime[id] = m_TouchTime; 
+	m_NodeTouchTime[id] = m_TouchTime;
 }
 
 void MainWindow::UpdateTouch() {
@@ -48,9 +48,12 @@ void MainWindow::UpdateTouch() {
 }
 
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
+	Link::Array.erase(std::remove_if(Link::Array.begin(), Link::Array.end(), 
+		[startPin](auto& link) { return link->StartPinID == startPin->ID; }), Link::Array.end());
 	startPin->Links.clear();
-	auto& link = Link::Array.emplace_back(
-		std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
+	auto& link = Link::Array.emplace_back(std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
+	if (endPin->Node)
+		startPin->SetValue(endPin->Node->Name);
 	startPin->Links[link->ID] = link.get();
 	endPin->Links[link->ID] = link.get();
 	return link.get();

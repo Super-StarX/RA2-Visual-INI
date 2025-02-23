@@ -257,11 +257,9 @@ void MainWindow::ShowSectionEditor() {
 						// Check if key already exists in KeyValues
 						auto it = m_SectionEditorNode->FindPin(key);
 						if (it != m_SectionEditorNode->KeyValues.end())
-							// Key exists, just update the value
-							(*it)->Value = value;
+							it->get()->Value = value; // Key exists, just update the value
 						else
-							// Key doesn't exist, add new entry
-							m_SectionEditorNode->AddKeyValue(key, value);
+							m_SectionEditorNode->AddKeyValue(key, value); // Key doesn't exist, add new entry
 					}
 				}
 

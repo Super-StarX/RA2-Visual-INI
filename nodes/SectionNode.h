@@ -10,6 +10,8 @@ class KeyValue : public Pin {
 public:
 	KeyValue(SectionNode* node, std::string key = "key", std::string value = "value");
 
+	virtual void SetValue(std::string str) { Value = str; };
+
 	std::string Key;
 	std::string Value;
 	bool IsInherited = false;
