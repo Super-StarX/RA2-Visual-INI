@@ -36,7 +36,7 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
-	Link* CreateLink(Pin* startPin, Pin* endPin);
+	static Link* CreateLink(Pin* startPin, Pin* endPin);
 
 	void BuildNode(const std::unique_ptr<Node>& node);
 	void BuildNodes();

@@ -32,6 +32,7 @@ public:
 	virtual void Menu();
 	virtual void Tooltip();
 	virtual void HoverMenu(bool isHovered);
+	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();

@@ -48,10 +48,16 @@ void MainWindow::UpdateTouch() {
 }
 
 Link* MainWindow::CreateLink(Pin* startPin, Pin* endPin) {
+	if (!startPin || !endPin)
+		return nullptr;
+
+	// 删除所有起始点的链接
 	Link::Array.erase(std::remove_if(Link::Array.begin(), Link::Array.end(), 
 		[startPin](auto& link) { return link->StartPinID == startPin->ID; }), Link::Array.end());
 	startPin->Links.clear();
-	auto& link = Link::Array.emplace_back(std::make_unique<Link>(GetNextId(), startPin->ID, endPin->ID));
+
+	// 生成新的链接
+	auto& link = Link::Array.emplace_back(std::make_unique<Link>(MainWindow::GetNextId(), startPin->ID, endPin->ID));
 	if (endPin->Node)
 		startPin->SetValue(endPin->Node->Name);
 	startPin->Links[link->ID] = link.get();

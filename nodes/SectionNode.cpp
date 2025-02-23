@@ -8,7 +8,7 @@ std::unordered_map<std::string, SectionNode*> SectionNode::Map;
 
 KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
 	Pin(MainWindow::GetNextId(), key.c_str(), "flow", PinKind::Output),
-	Key(key) ,Value(value){
+	Key(key), Value(value){
 	Node = node;
 }
 
@@ -78,6 +78,13 @@ void SectionNode::Update() {
 	builder->End();
 }
 
+Pin* SectionNode::GetFirstCompatiblePin(Pin* pin) {
+	if (pin->Kind == PinKind::Input)
+		return OutputPin.get();
+	else
+		return InputPin.get();
+}
+
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {
 	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const std::unique_ptr<KeyValue>& kv) { return kv->ID == key.ID; });
 }
@@ -117,7 +124,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 
 		// 根据类型绘制不同控件
 		ImGui::SetNextItemWidth(120);
-		DrawValueWidget(kv.Value, typeInfo);
+		DrawValueWidget(kv, typeInfo);
 	}
 
 	ImGui::Spring(0);
@@ -146,7 +153,8 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 	ImGui::PopStyleVar();
 }
 
-void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
+void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
+	std::string& value = kv.Value;
 	const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
 	ImGui::PushItemWidth(itemWidth);
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
@@ -205,7 +213,8 @@ void SectionNode::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	}
 	default: {
 		ImGui::SetNextItemWidth(value.size() * 10.f);
-		ImGui::InputText("##value", &value);
+		if (ImGui::InputText("##value", &value))
+			kv.UpdateLink(kv.Value);
 		break;
 	}
 	}
@@ -252,7 +261,7 @@ void SectionNode::DrawListInput(std::string & listValue, const ListType & listTy
 
 			// 递归绘制元素控件
 			TypeInfo elemType = GetTypeInfo(listType.ElementType);
-			DrawValueWidget(elements[i], elemType);
+			//DrawValueWidget(elements[i], elemType);
 
 			ImGui::PopID();
 		}

@@ -24,6 +24,28 @@ Pin* Pin::Get(ed::PinId id) {
 	return Array.count(id) ? Array.at(id) : nullptr;
 }
 
+void Pin::UpdateLink(std::string value) {
+	// 值变化后,判断自己连着的node的名字是否还是自己的值
+	// 如果不是的话,就断开当前链接,并遍历node::array寻找是否有新的node可以链接
+	if (!Node || Kind != PinKind::Output)
+		return;
+	for (auto it = Links.begin(); it != Links.end(); ) {
+		if (auto endpin = Get(it->second->EndPinID)) {
+			if (endpin->Node->Name != value) {
+				it = Links.erase(it);
+				Link::Array.erase(std::remove_if(Link::Array.begin(), Link::Array.end(),
+					[endpin](auto& link) { return link->EndPinID == endpin->ID; }), Link::Array.end());
+			}
+			else {
+				++it;
+			}
+		}
+	}
+	for (auto& pNode : Node::Array)
+		if (pNode->Name == value)
+			MainWindow::CreateLink(this, pNode->GetFirstCompatiblePin(this));
+}
+
 bool Pin::CanCreateLink(Pin* b) {
 	return b && b != this && b->Kind != Kind && b->Node != Node;
 }

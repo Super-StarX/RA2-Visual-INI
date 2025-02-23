@@ -26,6 +26,7 @@ public:
 
 	using BaseNode::BaseNode;
 	virtual void Update() override;
+	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);
@@ -46,7 +47,7 @@ private:
 		return TypeSystem::Get().GetTypeInfo(typeName);
 	}
 
-	void DrawValueWidget(std::string& value, const TypeInfo& type);
+	void DrawValueWidget(KeyValue& value, const TypeInfo& type);
 
 	void DrawListInput(std::string& listValue, const ListType& listType);
 	void OpenListEditor(std::string& listValue, const ListType& listType);

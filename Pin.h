@@ -35,6 +35,7 @@ public:
 
 	static Pin* Get(ed::PinId id);
 
+	void UpdateLink(std::string value);
 	virtual void SetValue(std::string str) {};
 
 	bool CanCreateLink(Pin* b);

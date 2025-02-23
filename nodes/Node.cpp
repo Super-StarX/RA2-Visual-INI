@@ -14,27 +14,6 @@ Node* Node::Get(ed::NodeId id) {
 	return nullptr;
 }
 
-ImVec2 Node::GetPosition() const {
-	return ed::GetNodePosition(ID);
-}
-
-void Node::SetPosition(ImVec2 pos) const {
-	return ed::SetNodePosition(ID, pos);
-}
-
-int Node::GetConnectedLinkCount() {
-	int count = 0;
-	for (auto& link : Link::Array) {
-		if (auto pin = Pin::Get(link->StartPinID)) {
-			if (pin->Node == this) ++count;
-		}
-		if (auto pin = Pin::Get(link->EndPinID)) {
-			if (pin->Node == this) ++count;
-		}
-	}
-	return count;
-}
-
 void Node::Menu() {
 	ImGui::Text("ID: %p", ID.AsPointer());
 	ImGui::Text("Type: %s", Type == NodeType::Section ? "Section" : "Unexcepted");
@@ -153,4 +132,41 @@ void Node::HoverMenu(bool isHovered) {
 	else {
 		hoverTime = 0.0f;
 	}
+}
+
+Pin* Node::GetFirstCompatiblePin(Pin* pin) {
+	if (pin->Kind == PinKind::Input) {
+		for (auto& output : Outputs) {
+			if (output.CanCreateLink(pin))
+				return &output;
+		}
+	}
+	else {
+		for (auto& input : Inputs) {
+			if (input.CanCreateLink(pin))
+				return &input;
+		}
+	}
+	return nullptr;
+}
+
+ImVec2 Node::GetPosition() const {
+	return ed::GetNodePosition(ID);
+}
+
+void Node::SetPosition(ImVec2 pos) const {
+	return ed::SetNodePosition(ID, pos);
+}
+
+int Node::GetConnectedLinkCount() {
+	int count = 0;
+	for (auto& link : Link::Array) {
+		if (auto pin = Pin::Get(link->StartPinID)) {
+			if (pin->Node == this) ++count;
+		}
+		if (auto pin = Pin::Get(link->EndPinID)) {
+			if (pin->Node == this) ++count;
+		}
+	}
+	return count;
 }
