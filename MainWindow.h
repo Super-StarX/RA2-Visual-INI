@@ -22,8 +22,6 @@ public:
 	using Application::Application;
 	static MainWindow* Instance;
 	
-	static bool createNewNode;
-	static Pin* newNodeLinkPin;
 	static Pin* newLinkPin;
 
 	static float leftPaneWidth;

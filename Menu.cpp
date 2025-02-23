@@ -5,18 +5,20 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include <sstream>
 
+static bool createNewNode = false;
 static ed::NodeId contextNodeId;
 static ed::LinkId contextLinkId;
 static ed::PinId  contextPinId;
+static Pin* newNodeLinkPin = nullptr;
 void MainWindow::Menu() {
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))
 		ImGui::OpenPopup("Node Context Menu");
 	else if (ed::ShowPinContextMenu(&contextPinId)) {
 		auto pin = Pin::Get(contextPinId);
-		if (auto kv = dynamic_cast<KeyValue*>(pin))
-			if (kv->IsFolded)
-				ImGui::OpenPopup("Pin Context Menu");
+		auto kv = dynamic_cast<KeyValue*>(pin);
+		if (!kv || !kv->IsFolded)
+			ImGui::OpenPopup("Pin Context Menu");
 	}
 	else if (ed::ShowLinkContextMenu(&contextLinkId))
 		ImGui::OpenPopup("Link Context Menu");

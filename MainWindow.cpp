@@ -9,8 +9,6 @@
 
 static ed::EditorContext* m_Editor = nullptr;
 MainWindow* MainWindow::Instance = nullptr;
-bool MainWindow::createNewNode = false;
-Pin* MainWindow::newNodeLinkPin = nullptr;
 Pin* MainWindow::newLinkPin = nullptr;
 
 float MainWindow::leftPaneWidth = 400.0f;
