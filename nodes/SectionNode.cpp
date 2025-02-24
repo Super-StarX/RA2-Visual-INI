@@ -42,6 +42,24 @@ void KeyValue::ToolTip() {
 	}
 }
 
+void KeyValue::SaveToJson(json& j) const {
+	Pin::SaveToJson(j);
+	j["Key"] = Key;
+	j["Value"] = Value;
+	j["IsInherited"] = IsInherited;
+	j["IsComment"] = IsComment;
+	j["IsFolded"] = IsFolded;
+}
+
+void KeyValue::LoadFromJson(const json& j) {
+	Pin::LoadFromJson(j);
+	Key = j["Key"];
+	Value = j["Value"];
+	IsInherited = j["IsInherited"];
+	IsComment = j["IsComment"];
+	IsFolded = j["IsFolded"];
+}
+
 void SectionNode::Update() {
 	auto builder = GetBuilder();
 
@@ -115,6 +133,32 @@ void SectionNode::Update() {
 
 Pin* SectionNode::GetFirstCompatiblePin(Pin* pin) {
 	return pin->Kind == PinKind::Input ? OutputPin.get() : InputPin.get();
+}
+
+void SectionNode::SaveToJson(json& j) const {
+	Node::SaveToJson(j);
+	json keyValuesJson;
+	for (const auto& kv : KeyValues) {
+		json kvJson;
+		kvJson["key"] = kv->Key;
+		kvJson["value"] = kv->Value;
+		kvJson["output_pin_id"] = kv->ID.Get();
+		keyValuesJson.push_back(kvJson);
+	}
+	j["key_values"] = keyValuesJson;
+}
+
+void SectionNode::LoadToJson(json& j) {
+	for (const auto& kvJson : j["key_values"]) {
+		std::string key = kvJson["key"].get<std::string>();
+		std::string value = kvJson["value"].get<std::string>();
+		int outputPinId = kvJson["output_pin_id"].get<int>();
+
+		AddKeyValue(key, value, outputPinId);
+	}
+
+	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "input");
+	OutputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "output");
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {

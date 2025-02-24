@@ -29,7 +29,7 @@ void HoudiniNode::Update() {
 		ImGui::Spring(1, 0);
 
 		ImRect inputsRect;
-		int inputAlpha = 200;
+		float inputAlpha = 200.f;
 		for (auto& pin : this->Inputs) {
 			ImGui::Dummy(ImVec2(padding, padding));
 			inputsRect = ed::Detail::ImGui_GetItemRect();
@@ -87,7 +87,7 @@ void HoudiniNode::Update() {
 		ImGui::Spring(1, 0);
 
 		ImRect outputsRect;
-		int outputAlpha = 200;
+		float outputAlpha = 200.f;
 		for (auto& pin : this->Outputs) {
 			ImGui::Dummy(ImVec2(padding, padding));
 			outputsRect = ed::Detail::ImGui_GetItemRect();

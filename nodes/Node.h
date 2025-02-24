@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Pin.h"
 #include "Link.h"
+#include "Object.h"
 #include "utilities/builders.h"
 
 #include <vector>
@@ -20,7 +21,7 @@ enum class NodeType {
 
 class KeyValue;
 class MainWindow;
-class Node {
+class Node : public Object {
 public:
 	static std::vector<std::unique_ptr<Node>> Array;
 
@@ -33,11 +34,15 @@ public:
 	virtual void Menu();
 	virtual void Tooltip();
 	virtual void HoverMenu(bool isHovered);
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	virtual KeyValue* ConvertToKeyValue(Pin* pin) { return nullptr; };
+
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
+
 
 	MainWindow* Owner = nullptr;
 

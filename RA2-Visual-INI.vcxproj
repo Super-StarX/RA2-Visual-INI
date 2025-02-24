@@ -166,6 +166,7 @@
     <ClCompile Include="nodes\Node.cpp" />
     <ClCompile Include="nodes\SectionNode.cpp" />
     <ClCompile Include="nodes\TreeNode.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Pin.cpp" />
     <ClCompile Include="nodes\SimpleNode.cpp" />
     <ClCompile Include="PinType.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="nodes\Node.h" />
     <ClInclude Include="nodes\SectionNode.h" />
     <ClInclude Include="nodes\TreeNode.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Pin.h" />
     <ClInclude Include="nodes\SimpleNode.h" />
     <ClInclude Include="PinType.h" />

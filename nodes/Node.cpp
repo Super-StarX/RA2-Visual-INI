@@ -170,3 +170,21 @@ int Node::GetConnectedLinkCount() {
 	}
 	return count;
 }
+
+void Node::SaveToJson(json& j) const {
+	auto pos = GetPosition();
+
+	j["section"] = Name;
+	j["position"] = { pos.x, pos.y };
+}
+
+void Node::LoadFromJson(const json& j) {
+	std::string section = j["section"].get<std::string>();
+	ImVec2 position = {
+		float(j["position"][0].get<int>()),
+		float(j["position"][1].get<int>())
+	};
+
+	//auto node = SpawnSectionNode(section);
+	//node->SetPosition(position);
+}

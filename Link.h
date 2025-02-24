@@ -1,11 +1,12 @@
 ﻿#pragma once
+#include "Object.h"
 #include "utilities/builders.h"
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace ed = ax::NodeEditor;
-class Link {
+class Link : public Object {
 public:
 	static std::vector<std::unique_ptr<Link>> Array;
 
@@ -14,6 +15,9 @@ public:
 	~Link();
 
 	static Link* Get(ed::LinkId id);
+
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 
 	void Draw() const;
 	void Menu();

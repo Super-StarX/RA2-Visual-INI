@@ -40,6 +40,9 @@ bool OpenFileDialog(LPCSTR fliter,char* path, int maxPath, bool isSaving) {
 void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
 	char path[MAX_PATH] = { 0 };
 	if (OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
+		std::string str(path);
+		if (!str.ends_with(".ini"))
+			str += ".ini";
 		if (isSaving)
 			Owner->ExportINI(path);
 		else
@@ -50,101 +53,93 @@ void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
 void LeftPanelClass::ShowProjFileDialog(bool isSaving) {
 	char path[MAX_PATH] = { 0 };
 	if (OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
+		std::string str(path);
+		if (!str.ends_with(".viproj"))
+			str += ".viproj";
 		if (isSaving)
-			Owner->SaveProject(path);
+			Owner->SaveProject(str);
 		else
-			Owner->LoadProject(path);
+			Owner->LoadProject(str);
 	}
 }
 
 void MainWindow::LoadProject(const std::string& filePath) {
 	using json = nlohmann::json;
-
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
-		// 处理文件打开失败的情况
+		std::cerr << "Failed to open file for reading.\n";
 		return;
 	}
 
-	json j = json::parse(file);
+	json root;
+	file >> root;
+	file.close();
 
-	// 清除现有数据
-	SectionNode::Map.clear();
+	// 清空现有数据
+	Node::Array.clear();
+	Pin::Array.clear();
 	Link::Array.clear();
-	
-	// 加载节点
-	for (const auto& nodeJson : j["nodes"]) {
-		std::string section = nodeJson["section"].get<std::string>();
-		ImVec2 position = { 
-			float(nodeJson["position"][0].get<int>()),
-			float(nodeJson["position"][1].get<int>())
-		};
 
-		auto node = SpawnSectionNode(section);
-		node->SetPosition(position);
-
-		for (const auto& kvJson : nodeJson["key_values"]) {
-			std::string key = kvJson["key"].get<std::string>();
-			std::string value = kvJson["value"].get<std::string>();
-			int outputPinId = kvJson["output_pin_id"].get<int>();
-
-			node->AddKeyValue(key, value, outputPinId);
-		}
-
-		node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
-		node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
+	// 加载 Nodes
+	for (const auto& nodeJson : root["Nodes"]) {
+		auto node = std::make_unique<Node>();
+		node->LoadFromJson(nodeJson);
+		Node::Array.push_back(std::move(node));
 	}
 
-	// 加载链接
-	for (const auto& linkJson : j["links"]) {
-		int startPinId = linkJson["start_pin_id"].get<int>();
-		int endPinId = linkJson["end_pin_id"].get<int>();
-		
-		if (auto startPin = Pin::Get(startPinId))
-			startPin->LinkTo(Pin::Get(endPinId));
+	// 加载 Pins
+	for (const auto& pinJson : root["Pins"]) {
+		auto pin = new Pin(0, ""); // 创建临时对象
+		pin->LoadFromJson(pinJson);
+		Pin::Array[pin->ID] = pin;
 	}
+
+	// 加载 Links
+	for (const auto& linkJson : root["Links"]) {
+		auto link = std::make_unique<Link>(0, 0, 0);
+		link->LoadFromJson(linkJson);
+		Link::Array.push_back(std::move(link));
+	}
+
+	std::cout << "Data loaded from " << filePath << "\n";
 }
 
 //把注释取消，就会开局弹框，我不理解
 void MainWindow::SaveProject(const std::string& filePath) {
 	using json = nlohmann::json;
-	json j;
+	json root;
 
-	// 保存节点信息
-	for (const auto& [section, node] : SectionNode::Map) {
+	// 保存 Nodes
+	for (const auto& node : Node::Array) {
 		json nodeJson;
-		nodeJson["section"] = node->Name;
-
-		auto pos = node->GetPosition();
-		nodeJson["position"] = { pos.x, pos.y };
-
-		json keyValuesJson;
-		for (const auto& kv : node->KeyValues) {
-			json kvJson;
-			kvJson["key"] = kv->Key;
-			kvJson["value"] = kv->Value;
-			kvJson["output_pin_id"] = kv->ID.Get();
-			keyValuesJson.push_back(kvJson);
-		}
-		nodeJson["key_values"] = keyValuesJson;
-
-		j["nodes"].push_back(nodeJson);
+		node->SaveToJson(nodeJson);
+		root["Nodes"].push_back(nodeJson);
 	}
 
-	// 保存链接信息
+	// 保存 Pins
+	for (const auto& [id, pin] : Pin::Array) {
+		json pinJson;
+		pin->SaveToJson(pinJson);
+		root["Pins"].push_back(pinJson);
+	}
+
+	// 保存 Links
 	for (const auto& link : Link::Array) {
 		json linkJson;
-		linkJson["start_pin_id"] = link->StartPinID.Get();
-		linkJson["end_pin_id"] = link->EndPinID.Get();
-		j["links"].push_back(linkJson);
+		link->SaveToJson(linkJson);
+		root["Links"].push_back(linkJson);
 	}
 
+	// 写入文件
 	std::ofstream file(filePath);
-	if (!file.is_open()) {
-		// 处理文件打开失败的情况
-		return;
+	if (file.is_open()) {
+		file << root.dump(4); // 格式化输出
+		file.close();
+		std::cout << "Data saved to " << filePath << "\n";
 	}
-	file << std::setw(4) << j << std::endl;
+	else {
+		std::cerr << "Failed to open file for writing.\n";
+	}
 }
 
 void MainWindow::ImportINI(const std::string& path) {

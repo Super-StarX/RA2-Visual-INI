@@ -54,3 +54,18 @@ void Link::Menu() {
 		ImGui::EndMenu();
 	}
 }
+
+void Link::SaveToJson(json& j) const {
+	json linkJson;
+	linkJson["start_pin_id"] = StartPinID.Get();
+	linkJson["end_pin_id"] = EndPinID.Get();
+	j["links"].push_back(linkJson);
+}
+
+void Link::LoadFromJson(const json& j) {
+	int startPinId = j["start_pin_id"].get<int>();
+	int endPinId = j["end_pin_id"].get<int>();
+
+	if (auto startPin = Pin::Get(startPinId))
+		startPin->LinkTo(Pin::Get(endPinId));
+}

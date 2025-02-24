@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Object.h"
 #include "utilities/builders.h"
 
 #include <string>
@@ -25,7 +26,7 @@ struct ComparePinId {
 class Node;
 class SectionNode;
 class Link;
-class Pin {
+class Pin : public Object {
 public:
 	constexpr static float IconSize = 24.f;
 	static std::map<ed::PinId, Pin*, ComparePinId> Array;
@@ -36,6 +37,8 @@ public:
 
 	virtual void SetValue(std::string str) { Name = str; }
 	virtual void Tooltip();
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 
 	void UpdateOutputLink(std::string value);
 	bool CanCreateLink(Pin* b);

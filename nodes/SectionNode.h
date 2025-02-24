@@ -12,6 +12,8 @@ public:
 
 	virtual void SetValue(std::string str) { Value = str; }
 	virtual void ToolTip();
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 
 	std::string Key;
 	std::string Value;
@@ -28,12 +30,15 @@ public:
 	using BaseNode::BaseNode;
 	virtual void Update() override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
+	virtual void SaveToJson(json& j) const;
+	virtual void LoadToJson(json& j);
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);
 	KeyValue* AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 	void FoldedKeyValues(size_t& i);
 	void UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::BlueprintNodeBuilder* builder);
+
 
 	vector_kv KeyValues;
 	std::unique_ptr<Pin> InputPin;
