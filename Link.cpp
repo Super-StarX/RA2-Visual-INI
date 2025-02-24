@@ -69,3 +69,12 @@ void Link::LoadFromJson(const json& j) {
 	if (auto startPin = Pin::Get(startPinId))
 		startPin->LinkTo(Pin::Get(endPinId));
 }
+
+void Link::Tooltip() {
+	ImGui::BeginTooltip();
+	ImGui::Text("Link %d", ID);
+	ImGui::Text("Type: %s", TypeIdentifier.c_str());
+	ImGui::Text("Start Pin: %d", StartPinID.Get());
+	ImGui::Text("End Pin: %d", EndPinID.Get());
+	ImGui::EndTooltip();
+}
