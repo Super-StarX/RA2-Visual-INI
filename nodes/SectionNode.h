@@ -38,6 +38,8 @@ public:
 	vector_kv KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
+	float maxSize;
+	float lastMaxSize;
 
 private:
 	TypeInfo GetKeyTypeInfo(const std::string& sectionType, const std::string& key) const {

@@ -85,6 +85,8 @@ void SectionNode::Update() {
 
 	// 渲染键值对
 	size_t i = 0;
+	lastMaxSize = maxSize + 40.f;
+	maxSize = 0;
 	while (i < this->KeyValues.size()) {
 		if (IsFolded)
 			break;
@@ -102,7 +104,7 @@ void SectionNode::Update() {
 	ImGui::Spring(1);
 	ImGui::Dummy(ImVec2(0, 1));
 	ImGui::Spring(0);
-	ImVec2 buttonSize(230, 4.0f);
+	ImVec2 buttonSize(lastMaxSize, 4.0f);
 	if (ImGui::Button("##AddKeyValue", buttonSize)) {
 		AddKeyValue("key", "value");
 	}
@@ -146,7 +148,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 		ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
 	}
 	else {
-		ImGui::SetNextItemWidth(80);
+		auto w1 = Utils::SetNextInputWidth(kv.Key, 60.f);
 		ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
 
 		// 获取当前键的类型信息（假设已实现类型查找逻辑）
@@ -154,7 +156,11 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 
 		// 根据类型绘制不同控件
 		ImGui::PushItemWidth(120);
+		auto ms = maxSize;
 		DrawValueWidget(kv, typeInfo);
+		// 这里的逻辑是，利用maxsize暂存value的长度，因此把原maxSize的值存到ms里
+		// 所以比较的长度是key的长度（w1）和value的长度（maxSize）之和与原maxSize（ms）
+		maxSize = std::max(maxSize + w1, ms);
 		ImGui::PopItemWidth();
 	}
 
@@ -173,13 +179,16 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 
 	// 绘制合并的折叠线
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-	ImVec2 buttonSize(230, 2.0f);
+	ImVec2 buttonSize(lastMaxSize, 2.0f);
+	ImGui::Spring(1);
+	ImGui::Dummy(ImVec2(0, 0.25));
+	ImGui::Spring(0);
 	ImGui::PushID(static_cast<int>(foldStart)); // 确保唯一ID
-	if (ImGui::Button("", buttonSize)) {
-		// 展开所有连续折叠的项
+	// 展开所有连续折叠的项
+	if (ImGui::Button("", buttonSize))
 		for (size_t j = foldStart; j < i; j++)
 			this->KeyValues[j]->IsFolded = false;
-	}
+	ImGui::Dummy(ImVec2(0, 0.15));
 	ImGui::PopID();
 	ImGui::PopStyleVar();
 }
@@ -189,6 +198,7 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 	//const float itemWidth = ImGui::GetContentRegionAvail().x * 0.6f;
 	//ImGui::PushItemWidth(itemWidth);
 	//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 3));
+	float width = 120.f;
 
 	switch (type.Category) {
 	case TypeCategory::NumberLimit: {
@@ -212,8 +222,11 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 				value = std::get<StringLimit>(type.Data).ValidValues[current];
 			}
 		}
-		else
+		else {
+			auto w = Utils::SetNextInputWidth(value, 100.f);
+			width = std::max(width, w);
 			ImGui::InputText("##str", &value);
+		}
 		break;
 	}
 	case TypeCategory::List: {
@@ -288,13 +301,15 @@ void SectionNode::DrawValueWidget(KeyValue& kv, const TypeInfo& type) {
 		break;
 	}
 	default: {
-		ImGui::SetNextItemWidth(value.size() * 10.f);
+		auto w = Utils::SetNextInputWidth(kv.Value, 100.f);
+		width = std::max(width, w);
 		if (ImGui::InputText("##value", &value))
 			kv.UpdateOutputLink(kv.Value);
 		break;
 	}
 	}
 
+	maxSize = width;
 	//ImGui::PopStyleVar();
 	//ImGui::PopItemWidth();
 }

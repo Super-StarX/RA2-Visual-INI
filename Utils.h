@@ -23,4 +23,5 @@ public:
 	static std::string JoinStrings(const std::vector<std::string>& elements, const std::string& delim);
 	static int GetComboIndex(const std::string& value, const std::vector<std::string>& options);
 	static const char* GetComboItems(const std::vector<std::string>& options);
+	static float SetNextInputWidth(const std::string& value, float minSize = 0.f, float maxSize = 400.f);
 };

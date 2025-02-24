@@ -1,4 +1,5 @@
 ﻿#include "Utils.h"
+#include <algorithm>
 
 void Utils::DrawTextOnCursor(const char* label, ImColor color) {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
@@ -62,4 +63,11 @@ const char* Utils::GetComboItems(const std::vector<std::string>& options) {
 	}
 	buffer += '\0';
 	return buffer.c_str();
+}
+
+float Utils::SetNextInputWidth(const std::string& value, float minSize, float maxSize) {
+	float textWidth = std::clamp(ImGui::CalcTextSize(value.c_str()).x, minSize, maxSize);
+	float inputWidth = textWidth + 20.0f;
+	ImGui::SetNextItemWidth(inputWidth);
+	return inputWidth;
 }
