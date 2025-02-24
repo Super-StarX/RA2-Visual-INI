@@ -57,12 +57,14 @@ void Link::Menu() {
 
 void Link::SaveToJson(json& j) const {
 	json linkJson;
+	linkJson["ID"] = ID.Get();
 	linkJson["start_pin_id"] = StartPinID.Get();
 	linkJson["end_pin_id"] = EndPinID.Get();
-	j["links"].push_back(linkJson);
+	j.push_back(linkJson);
 }
 
 void Link::LoadFromJson(const json& j) {
+	ID = j["ID"].get<int>();
 	int startPinId = j["start_pin_id"].get<int>();
 	int endPinId = j["end_pin_id"].get<int>();
 

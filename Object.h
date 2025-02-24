@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 class Object {
 public:
-	using json = nlohmann::json;
 	
 	Object() = default;
 	virtual ~Object() = default;

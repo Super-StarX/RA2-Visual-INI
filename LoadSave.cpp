@@ -82,24 +82,30 @@ void MainWindow::LoadProject(const std::string& filePath) {
 
 	// 加载 Nodes
 	for (const auto& nodeJson : root["Nodes"]) {
-		auto node = std::make_unique<Node>();
-		node->LoadFromJson(nodeJson);
-		Node::Array.push_back(std::move(node));
+		if (nodeJson["type"] == "Section") {
+			auto node = std::make_unique<SectionNode>(this, -1, "");
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
+		}
 	}
 
 	// 加载 Pins
+	/*
 	for (const auto& pinJson : root["Pins"]) {
 		auto pin = new Pin(0, ""); // 创建临时对象
 		pin->LoadFromJson(pinJson);
 		Pin::Array[pin->ID] = pin;
 	}
-
+	*/
 	// 加载 Links
+	/*
 	for (const auto& linkJson : root["Links"]) {
 		auto link = std::make_unique<Link>(0, 0, 0);
 		link->LoadFromJson(linkJson);
 		Link::Array.push_back(std::move(link));
 	}
+	*/
+	SetNextId(root["Totals"].get<int>());
 
 	std::cout << "Data loaded from " << filePath << "\n";
 }
@@ -110,6 +116,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	json root;
 
 	// 保存 Nodes
+	root["Totals"] = GetNextId();
 	for (const auto& node : Node::Array) {
 		json nodeJson;
 		node->SaveToJson(nodeJson);
@@ -117,12 +124,13 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	}
 
 	// 保存 Pins
+	/*
 	for (const auto& [id, pin] : Pin::Array) {
 		json pinJson;
 		pin->SaveToJson(pinJson);
 		root["Pins"].push_back(pinJson);
 	}
-
+	*/
 	// 保存 Links
 	for (const auto& link : Link::Array) {
 		json linkJson;

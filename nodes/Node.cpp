@@ -174,12 +174,14 @@ int Node::GetConnectedLinkCount() {
 void Node::SaveToJson(json& j) const {
 	auto pos = GetPosition();
 
+	j["ID"] = ID.Get();
 	j["section"] = Name;
 	j["position"] = { pos.x, pos.y };
 }
 
 void Node::LoadFromJson(const json& j) {
-	std::string section = j["section"].get<std::string>();
+	Name = j["section"].get<std::string>();
+	ID = j["ID"].get<int>();
 	ImVec2 position = {
 		float(j["position"][0].get<int>()),
 		float(j["position"][1].get<int>())

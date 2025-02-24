@@ -28,6 +28,7 @@ public:
 	static float rightPaneWidth;
 
 	static int GetNextId();
+	static void SetNextId(int id);
 	static void ClearAll();
 
 	float GetTouchProgress(ed::NodeId id);

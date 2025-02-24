@@ -4,11 +4,12 @@
 #include "TypeLoader.h"
 #include <memory>
 #include <string>
+#include "MainWindow.h"
 
 class SectionNode;
 class KeyValue : public Pin {
 public:
-	KeyValue(SectionNode* node, std::string key = "key", std::string value = "value");
+	KeyValue(SectionNode* node, std::string key = "key", std::string value = "value", int id = MainWindow::GetNextId());
 
 	virtual void SetValue(std::string str) { Value = str; }
 	virtual void ToolTip();
@@ -29,9 +30,9 @@ public:
 
 	using BaseNode::BaseNode;
 	virtual void Update() override;
-	virtual Pin* GetFirstCompatiblePin(Pin* pin);
-	virtual void SaveToJson(json& j) const;
-	virtual void LoadToJson(json& j);
+	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);

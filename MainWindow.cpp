@@ -14,9 +14,14 @@ Pin* MainWindow::newLinkPin = nullptr;
 float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
 
+static int m_NextId = 1;
+
 int MainWindow::GetNextId() {
-	static int m_NextId = 1;
 	return m_NextId++;
+}
+
+void MainWindow::SetNextId(int id) {
+	m_NextId = id;
 }
 
 void MainWindow::ClearAll() {

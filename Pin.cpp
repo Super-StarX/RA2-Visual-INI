@@ -39,7 +39,9 @@ void Pin::SaveToJson(json& j) const {
 }
 
 void Pin::LoadFromJson(const json& j) {
+	Array.erase(ID);
 	ID = ed::PinId(j["ID"]);
+	Array[ID] = this;
 	Name = j["Name"];
 	TypeIdentifier = j["TypeIdentifier"];
 	Kind = static_cast<PinKind>(j["Kind"]);

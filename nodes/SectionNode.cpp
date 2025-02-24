@@ -6,8 +6,8 @@
 
 std::unordered_map<std::string, SectionNode*> SectionNode::Map;
 
-KeyValue::KeyValue(SectionNode* node, std::string key, std::string value) :
-	Pin(MainWindow::GetNextId(), key.c_str(), "flow", PinKind::Output),
+KeyValue::KeyValue(SectionNode* node, std::string key, std::string value, int id) :
+	Pin(id, key.c_str(), "flow", PinKind::Output),
 	Key(key), Value(value) {
 	Node = node;
 }
@@ -140,25 +140,23 @@ void SectionNode::SaveToJson(json& j) const {
 	json keyValuesJson;
 	for (const auto& kv : KeyValues) {
 		json kvJson;
-		kvJson["key"] = kv->Key;
-		kvJson["value"] = kv->Value;
-		kvJson["output_pin_id"] = kv->ID.Get();
+		kv->SaveToJson(kvJson);
 		keyValuesJson.push_back(kvJson);
 	}
+
+	j["type"] = "Section";
+	j["input"] = InputPin->ID.Get();
+	j["output"] = OutputPin->ID.Get();
 	j["key_values"] = keyValuesJson;
 }
 
-void SectionNode::LoadToJson(json& j) {
+void SectionNode::LoadFromJson(const json& j) {
 	for (const auto& kvJson : j["key_values"]) {
-		std::string key = kvJson["key"].get<std::string>();
-		std::string value = kvJson["value"].get<std::string>();
-		int outputPinId = kvJson["output_pin_id"].get<int>();
-
-		AddKeyValue(key, value, outputPinId);
+		AddKeyValue("", "", -1)->LoadFromJson(kvJson);
 	}
 
-	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "input");
-	OutputPin = std::make_unique<Pin>(MainWindow::GetNextId(), "output");
+	InputPin = std::make_unique<Pin>(j["input"].get<int>(), "input");
+	OutputPin = std::make_unique<Pin>(j["output"].get<int>(), "output");
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {
@@ -173,7 +171,7 @@ KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& va
 	if (!pinid)
 		pinid = MainWindow::GetNextId();
 
-	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value));
+	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value, pinid));
 	kv->IsInherited = isInherited;
 	kv->IsComment = isComment;
 	kv->IsFolded = isFolded;
