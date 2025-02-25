@@ -1,13 +1,14 @@
 ﻿#include "MainWindow.h"
-#include "nodes/Node.h"
-#include "nodes/BlueprintNode.h"
-#include "nodes/CommentNode.h"
-#include "nodes/TagNode.h"
-#include "nodes/TreeNode.h"
-#include "nodes/GroupNode.h"
-#include "nodes/SimpleNode.h"
-#include "nodes/HoudiniNode.h"
-#include "nodes/SectionNode.h"
+#include "Pins/KeyValue.h"
+#include "Nodes/Node.h"
+#include "Nodes/BlueprintNode.h"
+#include "Nodes/CommentNode.h"
+#include "Nodes/TagNode.h"
+#include "Nodes/TreeNode.h"
+#include "Nodes/GroupNode.h"
+#include "Nodes/SimpleNode.h"
+#include "Nodes/HoudiniNode.h"
+#include "Nodes/SectionNode.h"
 
 void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 	for (auto& input : node->Inputs) {

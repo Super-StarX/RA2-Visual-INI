@@ -1,5 +1,5 @@
 ﻿#include "TagNode.h"
-#include "Pin.h"
+#include "Pins/Pin.h"
 #include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_node_editor.h>

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Pin.h"
+#include "Pins/Pin.h"
 #include "Link.h"
 #include "Object.h"
 #include "utilities/builders.h"

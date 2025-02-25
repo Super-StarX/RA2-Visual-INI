@@ -1,5 +1,6 @@
 ﻿#include "MainWindow.h"
-#include "nodes/SectionNode.h"
+#include "Nodes/SectionNode.h"
+#include "Pins/KeyValue.h"
 #include <nlohmann/json.hpp>
 
 #include <fstream>

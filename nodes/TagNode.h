@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "BaseNode.h"
-#include "Pin.h"
+#include "Pins/Pin.h"
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>

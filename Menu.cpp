@@ -1,7 +1,8 @@
 ﻿#include "MainWindow.h"
-#include "PinType.h"
 #include "Utils.h"
-#include "nodes/SectionNode.h"
+#include "Pins/PinType.h"
+#include "Pins/KeyValue.h"
+#include "Nodes/SectionNode.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <sstream>
 

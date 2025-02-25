@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "nodes/Node.h"
+#include "Nodes/Node.h"
 #include "utilities/builders.h"
 #include <vector>
 

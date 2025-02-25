@@ -1,7 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "LeftPanelClass.h"
 #include "MainWindow.h"
-#include "nodes/SectionNode.h"
+#include "Nodes/SectionNode.h"
 #include "utilities/builders.h"
 #include "utilities/widgets.h"
 #include <ImGui.h>

@@ -8,7 +8,7 @@
 #include <map>
 
 #include "Action.h"
-#include "nodes/Node.h"
+#include "Nodes/Node.h"
 #include "LeftPanelClass.h"
 #include "TemplateManager.h"
 

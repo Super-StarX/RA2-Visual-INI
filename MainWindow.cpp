@@ -1,9 +1,10 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
-#include "PinType.h"
 #include "Utils.h"
-#include "nodes/SectionNode.h"
+#include "Nodes/SectionNode.h"
+#include "Pins/KeyValue.h"
+#include "Pins/PinType.h"
 
 #include <imgui_internal.h>
 

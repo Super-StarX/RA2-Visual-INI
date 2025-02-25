@@ -1,7 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "Action.h"
 #include "MainWindow.h"
-#include "nodes/Node.h"
+#include "Nodes/Node.h"
 
 void MainWindow::Copy() {
 	clipboard.links.clear();

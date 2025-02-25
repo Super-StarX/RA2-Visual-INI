@@ -1,8 +1,8 @@
 ﻿#include "Pin.h"
 #include "PinType.h"
 #include "Utils.h"
-#include "nodes/Node.h"
-#include "nodes/SectionNode.h"
+#include "KeyValue.h"
+#include "Nodes/SectionNode.h"
 #include "MainWindow.h"
 #include "utilities/widgets.h"
 
