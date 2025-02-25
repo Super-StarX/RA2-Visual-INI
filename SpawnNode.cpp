@@ -68,6 +68,7 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 	node->Type = NodeType::Section;
 	node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
 	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
+	SectionNode::Map[section] = node;
 	return reinterpret_cast<SectionNode*>(node);
 }
 

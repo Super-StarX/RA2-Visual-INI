@@ -220,6 +220,8 @@ void MainWindow::ImportINI(const std::string& path) {
 			auto currentNode = map[section];
 			if (map.contains(value)) {
 				auto targetNode = map[value];
+				if (currentNode->KeyValues.empty())
+					continue;
 				auto kv = currentNode->KeyValues.back().get(); // 假设每个 key-value 对都已添加到 KeyValues 中
 				if (targetNode->InputPin->CanCreateLink(kv)){
 					auto link = kv->LinkTo(targetNode->InputPin.get());
