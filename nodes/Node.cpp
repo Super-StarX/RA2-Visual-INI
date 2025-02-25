@@ -150,6 +150,10 @@ Pin* Node::GetFirstCompatiblePin(Pin* pin) {
 	return nullptr;
 }
 
+KeyValue* Node::ConvertToKeyValue(Pin* pin) {
+	return nullptr;
+}
+
 ImVec2 Node::GetPosition() const {
 	return ed::GetNodePosition(ID);
 }
@@ -173,27 +177,32 @@ int Node::GetConnectedLinkCount() {
 
 void Node::SaveToJson(json& j) const {
 	auto pos = GetPosition();
-
+	// Inputs和Outputs暂时没存，因为目前没有实例
 	j["ID"] = ID.Get();
 	j["Section"] = Name;
 	j["Position"] = { pos.x, pos.y };
 	j["Color"] = { Color.Value.x,Color.Value.y,Color.Value.z };
 	j["Type"] = static_cast<int>(Type);
+	j["TypeName"] = TypeName;
+	j["IsFolded"] = IsFolded;
+	j["IsComment"] = IsComment;
 }
 
 void Node::LoadFromJson(const json& j) {
-	ID = ed::NodeId(j["ID"].get<int>());
-	Name = j["Section"].get<std::string>();
-	ImVec2 position = {
-		float(j["Position"][0].get<int>()),
-		float(j["Position"][1].get<int>())
-	};
+	ID = ed::NodeId(j["ID"]);
+	Name = j["Section"];
+	this->SetPosition({
+		j["Position"][0].get<float>(),
+		j["Position"][1].get<float>()
+	});
 	Color = {
-		float(j["Color"][0].get<float>()),
-		float(j["Color"][1].get<float>()),
-		float(j["Color"][2].get<float>()),
+		j["Color"][0].get<float>(),
+		j["Color"][1].get<float>(),
+		j["Color"][2].get<float>(),
 		1.0f
 	};
-	Type = static_cast<NodeType>(j["Type"].get<int>());
-	this->SetPosition(position);
+	Type = static_cast<NodeType>(j["Type"]);
+	TypeName = j["TypeName"];
+	IsFolded = j["IsFolded"];
+	IsComment = j["IsComment"];
 }

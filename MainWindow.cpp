@@ -86,6 +86,7 @@ void MainWindow::OnStart() {
 	m_TemplateManager.LoadTemplates("templates.ini");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
+	BaseNode::CreateHeader();
 
 	auto node1 = SpawnSectionNode("Section A");
 	node1->AddKeyValue("key", "Section B");
@@ -108,6 +109,7 @@ void MainWindow::OnStop() {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
 	}
+	BaseNode::DestroyHeader();
 }
 
 void MainWindow::OnFrame(float deltaTime) {

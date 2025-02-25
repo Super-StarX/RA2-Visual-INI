@@ -4,18 +4,21 @@
 ImTextureID BaseNode::m_HeaderBackground = nullptr;
 BaseNode::BaseNode(MainWindow* owner, int id, const char* name, ImColor color) :
 	Node(owner, id, name, color) {
-	m_HeaderBackground = owner->LoadTexture("data/BlueprintBackground.png");
+	
 }
 
 BaseNode::~BaseNode() {
-	auto releaseTexture = [this](ImTextureID& id) {
-		if (id) {
-			Owner->DestroyTexture(id);
-			id = nullptr;
-		}
-	};
+	Node::~Node();
+}
 
-	releaseTexture(m_HeaderBackground);
+void BaseNode::CreateHeader() {
+	m_HeaderBackground = MainWindow::Instance->LoadTexture("data/BlueprintBackground.png");
+}
+void BaseNode::DestroyHeader() {
+	if (m_HeaderBackground) {
+		MainWindow::Instance->DestroyTexture(m_HeaderBackground);
+		m_HeaderBackground = nullptr;
+	}
 }
 
 void BaseNode::UpdateInput(Pin& input) {

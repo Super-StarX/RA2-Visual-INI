@@ -31,6 +31,10 @@ void Pin::Tooltip() {
 	ImGui::Text("Links: %d", Links.size());
 }
 
+void Pin::SetValue(const std::string& str) {
+	Name = str; 
+}
+
 void Pin::SaveToJson(json& j) const {
 	j["ID"] = ID.Get();
 	j["Name"] = Name;

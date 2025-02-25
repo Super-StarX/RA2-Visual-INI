@@ -7,8 +7,7 @@ class KeyValue : public Pin {
 public:
 	KeyValue(::Node* node, std::string key = "key", std::string value = "value", int id = MainWindow::GetNextId());
 
-	virtual void SetValue(std::string str) { Value = str; }
-	virtual void ToolTip();
+	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 

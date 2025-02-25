@@ -30,14 +30,14 @@ public:
 
 	static Node* Get(ed::NodeId id);
 
-	virtual void Update() = 0;
-	virtual void Menu();
-	virtual void Tooltip();
+	virtual void Menu() override;
+	virtual void Tooltip() override;
 	virtual void HoverMenu(bool isHovered);
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual void Update() = 0;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
-	virtual KeyValue* ConvertToKeyValue(Pin* pin) { return nullptr; };
+	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;

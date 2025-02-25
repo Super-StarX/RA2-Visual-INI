@@ -106,9 +106,11 @@ void SectionNode::LoadFromJson(const json& j) {
 	Node::LoadFromJson(j);
 
 	InputPin = std::make_unique<Pin>(-1, "input");
+	InputPin->Node = this;
 	InputPin->LoadFromJson(j["Input"]);
 
 	OutputPin = std::make_unique<Pin>(-1, "output");
+	OutputPin->Node = this;
 	OutputPin->LoadFromJson(j["Output"]);
 
 	for (const auto& kvJson : j["KeyValues"])

@@ -95,7 +95,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		}
 	}
 
-	// 加载 Pins
+	// 加载 Pins 目前没有单独的Pin需要加载
 	/*
 	for (const auto& pinJson : root["Pins"]) {
 		auto pin = new Pin(0, ""); // 创建临时对象
@@ -104,13 +104,11 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	}
 	*/
 	// 加载 Links
-	/*
 	for (const auto& linkJson : root["Links"]) {
-		auto link = std::make_unique<Link>(0, 0, 0);
+		auto link = std::make_unique<Link>(-1, 0, 0);
 		link->LoadFromJson(linkJson);
 		Link::Array.push_back(std::move(link));
 	}
-	*/
 	SetNextId(root["Totals"].get<int>() + 1);
 
 	std::cout << "Data loaded from " << filePath << "\n";

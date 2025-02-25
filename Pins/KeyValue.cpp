@@ -8,7 +8,7 @@ KeyValue::KeyValue(::Node* node, std::string key, std::string value, int id) :
 	Node = node;
 }
 
-void KeyValue::ToolTip() {
+void KeyValue::Tooltip() {
 	if (!Node) return;
 
 	if (auto pKv = dynamic_cast<KeyValue*>(this)) {

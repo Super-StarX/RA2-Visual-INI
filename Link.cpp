@@ -56,20 +56,26 @@ void Link::Menu() {
 }
 
 void Link::SaveToJson(json& j) const {
-	json linkJson;
-	linkJson["ID"] = ID.Get();
-	linkJson["start_pin_id"] = StartPinID.Get();
-	linkJson["end_pin_id"] = EndPinID.Get();
-	j.push_back(linkJson);
+	j["ID"] = ID.Get();
+	j["StartID"] = StartPinID.Get();
+	j["EndID"] = EndPinID.Get();
+	j["TypeIdentifier"] = TypeIdentifier;
 }
 
 void Link::LoadFromJson(const json& j) {
-	ID = ed::LinkId(j["ID"].get<int>());
-	int startPinId = j["start_pin_id"].get<int>();
-	int endPinId = j["end_pin_id"].get<int>();
+	ID = ed::LinkId(j["ID"]);
+	StartPinID = ed::PinId(j["StartID"]);
+	EndPinID = ed::PinId(j["EndID"]);
+	TypeIdentifier = j["TypeIdentifier"];
 
-	if (auto startPin = Pin::Get(startPinId))
-		startPin->LinkTo(Pin::Get(endPinId));
+	if (auto startPin = Pin::Get(StartPinID)) {
+		if (auto endPin = Pin::Get(EndPinID)) {
+			if (endPin->Node)
+				startPin->SetValue(endPin->Node->Name);
+			startPin->Links[this->ID] = this;
+			endPin->Links[this->ID] = this;
+		}
+	}
 }
 
 void Link::Tooltip() {

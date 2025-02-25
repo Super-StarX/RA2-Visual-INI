@@ -35,10 +35,10 @@ public:
 	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
 	virtual ~Pin();
 
-	virtual void SetValue(std::string str) { Name = str; }
-	virtual void Tooltip();
+	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual void SetValue(const std::string& str);
 
 	void UpdateOutputLink(std::string value);
 	bool CanCreateLink(Pin* b);

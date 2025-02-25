@@ -4,6 +4,6 @@
 class GroupNode : public Node {
 public:
 	using Node::Node;
-	virtual void Update();
+	virtual void Update() override;
 };
 
