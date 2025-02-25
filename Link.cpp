@@ -64,7 +64,7 @@ void Link::SaveToJson(json& j) const {
 }
 
 void Link::LoadFromJson(const json& j) {
-	ID = j["ID"].get<int>();
+	ID = ed::LinkId(j["ID"].get<int>());
 	int startPinId = j["start_pin_id"].get<int>();
 	int endPinId = j["end_pin_id"].get<int>();
 

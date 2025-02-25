@@ -175,18 +175,25 @@ void Node::SaveToJson(json& j) const {
 	auto pos = GetPosition();
 
 	j["ID"] = ID.Get();
-	j["section"] = Name;
-	j["position"] = { pos.x, pos.y };
+	j["Section"] = Name;
+	j["Position"] = { pos.x, pos.y };
+	j["Color"] = { Color.Value.x,Color.Value.y,Color.Value.z };
+	j["Type"] = static_cast<int>(Type);
 }
 
 void Node::LoadFromJson(const json& j) {
-	Name = j["section"].get<std::string>();
-	ID = j["ID"].get<int>();
+	ID = ed::NodeId(j["ID"].get<int>());
+	Name = j["Section"].get<std::string>();
 	ImVec2 position = {
-		float(j["position"][0].get<int>()),
-		float(j["position"][1].get<int>())
+		float(j["Position"][0].get<int>()),
+		float(j["Position"][1].get<int>())
 	};
-
-	//auto node = SpawnSectionNode(section);
-	//node->SetPosition(position);
+	Color = {
+		float(j["Color"][0].get<float>()),
+		float(j["Color"][1].get<float>()),
+		float(j["Color"][2].get<float>()),
+		1.0f
+	};
+	Type = static_cast<NodeType>(j["Type"].get<int>());
+	this->SetPosition(position);
 }

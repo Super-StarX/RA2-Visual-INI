@@ -137,26 +137,35 @@ Pin* SectionNode::GetFirstCompatiblePin(Pin* pin) {
 
 void SectionNode::SaveToJson(json& j) const {
 	Node::SaveToJson(j);
+
+	json inputJson;
+	InputPin->SaveToJson(inputJson);
+	j["Input"] = inputJson;
+
+	json outputJson;
+	OutputPin->SaveToJson(outputJson);
+	j["Output"] = outputJson;
+
 	json keyValuesJson;
 	for (const auto& kv : KeyValues) {
 		json kvJson;
 		kv->SaveToJson(kvJson);
 		keyValuesJson.push_back(kvJson);
 	}
-
-	j["type"] = "Section";
-	j["input"] = InputPin->ID.Get();
-	j["output"] = OutputPin->ID.Get();
-	j["key_values"] = keyValuesJson;
+	j["KeyValues"] = keyValuesJson;
 }
 
 void SectionNode::LoadFromJson(const json& j) {
-	for (const auto& kvJson : j["key_values"]) {
-		AddKeyValue("", "", -1)->LoadFromJson(kvJson);
-	}
+	Node::LoadFromJson(j);
 
-	InputPin = std::make_unique<Pin>(j["input"].get<int>(), "input");
-	OutputPin = std::make_unique<Pin>(j["output"].get<int>(), "output");
+	InputPin = std::make_unique<Pin>(-1, "input");
+	InputPin->LoadFromJson(j["Input"]);
+
+	OutputPin = std::make_unique<Pin>(-1, "output");
+	OutputPin->LoadFromJson(j["Output"]);
+
+	for (const auto& kvJson : j["KeyValues"])
+		AddKeyValue("", "", -1)->LoadFromJson(kvJson);
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {

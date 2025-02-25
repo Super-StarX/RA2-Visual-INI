@@ -82,10 +82,15 @@ void MainWindow::LoadProject(const std::string& filePath) {
 
 	// 加载 Nodes
 	for (const auto& nodeJson : root["Nodes"]) {
-		if (nodeJson["type"] == "Section") {
+		switch (static_cast<NodeType>(nodeJson["Type"])) {
+		case NodeType::Section: {
 			auto node = std::make_unique<SectionNode>(this, -1, "");
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
+			break;
+		}
+		default:
+			throw "Unsupported node!";
 		}
 	}
 
@@ -105,7 +110,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		Link::Array.push_back(std::move(link));
 	}
 	*/
-	SetNextId(root["Totals"].get<int>());
+	SetNextId(root["Totals"].get<int>() + 1);
 
 	std::cout << "Data loaded from " << filePath << "\n";
 }
@@ -116,7 +121,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	json root;
 
 	// 保存 Nodes
-	root["Totals"] = GetNextId();
+	root["Totals"] = GetNextId() - 1;
 	for (const auto& node : Node::Array) {
 		json nodeJson;
 		node->SaveToJson(nodeJson);
