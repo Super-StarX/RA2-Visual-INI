@@ -1,4 +1,4 @@
-﻿#include "TagNode.h"
+#include "TagNode.h"
 #include "Pins/Pin.h"
 #include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -9,6 +9,7 @@
 namespace ed = ax::NodeEditor;
 
 std::unordered_set<std::string> TagNode::GlobalNames;
+std::unordered_set<std::string> TagNode::HighlightedNodes;
 TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
 	BaseNode(owner, id, name, color), IsInput(input){
 	GlobalNames.insert(name);
@@ -16,6 +17,13 @@ TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColo
 	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output");
 	InputPin->Node = this;
 	InputPin->Kind = PinKind::Input;
+}
+
+void TagNode::UpdateSelectedName() {
+	HighlightedNodes.clear();
+	for (auto& node : Node::GetSelectedNodes())
+		if (auto tagNode = dynamic_cast<TagNode*>(node))
+			HighlightedNodes.insert(tagNode->Name);
 }
 
 void TagNode::Update() {
@@ -27,9 +35,10 @@ void TagNode::Update() {
 
 	if (hasInputConflict)
 		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 0, 0, 1));
+	else if(HighlightedNodes.contains(Name))
+		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
 
 	builder->Begin(this->ID);
-
 	if (hasInputConflict) {
 		ed::PopStyleColor();
 		// 绘制标题（带冲突提示）
@@ -54,27 +63,14 @@ void TagNode::Update() {
 			hasInputConflict = true;
 		}
 		else {
-			GlobalNames.erase(this->Name);
+			GlobalNames.erase(Name);
 			GlobalNames.insert(Name);
 			hasInputConflict = false;
 		}
 	}
 	ImGui::PopItemWidth();
-
 	builder->End();
 
-	// 绘制冲突描边
-	if (hasInputConflict) {
-		constexpr float conflictOutlineWidth = 3.0f;
-		const ImColor conflictColor = (255, 0, 0, 255);
-		auto drawList = ed::GetNodeBackgroundDrawList(ID);
-		const ImVec2 padding(conflictOutlineWidth, conflictOutlineWidth);
-		const auto nodeRect = ed::Detail::ImGui_GetItemRect();
-		drawList->AddRect(
-			nodeRect.Min - padding, nodeRect.Max + padding,
-			conflictColor, 0.0f, 0, conflictOutlineWidth
-		);
-	}
 }
 
 void TagNode::SaveToJson(json& j) const {
@@ -97,11 +93,13 @@ void TagNode::LoadFromJson(const json& j) {
 
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
-	for (auto& node : Node::Array)
-		if (IsInput)
-			if (auto tagNode = dynamic_cast<TagNode*>(node.get()))
-				if (tagNode->IsInput && tagNode->Name == Name)
-					if (++count > 1)
-						return true;
+	for (auto& node : Node::Array) {
+		if (!IsInput)
+			continue;
+		auto tagNode = dynamic_cast<TagNode*>(node.get());
+		if (tagNode && tagNode->IsInput && tagNode->Name == Name)
+			if (++count > 1)
+				return true;
+	}
 	return false;
 }

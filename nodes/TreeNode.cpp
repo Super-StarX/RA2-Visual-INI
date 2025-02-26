@@ -28,7 +28,7 @@ void TreeNode::Update() {
 	ImGui::Spring(0, padding * 2);
 
 	ImRect inputsRect;
-	int inputAlpha = 200;
+	float inputAlpha = 200;
 	if (!this->Inputs.empty()) {
 		auto& pin = this->Inputs[0];
 		ImGui::Dummy(ImVec2(0, padding));
@@ -74,7 +74,7 @@ void TreeNode::Update() {
 	ImGui::Spring(0, padding * 2);
 
 	ImRect outputsRect;
-	int outputAlpha = 200;
+	float outputAlpha = 200;
 	if (!this->Outputs.empty()) {
 		auto& pin = this->Outputs[0];
 		ImGui::Dummy(ImVec2(0, padding));

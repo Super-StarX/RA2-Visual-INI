@@ -5,6 +5,7 @@
 #include "Nodes/SectionNode.h"
 #include "Pins/KeyValue.h"
 #include "Pins/PinType.h"
+#include "Nodes/TagNode.h"
 
 #include <imgui_internal.h>
 
@@ -49,6 +50,13 @@ void MainWindow::UpdateTouch() {
 		if (entry.second > 0.0f)
 			entry.second -= deltaTime;
 	}
+}
+
+void MainWindow::OnFrameStart() {
+	TagNode::UpdateSelectedName();
+}
+
+void MainWindow::OnFrameEnd() {
 }
 
 void MainWindow::OnStart() {
@@ -113,6 +121,7 @@ void MainWindow::OnStop() {
 }
 
 void MainWindow::OnFrame(float deltaTime) {
+	OnFrameStart();
 	UpdateTouch();
 
 	auto& io = ImGui::GetIO();
@@ -158,4 +167,5 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	//ImGui::ShowTestWindow();
 	//ImGui::ShowMetricsWindow();
+	OnFrameEnd();
 }

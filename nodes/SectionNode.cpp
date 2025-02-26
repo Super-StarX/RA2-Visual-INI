@@ -188,7 +188,7 @@ void SectionNode::FoldedKeyValues(size_t& i) {
 	if (ImGui::Button("", buttonSize))
 		for (size_t j = foldStart; j < i; j++)
 			this->KeyValues[j]->IsFolded = false;
-	ImGui::Dummy(ImVec2(0, 0.15));
+	ImGui::Dummy(ImVec2(0, 0.15f));
 	ImGui::PopID();
 	ImGui::PopStyleVar();
 }

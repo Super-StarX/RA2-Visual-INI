@@ -1,4 +1,4 @@
-﻿#include "Node.h"
+#include "Node.h"
 #include "Link.h"
 #include "MainWindow.h"
 #include "TypeLoader.h"
@@ -12,6 +12,16 @@ Node* Node::Get(ed::NodeId id) {
 			return node.get();
 
 	return nullptr;
+}
+
+std::vector<Node*> Node::GetSelectedNodes() {
+	std::vector<Node*> res;
+	std::vector<ed::NodeId> selectedNodes;
+	ed::GetSelectedNodes(selectedNodes.data(), ed::GetSelectedObjectCount());
+	for (auto& id : selectedNodes)
+		if (auto node = Node::Get(id))
+			res.push_back(node);
+	return res;
 }
 
 void Node::Menu() {
@@ -28,21 +38,18 @@ void Node::Menu() {
 		auto& ts = TypeSystem::Get();
 
 		// 显示所有已注册类型
-		for (auto& [name, _] : ts.Sections) {
-			if (ImGui::Selectable(name.c_str())) {
+		for (auto& [name, _] : ts.Sections)
+			if (ImGui::Selectable(name.c_str()))
 				TypeName = name;
-			}
-		}
-		for (auto& [name, _] : ts.NumberLimits) {
-			if (ImGui::Selectable(name.c_str())) {
+		for (auto& [name, _] : ts.NumberLimits)
+			if (ImGui::Selectable(name.c_str()))
 				TypeName = name;
-			}
-		}
-		for (auto& [name, _] : ts.Lists) {
-			if (ImGui::Selectable(name.c_str())) {
+		for (auto& [name, _] : ts.StringLimits)
+			if (ImGui::Selectable(name.c_str()))
 				TypeName = name;
-			}
-		}
+		for (auto& [name, _] : ts.Lists)
+			if (ImGui::Selectable(name.c_str()))
+				TypeName = name;
 		ImGui::EndCombo();
 	}
 

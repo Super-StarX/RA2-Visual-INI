@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -64,6 +64,8 @@ public:
 	void ImportINI(const std::string& path);
 	void ExportINI(const std::string& path);
 
+	void OnFrameStart();
+	void OnFrameEnd();
 	virtual void OnStart() override;
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;

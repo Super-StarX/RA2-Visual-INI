@@ -29,6 +29,7 @@ public:
 		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
 
 	static Node* Get(ed::NodeId id);
+	static std::vector<Node*> GetSelectedNodes();
 
 	virtual void Menu() override;
 	virtual void Tooltip() override;
@@ -42,8 +43,7 @@ public:
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
-
-
+	
 	MainWindow* Owner = nullptr;
 
 	ed::NodeId ID;
