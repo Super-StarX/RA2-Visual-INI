@@ -1,4 +1,4 @@
-#include "Node.h"
+﻿#include "Node.h"
 #include "Link.h"
 #include "MainWindow.h"
 #include "TypeLoader.h"
@@ -15,13 +15,16 @@ Node* Node::Get(ed::NodeId id) {
 }
 
 std::vector<Node*> Node::GetSelectedNodes() {
-	std::vector<Node*> res;
+	std::vector<Node*> ret;
 	std::vector<ed::NodeId> selectedNodes;
-	ed::GetSelectedNodes(selectedNodes.data(), ed::GetSelectedObjectCount());
+	selectedNodes.resize(ed::GetSelectedObjectCount(), ed::NodeId(0));
+	ed::GetSelectedNodes(selectedNodes.data(), (signed)selectedNodes.size());
+
 	for (auto& id : selectedNodes)
 		if (auto node = Node::Get(id))
-			res.push_back(node);
-	return res;
+			ret.push_back(node);
+
+	return ret;
 }
 
 void Node::Menu() {
@@ -115,7 +118,7 @@ void Node::HoverMenu(bool isHovered) {
 			auto typeInfo = TypeSystem::Get().GetTypeInfo(this->TypeName);
 			switch (typeInfo.Category) {
 			case TypeCategory::NumberLimit:
-				ImGui::Text("Range: %d - %d", 
+				ImGui::Text("Range: %d - %d",
 					std::get<NumberLimit>(typeInfo.Data).Min,
 					std::get<NumberLimit>(typeInfo.Data).Max);
 				break;

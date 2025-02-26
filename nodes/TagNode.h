@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BaseNode.h"
 #include "Pins/Pin.h"
 #include <memory>
@@ -12,9 +12,7 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	// 维护全局标签注册表
-	static std::unordered_set<std::string> GlobalNames;
 	static std::unordered_set<std::string> HighlightedNodes;
-	static std::unordered_map<std::string, Pin*> OutputPins;
 	static void UpdateSelectedName();
 
 	void Update() override;

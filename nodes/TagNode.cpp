@@ -1,19 +1,16 @@
-#include "TagNode.h"
+﻿#include "TagNode.h"
 #include "Pins/Pin.h"
 #include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
-#include <memory.h>
+#include <memory>
 
 namespace ed = ax::NodeEditor;
 
-std::unordered_set<std::string> TagNode::GlobalNames;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
 TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
 	BaseNode(owner, id, name, color), IsInput(input){
-	GlobalNames.insert(name);
-	
 	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output");
 	InputPin->Node = this;
 	InputPin->Kind = PinKind::Input;
@@ -44,6 +41,8 @@ void TagNode::Update() {
 		// 绘制标题（带冲突提示）
 		ImGui::Text("(Conflict!)");
 	}
+	else if (HighlightedNodes.contains(Name))
+		ed::PopStyleColor();
 
 	{
 		auto alpha = InputPin->GetAlpha();
@@ -57,17 +56,7 @@ void TagNode::Update() {
 
 	// 名称输入
 	ImGui::PushItemWidth(120);
-	if (ImGui::InputText("##Name", &Name)) {
-		// 名称去重处理
-		if (GlobalNames.count(Name)) {
-			hasInputConflict = true;
-		}
-		else {
-			GlobalNames.erase(Name);
-			GlobalNames.insert(Name);
-			hasInputConflict = false;
-		}
-	}
+	ImGui::InputText("##Name", &Name);
 	ImGui::PopItemWidth();
 	builder->End();
 
