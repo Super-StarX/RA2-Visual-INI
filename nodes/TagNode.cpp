@@ -77,6 +77,24 @@ void TagNode::Update() {
 	}
 }
 
+void TagNode::SaveToJson(json& j) const {
+	Node::SaveToJson(j);
+
+	json inputJson;
+	InputPin->SaveToJson(inputJson);
+	j["Input"] = inputJson;
+	j["Type"] = IsInput;
+}
+
+void TagNode::LoadFromJson(const json& j) {
+	Node::LoadFromJson(j);
+
+	InputPin = std::make_unique<Pin>(-1, "input");
+	InputPin->Node = this;
+	InputPin->LoadFromJson(j["Input"]);
+	IsInput = j["Type"];
+}
+
 bool TagNode::CheckInputConflicts() {
 	int count = 0;
 	for (auto& node : Node::Array)

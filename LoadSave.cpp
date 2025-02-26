@@ -1,5 +1,6 @@
 ﻿#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
+#include "Nodes/TagNode.h"
 #include "Pins/KeyValue.h"
 #include <nlohmann/json.hpp>
 
@@ -88,6 +89,14 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			auto node = std::make_unique<SectionNode>(this, -1, "");
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Tag: {
+			/*
+			auto node = std::make_unique<TagNode>(this, -1, "");
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
+			*/
 			break;
 		}
 		default:
