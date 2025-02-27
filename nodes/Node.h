@@ -40,6 +40,7 @@ public:
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 
+	ImVec2 GetNodeSize() const;
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
@@ -53,6 +54,7 @@ public:
 	ImColor Color{};
 	NodeType Type{ NodeType::Section };
 	ImVec2 Size;
+	int level;
 	bool IsFolded{false};
 	bool IsComment{false};
 	float HoverTimer = 0.0f;

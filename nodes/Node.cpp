@@ -164,6 +164,10 @@ KeyValue* Node::ConvertToKeyValue(Pin* pin) {
 	return nullptr;
 }
 
+ImVec2 Node::GetNodeSize() const {
+	return ed::GetNodeSize(ID);
+}
+
 ImVec2 Node::GetPosition() const {
 	return ed::GetNodePosition(ID);
 }
