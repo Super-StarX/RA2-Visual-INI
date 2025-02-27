@@ -2,6 +2,7 @@
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
 #include "Pins/KeyValue.h"
+#include "version.h"
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -77,6 +78,19 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	file >> root;
 	file.close();
 
+	{
+		std::string version = root["Version"];
+		int major, minor, revision, patch;
+		sscanf_s(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &patch);
+		if (VERSION_PATCH != patch) {
+			wchar_t buffer[0x100] = { 0 };
+			swprintf_s(buffer, L"当前版本：%hs\n存档版本：%hs\n\n要继续读取吗？", FILE_VERSION_STR, version.c_str());
+			if (MessageBox(NULL, buffer, L"警告：版本不同，存档可能不兼容！", MB_YESNO | MB_ICONWARNING) == IDNO) {
+				return;
+			}
+		}
+	}
+
 	// 清空现有数据
 	Node::Array.clear();
 	Pin::Array.clear();
@@ -104,14 +118,6 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		}
 	}
 
-	// 加载 Pins 目前没有单独的Pin需要加载
-	/*
-	for (const auto& pinJson : root["Pins"]) {
-		auto pin = new Pin(0, ""); // 创建临时对象
-		pin->LoadFromJson(pinJson);
-		Pin::Array[pin->ID] = pin;
-	}
-	*/
 	// 加载 Links
 	for (const auto& linkJson : root["Links"]) {
 		auto link = std::make_unique<Link>(-1, 0, 0);
@@ -123,27 +129,19 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	std::cout << "Data loaded from " << filePath << "\n";
 }
 
-//把注释取消，就会开局弹框，我不理解
 void MainWindow::SaveProject(const std::string& filePath) {
 	using json = nlohmann::json;
 	json root;
 
 	// 保存 Nodes
 	root["Totals"] = GetNextId() - 1;
+	root["Version"] = FILE_VERSION_STR;
 	for (const auto& node : Node::Array) {
 		json nodeJson;
 		node->SaveToJson(nodeJson);
 		root["Nodes"].push_back(nodeJson);
 	}
 
-	// 保存 Pins
-	/*
-	for (const auto& [id, pin] : Pin::Array) {
-		json pinJson;
-		pin->SaveToJson(pinJson);
-		root["Pins"].push_back(pinJson);
-	}
-	*/
 	// 保存 Links
 	for (const auto& link : Link::Array) {
 		json linkJson;

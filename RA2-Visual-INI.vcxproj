@@ -202,13 +202,18 @@
     <ClInclude Include="Nodes\SimpleNode.h" />
     <ClInclude Include="Pins\PinType.h" />
     <ClInclude Include="Nodes\TagNode.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
+    <ClInclude Include="version.h" />
     <ClInclude Include="TypeLoader.h" />
     <ClInclude Include="utilities\builders.h" />
     <ClInclude Include="utilities\drawing.h" />
     <ClInclude Include="utilities\widgets.h" />
     <ClInclude Include="Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
