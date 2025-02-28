@@ -8,13 +8,20 @@
 class TagNode : public BaseNode {
 public:
 	TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color = ImColor(255, 255, 255));
+	virtual ~TagNode();
 
 	virtual void Menu();
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual void SetName(const std::string& str) override;
+
 	// 维护全局标签注册表
+	static std::unordered_map<std::string, int> GlobalNames;
+	static std::unordered_map<std::string, TagNode*> Inputs;
+	static bool HasInputChanged;
 	static std::unordered_set<std::string> HighlightedNodes;
 	static void UpdateSelectedName();
+	static void UpdateInputs();
 
 	void Update() override;
 

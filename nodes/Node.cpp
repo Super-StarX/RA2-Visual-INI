@@ -144,6 +144,10 @@ void Node::HoverMenu(bool isHovered) {
 	}
 }
 
+void Node::SetName(const std::string& str) {
+	Name = str;
+}
+
 Pin* Node::GetFirstCompatiblePin(Pin* pin) {
 	if (pin->Kind == PinKind::Input) {
 		for (auto& output : Outputs) {
@@ -204,7 +208,7 @@ void Node::SaveToJson(json& j) const {
 
 void Node::LoadFromJson(const json& j) {
 	ID = ed::NodeId(j["ID"]);
-	Name = j["Section"];
+	SetName(j["Section"]);
 	this->SetPosition({
 		j["Position"][0].get<float>(),
 		j["Position"][1].get<float>()

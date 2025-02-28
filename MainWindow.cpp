@@ -57,6 +57,7 @@ void MainWindow::OnFrameStart() {
 }
 
 void MainWindow::OnFrameEnd() {
+	TagNode::UpdateInputs();
 }
 
 void MainWindow::OnStart() {

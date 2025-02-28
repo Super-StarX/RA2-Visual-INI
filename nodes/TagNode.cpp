@@ -9,12 +9,31 @@
 
 namespace ed = ax::NodeEditor;
 
+std::unordered_map<std::string, int> TagNode::GlobalNames;
+std::unordered_map<std::string, TagNode*> TagNode::Inputs;
+bool TagNode::HasInputChanged = false;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
 TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
 	BaseNode(owner, id, name, color), IsInput(input){
+
+	if (IsInput) {
+		GlobalNames[Name]++;
+		HasInputChanged = true;
+	}
+
 	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output");
 	InputPin->Node = this;
 	InputPin->Kind = PinKind::Input;
+}
+
+TagNode::~TagNode() {
+	if (!IsInput)
+		return;
+
+	GlobalNames[Name]--;
+	HasInputChanged = true;
+	if (GlobalNames[Name] == 0)
+		GlobalNames.erase(Name);
 }
 
 void TagNode::UpdateSelectedName() {
@@ -22,6 +41,38 @@ void TagNode::UpdateSelectedName() {
 	for (auto& node : Node::GetSelectedNodes())
 		if (auto tagNode = dynamic_cast<TagNode*>(node))
 			HighlightedNodes.insert(tagNode->Name);
+}
+
+void TagNode::UpdateInputs() {
+	if (!HasInputChanged)
+		return;
+
+	HasInputChanged = false;
+	Inputs.clear();
+	for (auto& node : Node::Array)
+		if (auto tag = dynamic_cast<TagNode*>(node.get()))
+			if (tag->IsInput && GlobalNames[tag->Name] == 1)
+				Inputs[tag->Name] = tag;
+
+}
+
+void TagNode::SetName(const std::string& str) {
+	if (Name == str)
+		return;
+
+	if (!IsInput)
+		return Node::SetName(str);
+
+	// 旧名字-1
+	GlobalNames[Name]--;
+	if (GlobalNames[Name] == 0)
+		GlobalNames.erase(Name);
+
+	Node::SetName(str);
+
+	// 新名字+1
+	GlobalNames[Name]++;
+	HasInputChanged = true;
 }
 
 void TagNode::Update() {
@@ -56,8 +107,10 @@ void TagNode::Update() {
 		}
 
 		// 名称输入
-		Utils::SetNextInputWidth(Name, 120.f);
-		ImGui::InputText("##Name", &Name);
+		std::string name = Name;
+		Utils::SetNextInputWidth(name, 120.f);
+		if (ImGui::InputText("##Name", &name))
+			SetName(name);
 		builder->End();
 	}
 	else {
@@ -125,23 +178,18 @@ void TagNode::LoadFromJson(const json& j) {
 }
 
 bool TagNode::CheckInputConflicts() {
-	int count = 0;
-	for (auto& node : Node::Array) {
-		if (!IsInput)
-			continue;
-		auto tagNode = dynamic_cast<TagNode*>(node.get());
-		if (tagNode && tagNode->IsInput && tagNode->Name == Name)
-			if (++count > 1)
-				return true;
-	}
+	if (!IsInput)
+		return false;
+
+	if (auto it = GlobalNames.find(Name); it != GlobalNames.end())
+		return it->second > 1;
+
 	return false;
 }
 
 TagNode* TagNode::GetInputTagNode() {
-	for (auto& node : Node::Array) {
-		auto tag = dynamic_cast<TagNode*>(node.get());
-		if (tag->IsInput && Name == tag->Name)
-			return tag;
-	}
+	if (auto it = Inputs.find(Name); it != Inputs.end())
+		return it->second;
+
 	return nullptr;
 }

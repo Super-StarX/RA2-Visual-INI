@@ -27,6 +27,7 @@ public:
 
 	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
 		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
+	virtual ~Node() = default;
 
 	static Node* Get(ed::NodeId id);
 	static std::vector<Node*> GetSelectedNodes();
@@ -37,6 +38,7 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	virtual void Update() = 0;
+	virtual void SetName(const std::string& str);
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 
