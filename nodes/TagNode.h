@@ -19,6 +19,7 @@ public:
 
 	std::unique_ptr<Pin> InputPin;			// 唯一输入引脚
 	bool IsInput{ true };
+	bool IsConstant{ false };
 
 	// 引脚管理
 	void UpdatePins();
