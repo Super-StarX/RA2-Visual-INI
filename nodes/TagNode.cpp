@@ -136,3 +136,12 @@ bool TagNode::CheckInputConflicts() {
 	}
 	return false;
 }
+
+TagNode* TagNode::GetInputTagNode() {
+	for (auto& node : Node::Array) {
+		auto tag = dynamic_cast<TagNode*>(node.get());
+		if (tag->IsInput && Name == tag->Name)
+			return tag;
+	}
+	return nullptr;
+}

@@ -25,4 +25,5 @@ public:
 	// 引脚管理
 	void UpdatePins();
 	bool CheckInputConflicts();
+	TagNode* GetInputTagNode();
 };

@@ -260,6 +260,33 @@ void MainWindow::ImportINI(const std::string& path) {
 	ApplyForceDirectedLayout();
 }
 
+// 递归解析指针类型TagNode的值
+std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited) {
+	if (!tagNode || visited.count(tagNode))
+		return "";
+	visited.insert(tagNode);
+
+	if (tagNode->IsConstant)
+		return tagNode->Name;
+
+	if (!tagNode->InputPin)
+		return "";
+
+	auto inputNode = tagNode->GetInputTagNode();
+	if (!inputNode)
+		return "";
+
+	if (auto section = dynamic_cast<SectionNode*>(inputNode)) {
+		return section->Name;
+	}
+	else if (auto tag = dynamic_cast<TagNode*>(inputNode)) {
+		if (tag->IsInput)
+			return tag->Name;
+		return ResolveTagPointer(tag, visited);
+	}
+	return "";
+}
+
 void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 
@@ -272,8 +299,8 @@ void MainWindow::ExportINI(const std::string& path) {
 	// 4. 继承的，递归调用函数
 	std::function<void(SectionNode*, std::vector<std::pair<std::string, std::string>>&, std::unordered_set<SectionNode*>&)> Collect =
 		[&](SectionNode* node, std::vector<std::pair<std::string, std::string>>& output, std::unordered_set<SectionNode*>& visited) {
-		
-		if (!node || visited.count(node)) 
+
+		if (!node || visited.count(node))
 			return;
 
 		visited.insert(node);
@@ -282,19 +309,32 @@ void MainWindow::ExportINI(const std::string& path) {
 			if (kv->IsComment)
 				continue;
 
-			auto linkedNode = kv->GetLinkedSection();
+			auto linkedNode = kv->GetLinkedNode();
 			if (!linkedNode) {
 				output.emplace_back(kv->Key, kv->Value);
 				continue;
 			}
 
-			if (!kv->IsInherited) {
-				output.emplace_back(kv->Key, linkedNode->Name);
-				continue;
+			// 处理SectionNode链接
+			if (auto sectionLinked = dynamic_cast<SectionNode*>(linkedNode)) {
+				if (!kv->IsInherited) {
+					output.emplace_back(kv->Key, sectionLinked->Name);
+				}
+				else {
+					Collect(sectionLinked, output, visited);
+				}
 			}
-
-			// 继承的情况，递归调用
-			Collect(linkedNode, output, visited);
+			// 处理TagNode链接
+			else if (auto tagLinked = dynamic_cast<TagNode*>(linkedNode)) {
+				if (tagLinked->IsConstant) {
+					output.emplace_back(kv->Key, tagLinked->Name);
+				}
+				else {
+					std::unordered_set<BaseNode*> tagVisited;
+					std::string value = ResolveTagPointer(tagLinked, tagVisited);
+					output.emplace_back(kv->Key, value);
+				}
+			}
 		}
 	};
 
