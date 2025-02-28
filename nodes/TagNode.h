@@ -9,6 +9,7 @@ class TagNode : public BaseNode {
 public:
 	TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color = ImColor(255, 255, 255));
 
+	virtual void Menu();
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	// 维护全局标签注册表

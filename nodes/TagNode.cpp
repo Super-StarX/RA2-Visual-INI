@@ -1,6 +1,7 @@
 ﻿#include "TagNode.h"
 #include "Pins/Pin.h"
 #include "MainWindow.h"
+#include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
@@ -24,42 +25,73 @@ void TagNode::UpdateSelectedName() {
 }
 
 void TagNode::Update() {
-	// 冲突检测
-	bool hasInputConflict = CheckInputConflicts();
-
 	// 开始节点
 	auto builder = GetBuilder();
 
-	if (hasInputConflict)
-		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 0, 0, 1));
-	else if(HighlightedNodes.contains(Name))
-		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
+	if (!IsConstant) {
+		// 冲突检测
+		bool hasInputConflict = CheckInputConflicts();
+		if (hasInputConflict)
+			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 0, 0, 1));
+		else if (HighlightedNodes.contains(Name))
+			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
 
-	builder->Begin(this->ID);
-	if (hasInputConflict) {
-		ed::PopStyleColor();
-		// 绘制标题（带冲突提示）
-		ImGui::Text("(Conflict!)");
+		builder->Begin(this->ID);
+		if (hasInputConflict) {
+			ed::PopStyleColor();
+			// 绘制标题（带冲突提示）
+			ImGui::Text("(Conflict!)");
+		}
+		else if (HighlightedNodes.contains(Name))
+			ed::PopStyleColor();
+
+		{
+			auto alpha = InputPin->GetAlpha();
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
+			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255), IsInput);
+			ed::EndPin();
+			ImGui::PopStyleVar();
+			ImGui::SameLine();
+		}
+
+		// 名称输入
+		Utils::SetNextInputWidth(Name, 120.f);
+		ImGui::InputText("##Name", &Name);
+		builder->End();
 	}
-	else if (HighlightedNodes.contains(Name))
-		ed::PopStyleColor();
+	else {
+		if (HighlightedNodes.contains(Name))
+			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
 
-	{
-		auto alpha = InputPin->GetAlpha();
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-		ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-		InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255), IsInput);
-		ed::EndPin();
-		ImGui::PopStyleVar();
-		ImGui::SameLine();
+		builder->Begin(this->ID);
+
+		if (HighlightedNodes.contains(Name))
+			ed::PopStyleColor();
+
+		Utils::SetNextInputWidth(Name, 120.f);
+		ImGui::InputText("##Name", &Name);
+
+		{
+			ImGui::SameLine();
+			auto alpha = InputPin->GetAlpha();
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ed::BeginPin(InputPin->ID, ed::PinKind::Output);
+			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
+			ed::EndPin();
+			ImGui::PopStyleVar();
+		}
+
+		builder->End();
 	}
 
-	// 名称输入
-	ImGui::PushItemWidth(120);
-	ImGui::InputText("##Name", &Name);
-	ImGui::PopItemWidth();
-	builder->End();
+}
 
+void TagNode::Menu() {
+	Node::Menu();
+
+	if (ImGui::MenuItem(IsConstant ? "Set Variable" : "Set Constant"))
+		IsConstant = !IsConstant;
 }
 
 void TagNode::SaveToJson(json& j) const {
