@@ -1,7 +1,8 @@
 ﻿#include "TagNode.h"
-#include "Pins/Pin.h"
 #include "MainWindow.h"
 #include "Utils.h"
+#include "Pins/Pin.h"
+#include "Nodes/SectionNode.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
@@ -177,19 +178,40 @@ void TagNode::LoadFromJson(const json& j) {
 	}
 }
 
-bool TagNode::CheckInputConflicts() {
-	if (!IsInput)
-		return false;
+// 递归解析指针类型TagNode的值
+std::string TagNode::ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited) {
+	if (!tagNode || visited.count(tagNode))
+		return "";
+	visited.insert(tagNode);
 
-	if (auto it = GlobalNames.find(Name); it != GlobalNames.end())
-		return it->second > 1;
+	if (tagNode->IsConstant)
+		return tagNode->Name;
+
+	if (!tagNode->InputPin)
+		return "";
+
+	auto inputNode = tagNode->GetInputTagNode();
+	if (!inputNode)
+		return "";
+
+	if (auto section = dynamic_cast<SectionNode*>(inputNode)) {
+		return section->Name;
+	}
+	else if (auto tag = dynamic_cast<TagNode*>(inputNode)) {
+		if (tag->IsInput)
+			return tag->Name;
+		return ResolveTagPointer(tag, visited);
+	}
+	return "";
+}
+
+bool TagNode::CheckInputConflicts() const {
+	if (IsInput && GlobalNames.contains(Name))
+		return GlobalNames[Name] > 1;
 
 	return false;
 }
 
-TagNode* TagNode::GetInputTagNode() {
-	if (auto it = Inputs.find(Name); it != Inputs.end())
-		return it->second;
-
-	return nullptr;
+TagNode* TagNode::GetInputTagNode() const {
+	return Inputs.contains(Name) ? Inputs[Name] : nullptr;
 }

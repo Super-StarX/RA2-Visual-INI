@@ -235,56 +235,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			}
 		}
 	}
-	// 初始化位置（圆形布局）
-	{
-		// 获取可用布局区域（示例值，根据实际UI调整）
-		const ImVec2 layoutSize = ImGui::GetContentRegionAvail();
-		const ImVec2 center(layoutSize.x / 2, layoutSize.y / 2);
-		const float radius = (std::min)(layoutSize.x, layoutSize.y) * 0.4f; // 修复std::min宏问题
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_real_distribution<> dis(-0.5f, 0.5f);
-
-		const float angleStep = 2 * 3.14159f / Node::Array.size();
-		float currentAngle = 0;
-		for (auto& node : Node::Array) {
-			ImVec2 pos = {
-				float(center.x + radius * cos(currentAngle) + dis(gen) * 50),
-				float(center.y + radius * sin(currentAngle) + dis(gen) * 50)
-			};
-			node->SetPosition(pos);
-			currentAngle += angleStep;
-		}
-	}
-
 	ApplyForceDirectedLayout();
-}
-
-// 递归解析指针类型TagNode的值
-std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited) {
-	if (!tagNode || visited.count(tagNode))
-		return "";
-	visited.insert(tagNode);
-
-	if (tagNode->IsConstant)
-		return tagNode->Name;
-
-	if (!tagNode->InputPin)
-		return "";
-
-	auto inputNode = tagNode->GetInputTagNode();
-	if (!inputNode)
-		return "";
-
-	if (auto section = dynamic_cast<SectionNode*>(inputNode)) {
-		return section->Name;
-	}
-	else if (auto tag = dynamic_cast<TagNode*>(inputNode)) {
-		if (tag->IsInput)
-			return tag->Name;
-		return ResolveTagPointer(tag, visited);
-	}
-	return "";
 }
 
 void MainWindow::ExportINI(const std::string& path) {
@@ -331,7 +282,7 @@ void MainWindow::ExportINI(const std::string& path) {
 				}
 				else {
 					std::unordered_set<BaseNode*> tagVisited;
-					std::string value = ResolveTagPointer(tagLinked, tagVisited);
+					std::string value = tagLinked->ResolveTagPointer(tagLinked, tagVisited);
 					output.emplace_back(kv->Key, value);
 				}
 			}

@@ -23,6 +23,7 @@ public:
 	static void UpdateSelectedName();
 	static void UpdateInputs();
 
+	std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited);
 	void Update() override;
 
 	std::unique_ptr<Pin> InputPin;			// 唯一输入引脚
@@ -31,6 +32,6 @@ public:
 
 	// 引脚管理
 	void UpdatePins();
-	bool CheckInputConflicts();
-	TagNode* GetInputTagNode();
+	bool CheckInputConflicts() const;
+	TagNode* GetInputTagNode() const;
 };
