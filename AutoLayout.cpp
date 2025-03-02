@@ -8,7 +8,6 @@
 #include <limits>
 
 void MainWindow::ApplyForceDirectedLayout() {
-
 	// 1. 动态创建标签节点
 	CreateTagNodesForMultiInputs();
 
@@ -65,9 +64,7 @@ void MainWindow::CreateTagNodesForMultiInputs() {
 	}
 }
 
-std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {
-	std::unordered_map<Node*, std::vector<Node*>> childrenMap;
-
+std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {std::unordered_map<Node*, std::vector<Node*>> childrenMap;
 	for (auto& node : Node::Array) {
 		// 处理所有具有输出引脚的节点类型
 		auto section = dynamic_cast<SectionNode*>(node.get());
@@ -134,6 +131,7 @@ std::map<int, std::vector<Node*>> MainWindow::CollectLayerNodes(const std::unord
 
 	// 按层级收集节点
 	for (auto& node : Node::Array) {
+		if (dynamic_cast<TagNode*>(node.get())) continue; // 跳过标签节点
 		if (node->level >= 0)
 			layers[node->level].push_back(node.get());
 		else
@@ -183,6 +181,9 @@ void MainWindow::ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& l
 			auto node = nodes[i];
 			ImVec2 size = node->GetNodeSize();
 
+			// 跳过标签节点的布局
+			if (dynamic_cast<TagNode*>(node)) continue;
+
 			float potentialWidth = currentRow->width;
 			if (i > 0) potentialWidth += horizontalSpacing;
 			potentialWidth += size.x;
@@ -213,5 +214,20 @@ void MainWindow::ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& l
 			layerHeight = std::max(layerHeight, row.y + row.height - currentY);
 		}
 		currentY += layerHeight + layerSpacing;
+	}
+
+	// 单独处理标签节点的位置
+	for (auto& node : Node::Array) {
+		if (auto tagNode = dynamic_cast<TagNode*>(node.get())) {
+			if (tagNode->IsInput) {
+				// 输入标签固定在关联节点左侧
+				if (auto inputTag = TagNode::Inputs[tagNode->Name])
+					if (auto associatedNode = inputTag->InputPin->GetLinkedNode())
+						tagNode->SetPosition(associatedNode->GetPosition() - ImVec2(200, 0));
+			}
+			else if (auto sourceNode = tagNode->InputPin->GetLinkedNode()) {
+				tagNode->SetPosition(sourceNode->GetPosition() + ImVec2(200, 0));
+			}
+		}
 	}
 }

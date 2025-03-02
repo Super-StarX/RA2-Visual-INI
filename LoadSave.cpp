@@ -127,6 +127,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	SetNextId(root["Totals"].get<int>() + 1);
 
 	std::cout << "Data loaded from " << filePath << "\n";
+	ed::NavigateToContent();
 }
 
 void MainWindow::SaveProject(const std::string& filePath) {
@@ -236,6 +237,7 @@ void MainWindow::ImportINI(const std::string& path) {
 		}
 	}
 	ApplyForceDirectedLayout();
+	ed::NavigateToContent();
 }
 
 void MainWindow::ExportINI(const std::string& path) {

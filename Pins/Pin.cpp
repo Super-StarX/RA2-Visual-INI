@@ -103,9 +103,9 @@ Node* Pin::GetLinkedNode() const {
 	if (!IsLinked())
 		return nullptr;
 
-	auto begin = Links.begin();
-	if (auto endpin = Get(begin->second->EndPinID))
-		return endpin->Node;
+	for (auto& [id, link] : Links)
+		if (auto otherPin = link->StartPinID == ID ? Get(link->EndPinID) : Get(link->StartPinID))
+			return otherPin->Node;
 
 	return nullptr;
 }
