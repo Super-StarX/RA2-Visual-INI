@@ -159,7 +159,7 @@ void MainWindow::ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& l
 	const float verticalSpacing = 60.0f;
 	const float layerSpacing = 120.0f;
 	const ImVec2 startPos(50.0f, 50.0f);
-	const float maxRowWidth = std::sqrtf(Node::Array.size()) * 500;
+	const float maxRowWidth = std::sqrtf(static_cast<float>(Node::Array.size())) * 500;
 	float currentY = startPos.y;
 
 	for (auto& layer : layers) {

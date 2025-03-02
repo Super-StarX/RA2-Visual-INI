@@ -12,9 +12,9 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 
-	float DrawValueWidget(const TypeInfo& type);
+	float DrawValueWidget(std::string& value, const TypeInfo& type);
 
-	static void DrawListInput(std::string& listValue, const ListType& listType);
+	void DrawListInput(std::string& listValue, const ListType& listType);
 	static void OpenListEditor(std::string& listValue, const ListType& listType);
 	static bool DrawElementEditor(std::string& value, const TypeInfo& type);
 

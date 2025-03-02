@@ -39,12 +39,12 @@ void KeyValue::Tooltip() {
 	}
 }
 
-float KeyValue::DrawValueWidget(const TypeInfo& type) {
+float KeyValue::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	float width = 120.f;
 
 	switch (type.Category) {
 	case TypeCategory::NumberLimit: {
-		int numValue = atoi(Value.c_str());
+		int numValue = atoi(value.c_str());
 		bool modified = ImGui::DragInt("##num", &numValue, 1,
 			std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max, "%d",
 			ImGuiSliderFlags_AlwaysClamp);
@@ -52,41 +52,41 @@ float KeyValue::DrawValueWidget(const TypeInfo& type) {
 			numValue > std::get<NumberLimit>(type.Data).Max) {
 			numValue = std::clamp(numValue,
 				std::get<NumberLimit>(type.Data).Min, std::get<NumberLimit>(type.Data).Max);
-			Value = std::to_string(numValue);
+			value = std::to_string(numValue);
 		}
 		break;
 	}
 	case TypeCategory::StringLimit: {
 		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
-			int current = Utils::GetComboIndex(Value, std::get<StringLimit>(type.Data).ValidValues);
+			int current = Utils::GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
 			if (ImGui::Combo("##str", &current,
 				Utils::GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
-				Value = std::get<StringLimit>(type.Data).ValidValues[current];
+				value = std::get<StringLimit>(type.Data).ValidValues[current];
 			}
 		}
 		else {
-			auto w = Utils::SetNextInputWidth(Value, 100.f);
+			auto w = Utils::SetNextInputWidth(value, 100.f);
 			width = std::max(width, w);
-			ImGui::InputText("##str", &Value);
+			ImGui::InputText("##str", &value);
 		}
 		break;
 	}
 	case TypeCategory::List: {
-		DrawListInput(Value, std::get<ListType>(type.Data));
+		DrawListInput(value, std::get<ListType>(type.Data));
 		break;
 	}
 	case TypeCategory::Bool: {
 		// 解析字符串为布尔值
-		bool boolValue = (Value == "true");
+		bool boolValue = (value == "true");
 		if (ImGui::Checkbox("##bool", &boolValue))
-			Value = boolValue ? "true" : "false"; // 更新字符串值
+			value = boolValue ? "true" : "false"; // 更新字符串值
 		break;
 	}
 	case TypeCategory::Color: {
 		// 解析字符串为颜色值
 		ImVec4 color;
 		int iR, iG, iB;
-		if (sscanf_s(Value.c_str(), "%d,%d,%d", &iR, &iG, &iB) == 3) {
+		if (sscanf_s(value.c_str(), "%d,%d,%d", &iR, &iG, &iB) == 3) {
 			color = ImVec4(iR / 255.f, iG / 255.f, iB / 255.f, 1.0f);
 		}
 		else {
@@ -138,15 +138,15 @@ float KeyValue::DrawValueWidget(const TypeInfo& type) {
 			iB = convert(B);
 
 			snprintf(buffer, sizeof(buffer), "%d,%d,%d", iR, iG, iB);
-			Value = buffer;
+			value = buffer;
 		}
 		break;
 	}
 	default: {
-		auto w = Utils::SetNextInputWidth(Value, 100.f);
+		auto w = Utils::SetNextInputWidth(value, 100.f);
 		width = std::max(width, w);
-		if (ImGui::InputText("##value", &Value))
-			UpdateOutputLink(Value);
+		if (ImGui::InputText("##value", &value))
+			UpdateOutputLink(value);
 		break;
 	}
 	}
@@ -191,7 +191,7 @@ void KeyValue::DrawListInput(std::string& listValue, const ListType& listType) {
 
 			// 递归绘制元素控件
 			TypeInfo elemType = TypeSystem::Get().GetTypeInfo(listType.ElementType);
-			//DrawValueWidget(elements[i], elemType);
+			DrawValueWidget(elements[i], elemType);
 
 			ImGui::PopID();
 		}
@@ -321,7 +321,7 @@ bool KeyValue::DrawElementEditor(std::string& value, const TypeInfo& type) {
 void KeyValue::SaveToJson(json& j) const {
 	Pin::SaveToJson(j);
 	j["Key"] = Key;
-	j["Value"] = Value;
+	j["value"] = Value;
 	j["IsInherited"] = IsInherited;
 	j["IsComment"] = IsComment;
 	j["IsFolded"] = IsFolded;
@@ -330,7 +330,7 @@ void KeyValue::SaveToJson(json& j) const {
 void KeyValue::LoadFromJson(const json& j) {
 	Pin::LoadFromJson(j);
 	Key = j["Key"];
-	Value = j["Value"];
+	Value = j["value"];
 	IsInherited = j["IsInherited"];
 	IsComment = j["IsComment"];
 	IsFolded = j["IsFolded"];

@@ -158,7 +158,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, ax::NodeEditor::Utilities::Blu
 		// 根据类型绘制不同控件
 		ImGui::PushItemWidth(120);
 		auto ms = maxSize;
-		maxSize = kv.DrawValueWidget(typeInfo);
+		maxSize = kv.DrawValueWidget(kv.Value, typeInfo);
 		// 这里的逻辑是，利用maxsize暂存value的长度，因此把原maxSize的值存到ms里
 		// 所以比较的长度是key的长度（w1）和value的长度（maxSize）之和与原maxSize（ms）
 		maxSize = std::max(maxSize + w1, ms);
