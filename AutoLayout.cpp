@@ -6,59 +6,70 @@
 #include <queue>
 #include <cmath>
 #include <limits>
+
 void MainWindow::ApplyForceDirectedLayout() {
-	const float horizontalSpacing = 80.0f;
-	const float verticalSpacing = 60.0f;
-	const float layerSpacing = 120.0f;
-	const ImVec2 startPos(50.0f, 50.0f);
-	const float maxRowWidth = std::sqrtf(Node::Array.size()) * 500;
 
-	//------------------------------
-	// 0. 动态创建标签节点（内联处理）
-	//------------------------------
-    std::unordered_map<SectionNode*, std::vector<Link*>> multiInputSections;
-    for (auto& node : Node::Array) {
-        if (auto section = dynamic_cast<SectionNode*>(node.get())) {
-            if (section->InputPin) {
-                // 修复C2672错误：手动提取Link指针
-                std::vector<Link*> links;
-                for (const auto& linkPair : section->InputPin->Links) {
-                    links.push_back(linkPair.second);
-                }
-                if (links.size() > 1) {
-                    multiInputSections[section] = links;
-                }
-            }
-        }
-    }
+	// 1. 动态创建标签节点
+	CreateTagNodesForMultiInputs();
 
-	for (auto& pair : multiInputSections) {
-		auto section = pair.first;
-		auto& links = pair.second;
+	// 2. 建立节点连接关系图
+	auto childrenMap = BuildChildrenMap();
 
-		// 创建input标签节点
-		std::string tagName = section->Name + "_input";
-		auto inputTag = SpawnTagNode(true, tagName);
-		inputTag->SetPosition(section->GetPosition() - ImVec2(200, 0));
+	// 3. 计算节点层级
+	CalculateNodeLevels(childrenMap);
 
-		// 创建output标签节点并连接回section
-		auto outputTag = SpawnTagNode(false, tagName);
-		outputTag->SetPosition(section->GetPosition() + ImVec2(200, 0));
+	// 4. 收集层级节点
+	auto layers = CollectLayerNodes(childrenMap);
 
-		// 重新路由原始连接
-		for (auto link : links) {
-			link->EndPinID = inputTag->InputPin->ID;
+	// 5. 执行布局排列
+	ArrangeNodesInLayers(layers);
+
+	ed::NavigateToContent();
+}
+
+void MainWindow::CreateTagNodesForMultiInputs() {
+	std::unordered_map<SectionNode*, std::vector<Link*>> multiInputSections;
+
+	// 收集都有谁被很多人链接(inputpin有很多link)
+	for (auto& node : Node::Array) {
+		if (auto section = dynamic_cast<SectionNode*>(node.get())) {
+			if (section->InputPin && section->InputPin->Links.size() > 1) {
+				std::vector<Link*> links;
+				for (const auto& linkPair : section->InputPin->Links)
+					links.push_back(linkPair.second);
+				multiInputSections[section] = links;
+			}
 		}
-
-		// 创建output到section的连接
-		auto newLink = outputTag->InputPin->LinkTo(section->InputPin.get());
 	}
 
-	//------------------------------
-	// 1. 建立连接关系（处理标签节点查找）
-	//------------------------------
+	// 创建标签节点对
+	for (auto& pair : multiInputSections) {
+		auto section = pair.first; // 被链接的node
+		auto& links = pair.second; // 该node的所有的inputs
+		std::string tagName = section->Name;
+
+		// 创建input标签节点
+		if (auto inputTag = SpawnTagNode(true, tagName)) {
+			inputTag->SetPosition(section->GetPosition() - ImVec2(200, 0));
+			section->OutputPin->LinkTo(inputTag->InputPin.get());
+		}
+
+		// 创建output标签节点
+		for (auto link : links) {
+			auto pin = Pin::Get(link->StartPinID);
+			if (auto outputTag = SpawnTagNode(false, tagName)) {
+				outputTag->SetPosition(section->GetPosition() + ImVec2(200, 0));
+				pin->LinkTo(outputTag->InputPin.get());
+			}
+		}
+	}
+}
+
+std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {
 	std::unordered_map<Node*, std::vector<Node*>> childrenMap;
+
 	for (auto& node : Node::Array) {
+		// 处理所有具有输出引脚的节点类型
 		auto section = dynamic_cast<SectionNode*>(node.get());
 		if (section && section->OutputPin) {
 			for (auto& linkPair : section->OutputPin->Links) {
@@ -83,24 +94,32 @@ void MainWindow::ApplyForceDirectedLayout() {
 		}
 	}
 
-	//------------------------------
-	// 2. BFS计算层级（保持原逻辑）
-	//------------------------------
+	return childrenMap;
+}
+
+void MainWindow::CalculateNodeLevels(const std::unordered_map<Node*, std::vector<Node*>>& childrenMap) {
 	std::queue<Node*> queue;
+
+	// 初始化层级（处理所有节点类型）
 	for (auto& node : Node::Array) {
-		auto section = dynamic_cast<SectionNode*>(node.get());
-		if (section) {
-			bool hasInput = section->InputPin && !section->InputPin->Links.empty();
-			node->level = hasInput ? -1 : 0;
-			if (node->level == 0)
-				queue.push(node.get());
+		bool hasInput = false;
+		if (auto section = dynamic_cast<SectionNode*>(node.get())) {
+			hasInput = section->InputPin && !section->InputPin->Links.empty();
 		}
+		node->level = hasInput ? -1 : 0;
+		if (node->level == 0)
+			queue.push(node.get());
 	}
 
+	// BFS计算层级（添加安全检查）
 	while (!queue.empty()) {
 		Node* current = queue.front();
 		queue.pop();
-		for (Node* child : childrenMap[current]) {
+
+		auto it = childrenMap.find(current);
+		if (it == childrenMap.end()) continue;
+
+		for (Node* child : it->second) {
 			int newLevel = current->level + 1;
 			if (newLevel > child->level) {
 				child->level = newLevel;
@@ -108,11 +127,12 @@ void MainWindow::ApplyForceDirectedLayout() {
 			}
 		}
 	}
+}
 
-	//------------------------------
-	// 3. 收集层级节点（保持原逻辑）
-	//------------------------------
+std::map<int, std::vector<Node*>> MainWindow::CollectLayerNodes(const std::unordered_map<Node*, std::vector<Node*>>& childrenMap) {
 	std::map<int, std::vector<Node*>> layers;
+
+	// 按层级收集节点
 	for (auto& node : Node::Array) {
 		if (node->level >= 0)
 			layers[node->level].push_back(node.get());
@@ -120,21 +140,30 @@ void MainWindow::ApplyForceDirectedLayout() {
 			layers[0].push_back(node.get());
 	}
 
-	// 按父节点输出顺序排序
+	// 层内排序（添加安全检查）
 	for (auto& layer : layers) {
 		auto& nodes = layer.second;
 		std::sort(nodes.begin(), nodes.end(), [&childrenMap](Node* a, Node* b) {
-			bool aHasChild = !childrenMap[a].empty();
-			bool bHasChild = !childrenMap[b].empty();
+			auto aIt = childrenMap.find(a);
+			auto bIt = childrenMap.find(b);
+			bool aHasChild = (aIt != childrenMap.end()) && !aIt->second.empty();
+			bool bHasChild = (bIt != childrenMap.end()) && !bIt->second.empty();
 			if (aHasChild != bHasChild) return bHasChild;
 			return a->ID.Get() < b->ID.Get();
 		});
 	}
 
-	//------------------------------
-	// 4. 计算布局位置（保持原逻辑）
-	//------------------------------
+	return layers;
+}
+
+void MainWindow::ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& layers) {
+	const float horizontalSpacing = 80.0f;
+	const float verticalSpacing = 60.0f;
+	const float layerSpacing = 120.0f;
+	const ImVec2 startPos(50.0f, 50.0f);
+	const float maxRowWidth = std::sqrtf(Node::Array.size()) * 500;
 	float currentY = startPos.y;
+
 	for (auto& layer : layers) {
 		auto& nodes = layer.second;
 

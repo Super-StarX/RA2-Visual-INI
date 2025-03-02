@@ -91,6 +91,13 @@ CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
 }
 
 TagNode* MainWindow::SpawnTagNode(bool input, const std::string& section) {
+	if (input && TagNode::Inputs.contains(section)) {
+		auto exsit = TagNode::Inputs[section];
+		ed::SelectNode(exsit->ID);
+		ed::NavigateToSelection();
+		return nullptr;
+	}
+
 	Node::Array.emplace_back(std::make_unique<TagNode>(this, GetNextId(), section.c_str(), input));
 	auto node = Node::Array.back().get();
 	node->Type = NodeType::Tag;

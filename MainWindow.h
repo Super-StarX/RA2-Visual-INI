@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <application.h>
 #include <imgui_node_editor.h>
 
@@ -43,7 +43,6 @@ public:
 	CommentNode* SpawnCommentNode(const std::string& section = "");
 	TagNode* SpawnTagNode(bool input = true, const std::string& section = "");
 
-	void ApplyForceDirectedLayout();
 	void NodeEditor();
 
 	void Menu();
@@ -54,6 +53,24 @@ public:
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
+
+	// 布局算法相关函数声明
+	void ApplyForceDirectedLayout();
+
+	// 标签节点创建
+	void CreateTagNodesForMultiInputs();
+
+	// 建立连接关系图
+	std::unordered_map<Node*, std::vector<Node*>> BuildChildrenMap();
+
+	// 层级计算
+	void CalculateNodeLevels(const std::unordered_map<Node*, std::vector<Node*>>& childrenMap);
+
+	// 收集层级节点
+	std::map<int, std::vector<Node*>> CollectLayerNodes(const std::unordered_map<Node*, std::vector<Node*>>& childrenMap);
+
+	// 执行布局排列
+	void ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& layers);
 
 	void Copy();
 	void Paste();
