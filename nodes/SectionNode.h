@@ -29,19 +29,4 @@ public:
 	std::unique_ptr<Pin> OutputPin;
 	float maxSize;
 	float lastMaxSize;
-
-private:
-	TypeInfo GetKeyTypeInfo(const std::string& sectionType, const std::string& key) const {
-		return TypeSystem::Get().GetKeyType(sectionType, key);
-	}
-
-	TypeInfo GetTypeInfo(const std::string& typeName) const {
-		return TypeSystem::Get().GetTypeInfo(typeName);
-	}
-
-	void DrawValueWidget(KeyValue& value, const TypeInfo& type);
-
-	void DrawListInput(std::string& listValue, const ListType& listType);
-	void OpenListEditor(std::string& listValue, const ListType& listType);
-	bool DrawElementEditor(std::string& value, const TypeInfo& type);
 };
