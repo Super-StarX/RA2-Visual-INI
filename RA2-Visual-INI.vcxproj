@@ -179,6 +179,7 @@
     <ClCompile Include="utilities\drawing.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Pins\ValuePin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
+    <ClInclude Include="Pins\ValuePin.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="TypeLoader.h" />
     <ClInclude Include="utilities\builders.h" />

@@ -10,6 +10,8 @@ std::map<ed::PinId, Pin*, ComparePinId> Pin::Array;
 
 Pin::Pin(int id, const char* name, std::string type, PinKind kind) :
 	ID(id), Node(nullptr), Name(name), TypeIdentifier(type), Kind(kind) {
+	if (id == -1)
+		ID = MainWindow::GetNextId();
 	Array[ID] = this;
 }
 

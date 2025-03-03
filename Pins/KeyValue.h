@@ -1,26 +1,15 @@
 ﻿#pragma once
-#include "Pin.h"
+#include "ValuePin.h"
 #include "MainWindow.h"
 #include "Nodes/Node.h"
-#include "TypeLoader.h"
 
-class KeyValue : public Pin {
+class KeyValue : public ValuePin {
 public:
-	KeyValue(::Node* node, std::string key = "key", std::string value = "value", int id = MainWindow::GetNextId());
+	KeyValue(::Node* node, std::string key = "key", std::string value = "value", int id = -1);
 
 	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 
-	float DrawValueWidget(std::string& value, const TypeInfo& type);
-
-	void DrawListInput(std::string& listValue, const ListType& listType);
-	static void OpenListEditor(std::string& listValue, const ListType& listType);
-	static bool DrawElementEditor(std::string& value, const TypeInfo& type);
-
 	std::string Key;
-	std::string Value;
-	bool IsInherited = false;
-	bool IsComment = false;
-	bool IsFolded = false;
 };
