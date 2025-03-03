@@ -1,5 +1,4 @@
-﻿// SectionNode.h
-#pragma once
+﻿#pragma once
 #include "BaseNode.h"
 #include "TypeLoader.h"
 #include "Pins/Pin.h"

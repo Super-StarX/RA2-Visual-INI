@@ -16,6 +16,7 @@ class SectionNode;
 class TagNode;
 class GroupNode;
 class CommentNode;
+class ListNode;
 
 class MainWindow : public Application {
 public:
@@ -42,6 +43,7 @@ public:
 	GroupNode* SpawnGroupNode(const std::string& section = "");
 	CommentNode* SpawnCommentNode(const std::string& section = "");
 	TagNode* SpawnTagNode(bool input = true, const std::string& section = "");
+	ListNode* SpawnListNode(const std::string& section = "");
 
 	void NodeEditor();
 

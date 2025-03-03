@@ -3,12 +3,13 @@
 #include "Nodes/Node.h"
 #include "Nodes/BlueprintNode.h"
 #include "Nodes/CommentNode.h"
+#include "Nodes/GroupNode.h"
+#include "Nodes/HoudiniNode.h"
+#include "Nodes/ListNode.h"
+#include "Nodes/SectionNode.h"
+#include "Nodes/SimpleNode.h"
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
-#include "Nodes/GroupNode.h"
-#include "Nodes/SimpleNode.h"
-#include "Nodes/HoudiniNode.h"
-#include "Nodes/SectionNode.h"
 
 void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
 	for (auto& input : node->Inputs) {
@@ -70,6 +71,17 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
 	SectionNode::Map[section] = node;
 	return reinterpret_cast<SectionNode*>(node);
+}
+
+ListNode* MainWindow::SpawnListNode(const std::string& section) {
+	Node::Array.emplace_back(std::make_unique<ListNode>(this, GetNextId(), section.c_str()));
+	auto node = reinterpret_cast<ListNode*>(Node::Array.back().get());
+	node->Type = NodeType::Tag;
+	node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
+	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
+	node->Size = ImVec2(300, 200);
+
+	return reinterpret_cast<ListNode*>(node);
 }
 
 GroupNode* MainWindow::SpawnGroupNode(const std::string& section) {

@@ -65,6 +65,8 @@ void MainWindow::LayerMenu() {
 		node = (Node*)SpawnTagNode(false);
 	else if (ImGui::MenuItem("Comment"))
 		node = (Node*)SpawnCommentNode();
+	else if (ImGui::MenuItem("ListNode"))
+		node = (Node*)SpawnListNode();
 	ImGui::Separator();
 	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
 		node = SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);

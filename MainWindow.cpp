@@ -119,7 +119,9 @@ void MainWindow::OnStop() {
 		m_Editor = nullptr;
 	}
 	BaseNode::DestroyHeader();
+	Node::Array.clear();
 	Pin::Array.clear();
+	Link::Array.clear();
 }
 
 void MainWindow::OnFrame(float deltaTime) {
