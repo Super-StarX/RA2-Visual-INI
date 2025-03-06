@@ -5,7 +5,7 @@
 
 class KeyValue : public ValuePin {
 public:
-	KeyValue(::Node* node, std::string key = "key", std::string value = "value", int id = -1);
+	KeyValue(::Node* node, std::string key = "key", std::string value = "value", int id = 0);
 
 	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
