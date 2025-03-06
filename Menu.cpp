@@ -176,22 +176,14 @@ void MainWindow::NodeEditor() {
 
 	if (ed::BeginDelete()) {
 		ed::NodeId nodeId = 0;
-		while (ed::QueryDeletedNode(&nodeId)) {
-			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(Node::Array.begin(), Node::Array.end(), [nodeId](auto& node) { return node->ID == nodeId; });
-				if (id != Node::Array.end())
-					Node::Array.erase(id);
-			}
-		}
+		while (ed::QueryDeletedNode(&nodeId))
+			if (ed::AcceptDeletedItem())
+				std::erase_if(Node::Array, [nodeId](auto& node) { return node->ID == nodeId; });
 
 		ed::LinkId linkId = 0;
-		while (ed::QueryDeletedLink(&linkId)) {
-			if (ed::AcceptDeletedItem()) {
-				auto id = std::find_if(Link::Array.begin(), Link::Array.end(), [linkId](auto& link) { return link->ID == linkId; });
-				if (id != Link::Array.end())
-					Link::Array.erase(id);
-			}
-		}
+		while (ed::QueryDeletedLink(&linkId))
+			if (ed::AcceptDeletedItem())
+				std::erase_if(Link::Array, [linkId](auto& link) { return link->ID == linkId; });
 	}
 	ed::EndDelete();
 	ImGui::SetCursorScreenPos(cursorTopLeft);
