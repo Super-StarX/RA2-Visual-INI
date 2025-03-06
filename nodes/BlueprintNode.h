@@ -1,9 +1,11 @@
 ﻿#pragma once
-#include "BaseNode.h"
+#include "INENode.h"
+#include "BuilderNode.h"
 
-class BlueprintNode : public BaseNode {
+class BlueprintNode : public INENode, public BuilderNode {
 public:
-	using BaseNode::BaseNode;
+	using BuilderNode::BuilderNode;
+	virtual NodeType GetNodeType() const override { return NodeType::Blueprint; }
 	virtual void Update();
 };
 

@@ -11,37 +11,12 @@
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
 
-void MainWindow::BuildNode(const std::unique_ptr<Node>& node) {
-	for (auto& input : node->Inputs) {
-		input.Node = node.get();
-		input.Kind = PinKind::Input;
-	}
-
-	for (auto& output : node->Outputs) {
-		output.Node = node.get();
-		output.Kind = PinKind::Output;
-	}
-
-	if (auto sectionNode = dynamic_cast<SectionNode*>(node.get())) {
-		sectionNode->InputPin->Node = sectionNode;
-		sectionNode->InputPin->Kind = PinKind::Input;
-		sectionNode->OutputPin->Node = sectionNode;
-		sectionNode->OutputPin->Kind = PinKind::Output;
-	}
-}
-
-void MainWindow::BuildNodes() {
-	for (const auto& node : Node::Array)
-		BuildNode(node);
-}
-
 Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position) {
 	// 转换屏幕坐标到画布坐标
 	const auto canvasPos = ed::ScreenToCanvas(position);
 
 	// 创建节点
 	auto* newNode = SpawnSectionNode(sectionName);
-	BuildNode(Node::Array.back());
 	ed::SetNodePosition(newNode->ID, canvasPos);
 
 	// 填充键值对
@@ -64,42 +39,31 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 }
 
 SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
-	Node::Array.emplace_back(std::make_unique<SectionNode>(this, GetNextId(), section.c_str()));
+	Node::Array.emplace_back(std::make_unique<SectionNode>(section.c_str()));
 	auto node = reinterpret_cast<SectionNode*>(Node::Array.back().get());
-	node->Type = NodeType::Section;
-	node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
-	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
-	SectionNode::Map[section] = node;
-	return reinterpret_cast<SectionNode*>(node);
+	node->Color = ImColor(0, 64, 128);
+	return node;
 }
 
 ListNode* MainWindow::SpawnListNode(const std::string& section) {
-	Node::Array.emplace_back(std::make_unique<ListNode>(this, GetNextId(), section.c_str()));
+	Node::Array.emplace_back(std::make_unique<ListNode>(section.c_str()));
 	auto node = reinterpret_cast<ListNode*>(Node::Array.back().get());
-	node->Type = NodeType::Tag;
-	node->InputPin = std::make_unique<Pin>(GetNextId(), "input");
-	node->OutputPin = std::make_unique<Pin>(GetNextId(), "output");
-	node->Size = ImVec2(300, 200);
 
-	return reinterpret_cast<ListNode*>(node);
+	return node;
 }
 
 GroupNode* MainWindow::SpawnGroupNode(const std::string& section) {
-	Node::Array.emplace_back(std::make_unique<GroupNode>(this, GetNextId(), section.c_str()));
-	auto node = Node::Array.back().get();
-	node->Type = NodeType::Group;
-	node->Size = ImVec2(300, 200);
+	Node::Array.emplace_back(std::make_unique<GroupNode>(section.c_str()));
+	auto node = reinterpret_cast<GroupNode*>(Node::Array.back().get());
 
-	return reinterpret_cast<GroupNode*>(node);
+	return node;
 }
 
 CommentNode* MainWindow::SpawnCommentNode(const std::string& section) {
-	Node::Array.emplace_back(std::make_unique<CommentNode>(this, GetNextId(), section.c_str()));
-	auto node = Node::Array.back().get();
-	node->Type = NodeType::Comment;
-	node->Size = ImVec2(300, 200);
+	Node::Array.emplace_back(std::make_unique<CommentNode>(section.c_str()));
+	auto node = reinterpret_cast<CommentNode*>(Node::Array.back().get());
 
-	return reinterpret_cast<CommentNode*>(node);
+	return node;
 }
 
 TagNode* MainWindow::SpawnTagNode(bool input, const std::string& section) {
@@ -110,10 +74,8 @@ TagNode* MainWindow::SpawnTagNode(bool input, const std::string& section) {
 		return nullptr;
 	}
 
-	Node::Array.emplace_back(std::make_unique<TagNode>(this, GetNextId(), section.c_str(), input));
-	auto node = Node::Array.back().get();
-	node->Type = NodeType::Tag;
-	node->Size = ImVec2(300, 200);
+	Node::Array.emplace_back(std::make_unique<TagNode>(section.c_str(), input));
+	auto node = reinterpret_cast<TagNode*>(Node::Array.back().get());
 
-	return reinterpret_cast<TagNode*>(node);
+	return node;
 }

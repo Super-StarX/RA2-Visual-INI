@@ -6,6 +6,11 @@
 
 std::vector<std::unique_ptr<Node>> Node::Array;
 
+Node::Node(const char* name, int id) :
+	Owner(MainWindow::Instance), Name(name),
+	ID(id ? id : MainWindow::Instance->GetNextId()) {
+}
+
 Node* Node::Get(ed::NodeId id) {
 	for (const auto& node : Node::Array)
 		if (node->ID == id)
@@ -29,14 +34,11 @@ std::vector<Node*> Node::GetSelectedNodes() {
 
 void Node::Menu() {
 	ImGui::Text("ID: %p", ID.AsPointer());
-	ImGui::Text("Type: %s", Type == NodeType::Section ? "Section" : "Unexcepted");
-	ImGui::Text("Inputs: %d", (int)Inputs.size());
-	ImGui::Text("Outputs: %d", (int)Outputs.size());
+	ImGui::Text("Type: %s", GetNodeType());
 	ImGui::Separator();
 
 	// 类型选择下拉框
 	ImGui::Separator();
-	ImGui::Text("NodeType:", (int)Outputs.size());
 	if (ImGui::BeginCombo("##NodeType", TypeName.c_str())) {
 		auto& ts = TypeSystem::Get();
 
@@ -56,12 +58,10 @@ void Node::Menu() {
 		ImGui::EndCombo();
 	}
 
-	if (Type == NodeType::Section) {
-		if (ImGui::MenuItem(IsComment ? "Uncomment" : "Set Comment"))
-			IsComment = !IsComment;
-		if (ImGui::MenuItem(IsFolded ? "Unfold" : "Fold"))
-			IsFolded = !IsFolded;
-	}
+	if (ImGui::MenuItem(IsComment ? "Uncomment" : "Set Comment"))
+		IsComment = !IsComment;
+	if (ImGui::MenuItem(IsFolded ? "Unfold" : "Fold"))
+		IsFolded = !IsFolded;
 }
 
 void Node::Tooltip() {
@@ -149,18 +149,6 @@ void Node::SetName(const std::string& str) {
 }
 
 Pin* Node::GetFirstCompatiblePin(Pin* pin) {
-	if (pin->Kind == PinKind::Input) {
-		for (auto& output : Outputs) {
-			if (output.CanCreateLink(pin))
-				return &output;
-		}
-	}
-	else {
-		for (auto& input : Inputs) {
-			if (input.CanCreateLink(pin))
-				return &input;
-		}
-	}
 	return nullptr;
 }
 
@@ -200,7 +188,7 @@ void Node::SaveToJson(json& j) const {
 	j["Section"] = Name;
 	j["Position"] = { pos.x, pos.y };
 	j["Color"] = { Color.Value.x,Color.Value.y,Color.Value.z };
-	j["Type"] = static_cast<int>(Type);
+	j["Type"] = static_cast<int>(GetNodeType());
 	j["TypeName"] = TypeName;
 	j["IsFolded"] = IsFolded;
 	j["IsComment"] = IsComment;
@@ -219,7 +207,7 @@ void Node::LoadFromJson(const json& j) {
 		j["Color"][2].get<float>(),
 		1.0f
 	};
-	Type = static_cast<NodeType>(j["Type"]);
+	//Type = static_cast<NodeType>(j["Type"]);
 	TypeName = j["TypeName"];
 	IsFolded = j["IsFolded"];
 	IsComment = j["IsComment"];

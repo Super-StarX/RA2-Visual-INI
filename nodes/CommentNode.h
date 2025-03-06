@@ -1,10 +1,12 @@
 ﻿#pragma once
-#include "BaseNode.h"
-class CommentNode : public BaseNode {
-public:
-	using BaseNode::BaseNode;
-	virtual void Update() override;
+#include "Node.h"
+#include "BuilderNode.h"
 
+class CommentNode : public Node, public BuilderNode {
+public:
+	using Node::Node;
+	virtual NodeType GetNodeType() const override { return NodeType::Comment; }
+	virtual void Update() override;
 
 public:
 	std::string Content;   // 注释内容

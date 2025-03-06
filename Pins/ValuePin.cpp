@@ -3,7 +3,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 ValuePin::ValuePin(::Node* node, std::string value, int id) :
-	Pin(id, value.c_str(), "flow", PinKind::Output),
+	Pin(node, value.c_str(), PinKind::Output, id),
 	Value(value) {
 	Node = node;
 }

@@ -14,17 +14,15 @@ std::unordered_map<std::string, int> TagNode::GlobalNames;
 std::unordered_map<std::string, TagNode*> TagNode::Inputs;
 bool TagNode::HasInputChanged = false;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
-TagNode::TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color) :
-	BaseNode(owner, id, name, color), IsInput(input){
+TagNode::TagNode(const char* name, bool input, int id) :
+	Node(name, id), IsInput(input){
 
 	if (IsInput) {
 		GlobalNames[Name]++;
 		HasInputChanged = true;
 	}
 
-	InputPin = std::make_unique<Pin>(MainWindow::GetNextId(), input ? "input" : "output");
-	InputPin->Node = this;
-	InputPin->Kind = PinKind::Input;
+	InputPin = std::make_unique<Pin>(this, input ? "input" : "output", PinKind::Input);
 }
 
 TagNode::~TagNode() {
@@ -55,6 +53,10 @@ void TagNode::UpdateInputs() {
 			if (tag->IsInput && GlobalNames[tag->Name] == 1)
 				Inputs[tag->Name] = tag;
 
+}
+
+Pin* TagNode::GetFirstCompatiblePin(Pin* pin) {
+	return InputPin.get();
 }
 
 void TagNode::SetName(const std::string& str) {
@@ -160,7 +162,7 @@ void TagNode::SaveToJson(json& j) const {
 void TagNode::LoadFromJson(const json& j) {
 	Node::LoadFromJson(j);
 
-	InputPin = std::make_unique<Pin>(-1, "input");
+	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input);
 	InputPin->Node = this;
 	InputPin->LoadFromJson(j["Input"]);
 	auto type = j["Type"].get<std::string>();
@@ -179,7 +181,7 @@ void TagNode::LoadFromJson(const json& j) {
 }
 
 // 递归解析指针类型TagNode的值
-std::string TagNode::ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited) {
+std::string TagNode::ResolveTagPointer(TagNode* tagNode, std::unordered_set<Node*>& visited) {
 	if (!tagNode || visited.count(tagNode))
 		return "";
 	visited.insert(tagNode);

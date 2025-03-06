@@ -36,8 +36,6 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
-	void BuildNode(const std::unique_ptr<Node>& node);
-	void BuildNodes();
 	Node* SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
 	SectionNode* SpawnSectionNode(const std::string& section = "");
 	GroupNode* SpawnGroupNode(const std::string& section = "");

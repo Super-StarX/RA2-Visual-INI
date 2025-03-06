@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include "Node.h"
+#include "INENode.h"
 
-class TreeNode : public Node {
+class TreeNode : public INENode {
 public:
-	using Node::Node;
+	using INENode::INENode;
+	virtual NodeType GetNodeType() const override { return NodeType::Tree; }
 	virtual void Update();
 };
 

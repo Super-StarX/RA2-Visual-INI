@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include "Node.h"
+#include "INENode.h"
 
-class HoudiniNode :	public Node {
+class HoudiniNode :	public INENode {
 public:
-	using Node::Node;
+	using INENode::INENode;
+	virtual NodeType GetNodeType() const override { return NodeType::Houdini; }
 	virtual void Update();
 };
 

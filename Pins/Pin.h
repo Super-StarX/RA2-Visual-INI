@@ -32,7 +32,7 @@ public:
 	static std::map<ed::PinId, Pin*, ComparePinId> Array;
 	static Pin* Get(ed::PinId id);
 
-	Pin(int id, const char* name, std::string type = "flow", PinKind kind = PinKind::Input);
+	Pin(::Node* node, const char* name, PinKind kind = PinKind::Output, int id = 0);
 	virtual ~Pin();
 
 	virtual void Tooltip() override;
@@ -56,7 +56,7 @@ public:
 	::Node* Node;
 	std::map<ed::LinkId, Link*, CompareLinkId> Links;
 	std::string Name;
-	std::string TypeIdentifier;
+	std::string TypeIdentifier = "flow";
 	PinKind     Kind;
 	float HoverTimer = 0.0f;
 };

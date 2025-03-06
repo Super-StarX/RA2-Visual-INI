@@ -1,27 +1,18 @@
-﻿#include "BaseNode.h"
+﻿#include "BuilderNode.h"
 #include "MainWindow.h"
 
-ImTextureID BaseNode::m_HeaderBackground = nullptr;
-BaseNode::BaseNode(MainWindow* owner, int id, const char* name, ImColor color) :
-	Node(owner, id, name, color) {
-	
-}
-
-BaseNode::~BaseNode() {
-	Node::~Node();
-}
-
-void BaseNode::CreateHeader() {
+ImTextureID BuilderNode::m_HeaderBackground = nullptr;
+void BuilderNode::CreateHeader() {
 	m_HeaderBackground = MainWindow::Instance->LoadTexture("data/BlueprintBackground.png");
 }
-void BaseNode::DestroyHeader() {
+void BuilderNode::DestroyHeader() {
 	if (m_HeaderBackground) {
 		MainWindow::Instance->DestroyTexture(m_HeaderBackground);
 		m_HeaderBackground = nullptr;
 	}
 }
 
-void BaseNode::UpdateInput(Pin& input) {
+void BuilderNode::UpdateInput(Pin& input) {
 	auto builder = GetBuilder();
 	float alpha = input.GetAlpha();
 	builder->Input(input.ID);
@@ -40,7 +31,7 @@ void BaseNode::UpdateInput(Pin& input) {
 	builder->EndInput();
 }
 
-void BaseNode::UpdateOutput(Pin& output) {
+void BuilderNode::UpdateOutput(Pin& output) {
 	auto builder = GetBuilder();
 	auto newLinkPin = MainWindow::newLinkPin;
 	auto alpha = ImGui::GetStyle().Alpha;
@@ -76,9 +67,12 @@ void BaseNode::UpdateOutput(Pin& output) {
 	builder->EndOutput();
 }
 
-BlueprintNodeBuilder* BaseNode::GetBuilder() {
-	static BlueprintNodeBuilder builder = BlueprintNodeBuilder(m_HeaderBackground,
-			Owner->GetTextureWidth(m_HeaderBackground), Owner->GetTextureHeight(m_HeaderBackground));
+BlueprintNodeBuilder* BuilderNode::GetBuilder() {
+	static BlueprintNodeBuilder builder = BlueprintNodeBuilder(
+		m_HeaderBackground, 
+		MainWindow::Instance->GetTextureWidth(m_HeaderBackground),
+		MainWindow::Instance->GetTextureHeight(m_HeaderBackground)
+	);
 	
 	return &builder;
 }

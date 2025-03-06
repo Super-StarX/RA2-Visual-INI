@@ -56,8 +56,8 @@ void BlueprintNode::Update() {
 			UpdateOutput(output);
 
 	if (ImGui::Button("+")) {
-		this->Inputs.emplace_back(Owner->GetNextId(), "NewAddInput", "delegate");
-		this->Outputs.emplace_back(Owner->GetNextId(), "NewAddOutput", "bool");
+		this->Inputs.emplace_back(this, "NewAddInput", PinKind::Input);
+		this->Outputs.emplace_back(this, "NewAddOutput", PinKind::Output);
 	}
 
 	builder->End();

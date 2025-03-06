@@ -95,7 +95,7 @@ void MainWindow::OnStart() {
 	m_TemplateManager.LoadTemplates("templates.ini");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
-	BaseNode::CreateHeader();
+	BuilderNode::CreateHeader();
 
 	auto node1 = SpawnSectionNode("Section A");
 	node1->AddKeyValue("key", "Section B");
@@ -105,8 +105,6 @@ void MainWindow::OnStart() {
 	back->LinkTo(node2->InputPin.get());
 
 	ed::NavigateToContent();
-
-	BuildNodes();
 
 	m_LeftPanel = LeftPanelClass(this);
 	//auto& io = ImGui::GetIO();
@@ -118,7 +116,7 @@ void MainWindow::OnStop() {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
 	}
-	BaseNode::DestroyHeader();
+	BuilderNode::DestroyHeader();
 	Node::Array.clear();
 	Pin::Array.clear();
 	Link::Array.clear();

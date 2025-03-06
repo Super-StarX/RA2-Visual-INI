@@ -1,18 +1,21 @@
 ﻿#pragma once
-#include "BaseNode.h"
+#include "Node.h"
+#include "BuilderNode.h"
 #include "Pins/Pin.h"
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
 
-class TagNode : public BaseNode {
+class TagNode : public Node, public BuilderNode {
 public:
-	TagNode(MainWindow* owner, int id, const char* name, bool input, ImColor color = ImColor(255, 255, 255));
+	TagNode(const char* name, bool input, int id = -1);
 	virtual ~TagNode();
 
+	virtual NodeType GetNodeType() const override { return NodeType::Tag; }
 	virtual void Menu();
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
 	virtual void SetName(const std::string& str) override;
 
 	// 维护全局标签注册表
@@ -23,7 +26,7 @@ public:
 	static void UpdateSelectedName();
 	static void UpdateInputs();
 
-	std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<BaseNode*>& visited);
+	std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<Node*>& visited);
 	void Update() override;
 
 	std::unique_ptr<Pin> InputPin;			// 唯一输入引脚

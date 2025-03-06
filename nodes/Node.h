@@ -17,21 +17,31 @@ enum class NodeType {
 	Houdini,
 	Section,
 	Comment,
+	List,
 };
-
+/*
+Node->INENode->HeaderNode->BlueprintNode
+Node->INENode->HeaderNode->SimpleNode
+Node->INENode->HoudiniNode
+Node->INENode->TreeNode
+Node->VINode->SectionNode
+Node->VINode->ListNode
+Node->GroupNode
+Node->TagNode
+*/
 class KeyValue;
 class MainWindow;
 class Node : public Object {
 public:
 	static std::vector<std::unique_ptr<Node>> Array;
 
-	Node(MainWindow* owner, int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
-		Owner(owner), ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0) {}
+	Node(const char* name, int id = 0);
 	virtual ~Node() = default;
 
 	static Node* Get(ed::NodeId id);
 	static std::vector<Node*> GetSelectedNodes();
 
+	virtual NodeType GetNodeType() const = 0;
 	virtual void Menu() override;
 	virtual void Tooltip() override;
 	virtual void HoverMenu(bool isHovered);
@@ -51,11 +61,7 @@ public:
 
 	ed::NodeId ID;
 	std::string Name{""};
-	std::vector<Pin> Inputs;
-	std::vector<Pin> Outputs;
 	ImColor Color{};
-	NodeType Type{ NodeType::Section };
-	ImVec2 Size;
 	int level;
 	bool IsFolded{false};
 	bool IsComment{false};

@@ -100,14 +100,14 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	for (const auto& nodeJson : root["Nodes"]) {
 		switch (static_cast<NodeType>(nodeJson["Type"])) {
 		case NodeType::Section: {
-			auto node = std::make_unique<SectionNode>(this, -1, "");
+			auto node = std::make_unique<SectionNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			break;
 		}
 		case NodeType::Tag: {
 			/*
-			auto node = std::make_unique<TagNode>(this, -1, "");
+			auto node = std::make_unique<TagNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			*/
@@ -182,9 +182,6 @@ void MainWindow::ImportINI(const std::string& path) {
 				keyValuePairs[currentSection].emplace_back(key, value);
 		}
 	}
-
-	// 重建所有节点
-	BuildNodes();
 
 	// 重置文件指针到文件开头
 	file.clear();
@@ -283,7 +280,7 @@ void MainWindow::ExportINI(const std::string& path) {
 					output.emplace_back(kv->Key, tagLinked->Name);
 				}
 				else {
-					std::unordered_set<BaseNode*> tagVisited;
+					std::unordered_set<Node*> tagVisited;
 					std::string value = tagLinked->ResolveTagPointer(tagLinked, tagVisited);
 					output.emplace_back(kv->Key, value);
 				}

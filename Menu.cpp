@@ -73,34 +73,15 @@ void MainWindow::LayerMenu() {
 	});
 
 	if (node) {
-		BuildNodes();
-
 		createNewNode = false;
 		
 		const ImVec2 canvasPos = ed::ScreenToCanvas(openPopupPosition);
 		ed::SetNodePosition(node->ID, canvasPos);
 
-		if (auto startPin = newNodeLinkPin) {
-			if (auto sectionNode = dynamic_cast<SectionNode*>(node)) {
-				auto pin = startPin->Kind == PinKind::Input ? sectionNode->OutputPin.get() : sectionNode->InputPin.get();
-				if (startPin->Kind == PinKind::Input)
-					std::swap(startPin, pin);
+		if (auto startPin = newNodeLinkPin)
+			if(auto pin = node->GetFirstCompatiblePin(startPin))
 				if (startPin->CanCreateLink(pin))
 					startPin->LinkTo(pin)->TypeIdentifier = startPin->GetLinkType();
-			}
-			else {
-				auto& pins = startPin->Kind == PinKind::Input ? node->Outputs : node->Inputs;
-				for (auto& pin : pins) {
-					if (startPin->CanCreateLink(&pin)) {
-						auto endPin = &pin;
-						if (startPin->Kind == PinKind::Input)
-							std::swap(startPin, endPin);
-						startPin->LinkTo(endPin)->TypeIdentifier = startPin->GetLinkType();
-						break;
-					}
-				}
-			}
-		}
 	}
 
 	ImGui::EndPopup();
