@@ -1,6 +1,7 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
+#include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
 #include "version.h"
 #include <nlohmann/json.hpp>
@@ -11,6 +12,8 @@
 #include <random>
 #include <windows.h>
 #include <commdlg.h>
+#include <filesystem>
+#include <shellapi.h>
 
 bool OpenFileDialog(LPCSTR fliter,char* path, int maxPath, bool isSaving) {
 	OPENFILENAMEA ofn;
@@ -42,14 +45,23 @@ bool OpenFileDialog(LPCSTR fliter,char* path, int maxPath, bool isSaving) {
 
 void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
 	char path[MAX_PATH] = { 0 };
-	if (OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
-		std::string str(path);
-		if (!str.ends_with(".ini"))
-			str += ".ini";
-		if (isSaving)
-			Owner->ExportINI(path);
-		else
-			Owner->ImportINI(path);
+	if (!OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0",
+		path, MAX_PATH, isSaving)) {
+		return;
+	}
+
+	std::filesystem::path filePath(path);
+	if (isSaving) {
+		// 强制添加.ini后缀（不覆盖原有扩展名）
+		if (filePath.extension() != ".ini") {
+			filePath += ".ini";
+		}
+
+		Owner->ExportINI(filePath.string());
+		ShellExecuteA(nullptr, "open", path, nullptr, nullptr, SW_SHOW);
+	}
+	else {
+		Owner->ImportINI(filePath.string());
 	}
 }
 
