@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
 #include "Nodes/ListNode.h"
@@ -296,6 +296,16 @@ void MainWindow::ExportINI(const std::string& path) {
 					std::string value = tagLinked->ResolveTagPointer(tagLinked, tagVisited);
 					output.emplace_back(kv->Key, value);
 				}
+			}
+			// 新增：处理ListNode链接
+			else if (auto listLinked = dynamic_cast<ListNode*>(linkedNode)) {
+				std::string values;
+				for (const auto& valuePin : listLinked->KeyValues) {
+					if (!values.empty())
+						values += ",";
+					values += valuePin->Value;
+				}
+				output.emplace_back(kv->Key, values);
 			}
 		}
 	};
