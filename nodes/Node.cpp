@@ -34,7 +34,7 @@ std::vector<Node*> Node::GetSelectedNodes() {
 
 void Node::Menu() {
 	ImGui::Text("ID: %p", ID.AsPointer());
-	ImGui::Text("Type: %s", GetNodeType());
+	ImGui::Text("Type: %d", GetNodeType());
 	ImGui::Separator();
 
 	// 类型选择下拉框

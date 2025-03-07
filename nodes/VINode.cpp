@@ -30,7 +30,7 @@ void VINode<T>::Update() {
 	}
 
 	ImGui::PushID(this);
-	ImGui::SetNextItemWidth(150);
+	Utils::SetNextInputWidth(Name, 130.f);
 	if (ImGui::InputText("##SectionName", &Name)) {
 		for (const auto& [_, pLink] : InputPin->Links) {
 			if (auto pPin = Pin::Get(pLink->StartPinID))

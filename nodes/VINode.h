@@ -20,7 +20,7 @@ public:
 	vector KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
-	float maxSize;
-	float lastMaxSize;
+	float maxSize{ 0 };
+	float lastMaxSize{ 0 };
 };
 
