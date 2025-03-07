@@ -5,7 +5,10 @@
 ValuePin::ValuePin(::Node* node, std::string value, int id) :
 	Pin(node, value.c_str(), PinKind::Output, id),
 	Value(value) {
-	Node = node;
+}
+
+void ValuePin::SetValue(const std::string& str) { 
+	Value = str; 
 }
 
 float ValuePin::DrawValueWidget(std::string& value, const TypeInfo& type) {

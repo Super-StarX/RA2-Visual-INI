@@ -5,6 +5,7 @@
 class ValuePin : public Pin {
 public:
 	ValuePin(::Node* node, std::string value = "value", int id = -1);
+	virtual void SetValue(const std::string& str) override;
 
 	float DrawValueWidget(std::string& value, const TypeInfo& type);
 
