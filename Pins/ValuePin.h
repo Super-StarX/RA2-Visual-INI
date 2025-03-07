@@ -4,14 +4,19 @@
 
 class ValuePin : public Pin {
 public:
+	static void OpenListEditor(std::string& listValue, const ListType& listType);
+	static bool DrawElementEditor(std::string& value, const TypeInfo& type);
+
+	static std::string EditBuffer;
+	static ListType EditType;
+	static ValuePin* EditPin;
+
 	ValuePin(::Node* node, std::string value = "value", int id = -1);
 	virtual void SetValue(const std::string& str) override;
 
 	float DrawValueWidget(std::string& value, const TypeInfo& type);
 
 	void DrawListInput(std::string& listValue, const ListType& listType);
-	static void OpenListEditor(std::string& listValue, const ListType& listType);
-	static bool DrawElementEditor(std::string& value, const TypeInfo& type);
 
 	std::string Value;
 	bool IsInherited = false;

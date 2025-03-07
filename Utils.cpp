@@ -34,7 +34,7 @@ std::vector<std::string> Utils::SplitString(const std::string& s, char delimiter
 	std::string token;
 	std::istringstream tokenStream(s);
 	while (std::getline(tokenStream, token, delimiter)) {
-		if (!token.empty()) tokens.push_back(token);
+		tokens.push_back(token);
 	}
 	return tokens;
 }

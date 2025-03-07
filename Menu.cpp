@@ -302,6 +302,89 @@ void MainWindow::ShowPinTypeEditor() {
 	ImGui::End();
 }
 
+void MainWindow::ShowListEditor() {
+	if (!m_ShowListEditor) return;
+
+	if (ImGui::Begin("List Editor", &m_ShowListEditor,
+		ImGuiWindowFlags_AlwaysAutoResize)) {
+		auto& editBuffer = KeyValue::EditBuffer;
+		auto& editType = KeyValue::EditType;
+		auto Pin = KeyValue::EditPin;
+
+		if (Pin == nullptr) {
+			m_ShowListEditor = false;
+			return;
+		}
+
+		std::vector<std::string> elements = Utils::SplitString(editBuffer, ',');
+
+		// 自动填充/截断
+		if (elements.size() < editType.MinLength)
+			elements.resize(editType.MinLength);
+		else if (elements.size() > editType.MaxLength)
+			elements.resize(editType.MaxLength);
+
+		// 元素类型信息
+		TypeInfo elemType = TypeSystem::Get().GetTypeInfo(editType.ElementType);
+		
+		if (auto kv = dynamic_cast<KeyValue*>(Pin)) {
+			ImGui::PushID(Pin->ID.AsPointer());
+			std::string title = kv->Node->Name + " - " + kv->Key;
+			ImGui::TextUnformatted(title.c_str());
+			ImGui::PopID();
+		}
+
+		// 动态绘制元素
+		bool modified = false;
+		for (size_t i = 0; i < elements.size(); ++i) {
+			ImGui::PushID(static_cast<int>(i));
+			ImGui::Text("Item %d:", static_cast<int>(i + 1));
+			ImGui::SameLine();
+
+			std::string elemValue = elements[i];
+			if (KeyValue::DrawElementEditor(elemValue, elemType)) {
+				elements[i] = elemValue;
+				modified = true;
+			}
+			ImGui::PopID();
+		}
+
+		// 长度控制按钮
+		if (elements.size() < editType.MaxLength) {
+			if (ImGui::Button("+ Add Item")) {
+				elements.emplace_back(" ");
+				modified = true;
+			}
+		}
+		if (elements.size() > editType.MinLength) {
+			ImGui::SameLine();
+			if (ImGui::Button("- Remove Last")) {
+				elements.pop_back();
+				modified = true;
+			}
+		}
+
+		// 确认操作
+		ImGui::Separator();
+		if (ImGui::Button("OK", ImVec2(120, 0))) {
+			Pin->Value = editBuffer;
+			KeyValue::EditPin = nullptr;
+			m_ShowListEditor = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+			KeyValue::EditPin = nullptr;
+			m_ShowListEditor = false;
+		}
+
+		if (modified)
+			editBuffer = Utils::JoinStrings(elements, ",");
+
+		ImGui::End();
+	}
+}
+
+
 void MainWindow::LinkMenu() {
 	auto link = Link::Get(contextLinkId);
 

@@ -53,6 +53,7 @@ public:
 	void LinkMenu();
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
+	void ShowListEditor();
 
 	// 布局算法相关函数声明
 	void ApplyForceDirectedLayout();
@@ -95,4 +96,5 @@ public:
 	bool								m_ShowPinTypeEditor{ false };
 	bool                                m_ShowSectionEditor{ false };
 	SectionNode*                        m_SectionEditorNode{ nullptr };
+	bool                                m_ShowListEditor{ false };
 };

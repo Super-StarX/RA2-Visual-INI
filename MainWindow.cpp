@@ -152,6 +152,7 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	ShowPinTypeEditor();
 	ShowSectionEditor();
+	ShowListEditor();
 
 	ed::Begin("Node editor");
 	for (auto& node : Node::Array)

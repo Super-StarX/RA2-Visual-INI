@@ -1,6 +1,11 @@
 ﻿#include "ValuePin.h"
 #include "Utils.h"
+#include "MainWindow.h"
 #include <misc/cpp/imgui_stdlib.h>
+
+std::string ValuePin::EditBuffer;
+ListType ValuePin::EditType;
+ValuePin* ValuePin::EditPin = nullptr;
 
 ValuePin::ValuePin(::Node* node, std::string value, int id) :
 	Pin(node, value.c_str(), PinKind::Output, id),
@@ -170,7 +175,8 @@ void ValuePin::DrawListInput(std::string& listValue, const ListType& listType) {
 	}
 	else { // 长列表折叠显示
 		if (ImGui::Button("Edit List")) {
-			// 打开列表编辑窗口（需实现弹出窗口逻辑）
+			// 打开列表编辑窗口
+			EditPin = this;
 			OpenListEditor(listValue, listType);
 		}
 	}
@@ -180,73 +186,10 @@ void ValuePin::DrawListInput(std::string& listValue, const ListType& listType) {
 
 // 列表编辑窗口实现
 void ValuePin::OpenListEditor(std::string& listValue, const ListType& listType) {
-	static std::string editBuffer;
-	static ListType editType;
-
-	if (!ImGui::IsPopupOpen("List Editor")) {
-		editBuffer = listValue;
-		editType = listType;
-		ImGui::OpenPopup("List Editor");
-	}
-
-	if (ImGui::BeginPopupModal("List Editor", nullptr,
-		ImGuiWindowFlags_AlwaysAutoResize)) {
-		std::vector<std::string> elements = Utils::SplitString(editBuffer, ',');
-
-		// 自动填充/截断
-		if (elements.size() < editType.MinLength)
-			elements.resize(editType.MinLength);
-		else if (elements.size() > editType.MaxLength)
-			elements.resize(editType.MaxLength);
-
-		// 元素类型信息
-		TypeInfo elemType = TypeSystem::Get().GetTypeInfo(editType.ElementType);
-
-		// 动态绘制元素
-		bool modified = false;
-		for (size_t i = 0; i < elements.size(); ++i) {
-			ImGui::PushID(static_cast<int>(i));
-			ImGui::Text("Item %d:", static_cast<int>(i + 1));
-			ImGui::SameLine();
-
-			std::string elemValue = elements[i];
-			if (DrawElementEditor(elemValue, elemType)) {
-				elements[i] = elemValue;
-				modified = true;
-			}
-			ImGui::PopID();
-		}
-
-		// 长度控制按钮
-		if (elements.size() < editType.MaxLength) {
-			if (ImGui::Button("+ Add Item")) {
-				elements.emplace_back("");
-				modified = true;
-			}
-		}
-		if (elements.size() > editType.MinLength) {
-			ImGui::SameLine();
-			if (ImGui::Button("- Remove Last")) {
-				elements.pop_back();
-				modified = true;
-			}
-		}
-
-		// 确认操作
-		ImGui::Separator();
-		if (ImGui::Button("OK", ImVec2(120, 0))) {
-			listValue = Utils::JoinStrings(elements, ",");
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(120, 0)))
-			ImGui::CloseCurrentPopup();
-
-		if (modified)
-			editBuffer = Utils::JoinStrings(elements, ",");
-
-		ImGui::EndPopup();
-	}
+	EditBuffer = listValue;
+	EditType = listType;
+	//ImGui::OpenPopup("List Editor");
+	MainWindow::Instance->m_ShowListEditor = true;
 }
 
 // 元素级编辑器
