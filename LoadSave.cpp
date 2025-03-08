@@ -119,7 +119,6 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		}
 		case NodeType::Tag: {
 			auto type = j["TagType"].get<std::string>();
-			std::string name = j["Name"];
 			bool isInput = false;
 			bool isConst = false;
 			if (type == "Input") {
@@ -134,8 +133,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 				isInput = false;
 				isConst = false;
 			}
-
-			auto node = std::make_unique<TagNode>(name.c_str(), isInput, -1);
+			auto node = std::make_unique<TagNode>("", isInput, -1);
 			node->IsInput = isInput;
 			node->IsConstant = isConst;
 			node->LoadFromJson(nodeJson);
