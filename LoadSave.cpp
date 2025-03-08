@@ -116,6 +116,12 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			Node::Array.push_back(std::move(node));
 			break;
 		}
+		case NodeType::List: {
+			auto node = std::make_unique<SectionNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
+			break;
+		}
 		case NodeType::Group: {
 			auto node = std::make_unique<GroupNode>("", -1);
 			node->LoadFromJson(nodeJson);

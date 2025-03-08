@@ -34,9 +34,8 @@ void ListNode::LoadFromJson(const json& j) {
 
 void ListNode::AddKeyValue() {
 	ImVec2 buttonSize(lastMaxSize, 4.0f);
-	if (ImGui::Button("##Add Value", buttonSize)) {
+	if (ImGui::Button("##Add Value", buttonSize))
 		AddKeyValue("value");
-	}
 }
 
 ValuePin* ListNode::AddKeyValue(const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
