@@ -4,7 +4,6 @@
 
 class ValuePin : public Pin {
 public:
-	static void OpenListEditor(std::string& listValue, const ListType& listType);
 	static bool DrawElementEditor(std::string& value, const TypeInfo& type);
 
 	static std::string EditBuffer;

@@ -133,7 +133,7 @@ float ValuePin::DrawValueWidget(std::string& value, const TypeInfo& type) {
 // 列表控件绘制
 void ValuePin::DrawListInput(std::string& listValue, const ListType& listType) {
 	std::vector<std::string> elements = Utils::SplitString(listValue, ',');
-
+	bool changedDirectly = false;
 	// 自动调整元素数量
 	elements.resize(std::clamp(
 		int(elements.size()),
@@ -174,22 +174,25 @@ void ValuePin::DrawListInput(std::string& listValue, const ListType& listType) {
 		}
 	}
 	else { // 长列表折叠显示
-		if (ImGui::Button("Edit List")) {
+		ImGui::PushID(this->ID.AsPointer());
+		ImGui::BeginHorizontal("##listedit");
+		Utils::SetNextInputWidth(listValue, 100.f);
+		if (ImGui::InputText("##list", &listValue))
+			changedDirectly = true;
+		
+		if (ImGui::Button("Edit")) {
 			// 打开列表编辑窗口
 			EditPin = this;
-			OpenListEditor(listValue, listType);
+			EditBuffer = listValue;
+			EditType = listType;
+			MainWindow::Instance->m_ShowListEditor = true;
 		}
+		ImGui::EndHorizontal();
+		ImGui::PopID();
 	}
 
-	listValue = Utils::JoinStrings(elements, ",");
-}
-
-// 列表编辑窗口实现
-void ValuePin::OpenListEditor(std::string& listValue, const ListType& listType) {
-	EditBuffer = listValue;
-	EditType = listType;
-	//ImGui::OpenPopup("List Editor");
-	MainWindow::Instance->m_ShowListEditor = true;
+	if (!changedDirectly)
+		listValue = Utils::JoinStrings(elements, ",");
 }
 
 // 元素级编辑器
