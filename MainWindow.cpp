@@ -3,6 +3,7 @@
 #include "LeftPanelClass.h"
 #include "Utils.h"
 #include "Nodes/SectionNode.h"
+#include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
 #include "Pins/PinType.h"
 #include "Nodes/TagNode.h"
@@ -28,7 +29,12 @@ void MainWindow::SetNextId(int id) {
 
 void MainWindow::ClearAll() {
 	Node::Array.clear();
+	Pin::Array.clear();
 	Link::Array.clear();
+	ListNode::Map.clear();
+	SectionNode::Map.clear();
+	TagNode::GlobalNames.clear();
+	TagNode::Inputs.clear();
 	SectionNode::Map.clear();
 }
 
@@ -117,9 +123,7 @@ void MainWindow::OnStop() {
 		m_Editor = nullptr;
 	}
 	BuilderNode::DestroyHeader();
-	Node::Array.clear();
-	Pin::Array.clear();
-	Link::Array.clear();
+	ClearAll();
 }
 
 void MainWindow::OnFrame(float deltaTime) {

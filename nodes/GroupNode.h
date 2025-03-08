@@ -7,5 +7,5 @@ public:
 	virtual NodeType GetNodeType() const override { return NodeType::Group; }
 	virtual void Update() override;
 
-	ImVec2 Size;
+	ImVec2 Size{ 300,200 };
 };

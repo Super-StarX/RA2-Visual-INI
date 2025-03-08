@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
 #include "Nodes/ListNode.h"
@@ -104,9 +104,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	}
 
 	// 清空现有数据
-	Node::Array.clear();
-	Pin::Array.clear();
-	Link::Array.clear();
+	ClearAll();
 
 	// 加载 Nodes
 	for (const auto& nodeJson : root["Nodes"]) {
@@ -118,7 +116,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			break;
 		}
 		case NodeType::Tag: {
-			auto type = j["TagType"].get<std::string>();
+			std::string type = nodeJson["TagType"];
 			bool isInput = false;
 			bool isConst = false;
 			if (type == "Input") {
