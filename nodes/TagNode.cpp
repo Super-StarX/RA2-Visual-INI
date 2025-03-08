@@ -165,19 +165,6 @@ void TagNode::LoadFromJson(const json& j) {
 	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input);
 	InputPin->Node = this;
 	InputPin->LoadFromJson(j["Input"]);
-	auto type = j["TagType"].get<std::string>();
-	if (type == "Input") {
-		IsInput = true;
-		IsConstant = false;
-	}
-	else if (type == "Const") {
-		IsInput = false;
-		IsConstant = true;
-	}
-	else if (type == "Output") {
-		IsInput = false;
-		IsConstant = false;
-	}
 }
 
 // 递归解析指针类型TagNode的值

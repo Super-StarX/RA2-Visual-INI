@@ -118,7 +118,26 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			break;
 		}
 		case NodeType::Tag: {
-			auto node = std::make_unique<TagNode>("", -1);
+			auto type = j["TagType"].get<std::string>();
+			std::string name = j["Name"];
+			bool isInput = false;
+			bool isConst = false;
+			if (type == "Input") {
+				isInput = true;
+				isConst = false;
+			}
+			else if (type == "Const") {
+				isInput = false;
+				isConst = true;
+			}
+			else if (type == "Output") {
+				isInput = false;
+				isConst = false;
+			}
+
+			auto node = std::make_unique<TagNode>(name.c_str(), isInput, -1);
+			node->IsInput = isInput;
+			node->IsConstant = isConst;
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			break;
