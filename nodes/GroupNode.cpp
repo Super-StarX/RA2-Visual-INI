@@ -57,3 +57,18 @@ void GroupNode::Update() {
 	}
 	ed::EndGroupHint();
 }
+
+void GroupNode::SaveToJson(json& j) const {
+	Node::SaveToJson(j);
+
+	j["Size"] = { Size.x, Size.y };
+}
+
+void GroupNode::LoadFromJson(const json& j) {
+	Node::LoadFromJson(j);
+
+	Size = {
+		j["Size"][0].get<float>(),
+		j["Size"][1].get<float>()
+	};
+}

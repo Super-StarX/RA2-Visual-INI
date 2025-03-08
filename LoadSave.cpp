@@ -1,6 +1,7 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
+#include "Nodes/GroupNode.h"
 #include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
 #include "version.h"
@@ -111,6 +112,12 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		switch (static_cast<NodeType>(nodeJson["Type"])) {
 		case NodeType::Section: {
 			auto node = std::make_unique<SectionNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Group: {
+			auto node = std::make_unique<GroupNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			break;
