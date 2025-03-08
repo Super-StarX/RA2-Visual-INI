@@ -156,7 +156,7 @@ void TagNode::SaveToJson(json& j) const {
 	json inputJson;
 	InputPin->SaveToJson(inputJson);
 	j["Input"] = inputJson;
-	j["TagType"] = IsInput ? "Input" : IsConstant ? "Const" : "Output";
+	j["TagType"] = IsConstant ? "Const" : IsInput ? "Input" : "Output";
 }
 
 void TagNode::LoadFromJson(const json& j) {

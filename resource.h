@@ -1,6 +1,6 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ …˙≥…µƒ∞¸∫¨Œƒº˛°£
-// π© version.rc  π”√
+Ôªø//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ ÁîüÊàêÁöÑÂåÖÂê´Êñá‰ª∂„ÄÇ
+// ‰æõ version.rc ‰ΩøÁî®
 //
 #define SW_HIDE                         0
 #define HIDE_WINDOW                     0
@@ -36,8 +36,6 @@
 #define _USE_DECLSPECS_FOR_SAL          0
 #define _USE_ATTRIBUTES_FOR_SAL         0
 #define __drv_typeConst                 0
-#define VERSION_MAJOR                   0
-#define VERSION_PATCH                   0
 #define CREATEPROCESS_MANIFEST_RESOURCE_ID 1
 #define MINIMUM_RESERVED_MANIFEST_RESOURCE_ID 1
 #define SW_SHOWNORMAL                   1
@@ -221,7 +219,6 @@
 #define VFFF_ISSHAREDFILE               0x0001
 #define VFF_CURNEDEST                   0x0001
 #define VIFF_FORCEINSTALL               0x0001
-#define VERSION_MINOR                   1
 #define ID_VERSION                      1
 #define WINAPI_FAMILY_PC_APP            2
 #define ISOLATIONAWARE_MANIFEST_RESOURCE_ID 2
@@ -346,7 +343,6 @@
 #define SUBLANG_SPANISH_MODERN          0x03
 #define SORT_CHINESE_BOPOMOFO           0x3
 #define __drv_typeExpr                  3
-#define VERSION_REVISION                3
 #define WINAPI_FAMILY_SYSTEM            4
 #define ISOLATIONPOLICY_MANIFEST_RESOURCE_ID 4
 #define SW_SHOWNOACTIVATE               4
