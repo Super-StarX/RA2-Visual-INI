@@ -11,6 +11,7 @@ static ed::NodeId contextNodeId;
 static ed::LinkId contextLinkId;
 static ed::PinId  contextPinId;
 static Pin* newNodeLinkPin = nullptr;
+SectionNode* m_SectionEditorNode{ nullptr };
 void MainWindow::Menu() {
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))

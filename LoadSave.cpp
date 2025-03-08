@@ -183,11 +183,34 @@ void MainWindow::ImportINI(const std::string& path) {
 
 	// 第一次遍历：记录所有的 section 和 key-value 对
 	while (std::getline(file, line)) {
-		if (line.find('[') != std::string::npos) {
-			currentSection = line.substr(1, line.find(']') - 1);
-			SpawnSectionNode(currentSection);
+		size_t bracketPos = line.find('[');
+		if (bracketPos != std::string::npos) {
+			size_t commentPos = line.find(';');
+			bool isComment = false;
+
+			// 判断分号是否在 '[' 之前
+			if (commentPos != std::string::npos && commentPos < bracketPos) {
+				isComment = true;
+				line = line.substr(commentPos + 1);
+				bracketPos = line.find('['); // 重新查找 '[' 的位置（因为 line 已被修改）
+			}
+
+			// 确保 '[' 和 ']' 存在且顺序正确
+			size_t endBracketPos = line.find(']');
+			if (bracketPos != std::string::npos &&
+				endBracketPos != std::string::npos &&
+				endBracketPos > bracketPos) {
+				// 提取中括号之间的内容
+				currentSection = line.substr(bracketPos + 1, endBracketPos - bracketPos - 1);
+				auto sectionNode = SpawnSectionNode(currentSection);
+				if (isComment)
+					sectionNode->IsComment = true;
+			}
+			else
+				currentSection.clear(); // 格式错误时清空 section
 		}
 		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
+			// 处理键值对逻辑
 			std::istringstream iss(line);
 			std::string key, value;
 			if (std::getline(iss, key, '=') && std::getline(iss, value))
@@ -202,27 +225,57 @@ void MainWindow::ImportINI(const std::string& path) {
 	// 第二次遍历：处理所有的 key-value 对并进行连线
 	auto& map = SectionNode::Map;
 	while (std::getline(file, line)) {
-		if (line.find('[') != std::string::npos) {
-			currentSection = line.substr(1, line.find(']') - 1);
+		// 处理 Section 标题
+		size_t bracketPos = line.find('[');
+		if (bracketPos != std::string::npos) {
+			size_t semicolonPos = line.find(';');
+			bool isComment = false;
+
+			// 如果分号存在且在 '[' 前面
+			if (semicolonPos != std::string::npos && semicolonPos < bracketPos) {
+				isComment = true;
+				line = line.substr(semicolonPos + 1);
+				bracketPos = line.find('['); // 重新定位 '[' 的位置（因为 line 已修改）
+			}
+
+			// 确保 '[' 和 ']' 存在且顺序正确
+			size_t endBracketPos = line.find(']');
+			if (bracketPos != std::string::npos &&
+				endBracketPos != std::string::npos &&
+				endBracketPos > bracketPos) {
+				currentSection = line.substr(bracketPos + 1, endBracketPos - bracketPos - 1);
+				// 如果当前 Section 是注释，需要同步到节点（根据需求决定是否处理）
+			}
+			else {
+				currentSection.clear(); // 格式错误时清空 section
+			}
 		}
+		// 处理键值对逻辑保持不变
 		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
 			std::istringstream iss(line);
 			std::string key, value;
-			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-				auto currentNode = map[currentSection];
-				currentNode->SetPosition({ 0, 0 });
-				bool isComment = line.find(';') != std::string::npos;
-				// TODO: 这里还差一句把';'去掉
+			if (std::getline(iss, key, '=')) {
+				// 去除键中的注释（分号开头）
+				bool isComment = false;
+				if (!key.empty() && key[0] == ';') {
+					isComment = true;
+					key = key.substr(1);
+					while (!key.empty() && key[0] == ';') // 去除后续可能的前导分号（如 ";;key"）
+						key = key.substr(1);
+				}
 
-				// 添加输出引脚
-				auto kv = currentNode->AddKeyValue(key, value, 0, false, isComment);
+				if (std::getline(iss, value)) {
+					auto currentNode = map[currentSection];
+					currentNode->SetPosition({ 0, 0 });
+					auto kv = currentNode->AddKeyValue(key, value, 0, false, isComment);
 
-				// 创建连线
-				if (map.contains(value)) {
-					auto targetNode = map[value];
-					if (targetNode->InputPin->CanCreateLink(kv)) {
-						auto link = kv->LinkTo(targetNode->InputPin.get());
-						link->TypeIdentifier = kv->GetLinkType();
+					// 如果场内有对应的 section 就连上 Link
+					if (map.contains(value)) {
+						auto targetNode = map[value];
+						if (targetNode->InputPin->CanCreateLink(kv)) {
+							auto link = kv->LinkTo(targetNode->InputPin.get());
+							link->TypeIdentifier = kv->GetLinkType();
+						}
 					}
 				}
 			}

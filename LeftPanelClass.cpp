@@ -206,7 +206,6 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 }
 
 void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<ed::NodeId>& selectedNodes, int linkCount, std::vector<ed::LinkId>& selectedLinks) {
-
 	ImGui::GetWindowDrawList()->AddRectFilled(
 		ImGui::GetCursorScreenPos(),
 		ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
@@ -226,8 +225,7 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	ImGui::EndChild();
 }
 
-void LeftPanelClass::ShowLeftPanel(float paneWidth) {
-
+void LeftPanelClass::OnFrame(float paneWidth) {
 	ImGui::BeginChild("Selection", ImVec2(paneWidth, 0));
 
 	paneWidth = ImGui::GetContentRegionAvail().x;

@@ -146,7 +146,7 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	Utils::Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
-	m_LeftPanel.ShowLeftPanel(leftPaneWidth - 4.0f);
+	m_LeftPanel.OnFrame(leftPaneWidth - 4.0f);
 
 	ImGui::SameLine(0.0f, 12.0f);
 

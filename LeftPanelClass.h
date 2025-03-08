@@ -17,7 +17,7 @@ public:
 	void DrawIcon(ImDrawList* drawList, ImTextureID* icon);
 	void SelectionPanel(float paneWidth, int nodeCount, std::vector<ed::NodeId>& selectedNodes, int linkCount, std::vector<ed::LinkId>& selectedLinks);
 	void NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes);
-	void ShowLeftPanel(float paneWidth);
+	void OnFrame(float paneWidth);
 	void ShowOrdinals() const;
 	void ShowProjFileDialog(bool isSaving);
 	void ShowINIFileDialog(bool isSaving);
