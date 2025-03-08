@@ -31,10 +31,12 @@ bool Utils::Splitter(bool split_vertically, float thickness, float* size1, float
 
 std::vector<std::string> Utils::SplitString(const std::string& s, char delimiter) {
 	std::vector<std::string> tokens;
+	tokens.resize(std::count(s.begin(), s.end(), ',') + 1);
 	std::string token;
 	std::istringstream tokenStream(s);
+	int i = 0;
 	while (std::getline(tokenStream, token, delimiter)) {
-		tokens.push_back(token);
+		tokens[i++] = token;
 	}
 	return tokens;
 }

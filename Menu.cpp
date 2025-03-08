@@ -316,7 +316,7 @@ void MainWindow::ShowListEditor() {
 			return;
 		}
 
-		std::vector<std::string> elements = Utils::SplitString(editBuffer, ',');
+		auto elements = Utils::SplitString(editBuffer, ',');
 
 		// 自动填充/截断
 		if (elements.size() < editType.MinLength)
@@ -352,7 +352,7 @@ void MainWindow::ShowListEditor() {
 		// 长度控制按钮
 		if (elements.size() < editType.MaxLength) {
 			if (ImGui::Button("+ Add Item")) {
-				elements.emplace_back(" ");
+				elements.emplace_back("");
 				modified = true;
 			}
 		}
