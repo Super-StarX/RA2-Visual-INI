@@ -118,11 +118,9 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			break;
 		}
 		case NodeType::Tag: {
-			/*
 			auto node = std::make_unique<TagNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
-			*/
 			break;
 		}
 		default:

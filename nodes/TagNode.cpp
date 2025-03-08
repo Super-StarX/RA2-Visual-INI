@@ -156,7 +156,7 @@ void TagNode::SaveToJson(json& j) const {
 	json inputJson;
 	InputPin->SaveToJson(inputJson);
 	j["Input"] = inputJson;
-	j["Type"] = IsInput ? "Input" : IsConstant ? "Const" : "Output";
+	j["TagType"] = IsInput ? "Input" : IsConstant ? "Const" : "Output";
 }
 
 void TagNode::LoadFromJson(const json& j) {
@@ -165,7 +165,7 @@ void TagNode::LoadFromJson(const json& j) {
 	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input);
 	InputPin->Node = this;
 	InputPin->LoadFromJson(j["Input"]);
-	auto type = j["Type"].get<std::string>();
+	auto type = j["TagType"].get<std::string>();
 	if (type == "Input") {
 		IsInput = true;
 		IsConstant = false;
