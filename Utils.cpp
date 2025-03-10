@@ -1,5 +1,6 @@
 ﻿#include "Utils.h"
 #include <algorithm>
+#include <regex>
 
 void Utils::DrawTextOnCursor(const char* label, ImColor color) {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
@@ -72,4 +73,15 @@ float Utils::SetNextInputWidth(const std::string& value, float minSize, float ma
 	float inputWidth = textWidth + 20.0f;
 	ImGui::SetNextItemWidth(inputWidth);
 	return inputWidth;
+}
+
+std::string Utils::StringTrim(const std::string& str) {
+	size_t start = str.find_first_not_of(" \t\r\n");
+	size_t end = str.find_last_not_of(" \t\r\n");
+	return (start == std::string::npos || end == std::string::npos) ? "" : str.substr(start, end - start + 1);
+}
+
+bool Utils::IsCommentSection(const std::string& str) {
+	static std::regex pattern(R"(;\s*\[)");
+	return std::regex_search(str, pattern);
 }

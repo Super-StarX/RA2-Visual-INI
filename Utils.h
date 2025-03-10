@@ -24,4 +24,6 @@ public:
 	static int GetComboIndex(const std::string& value, const std::vector<std::string>& options);
 	static const char* GetComboItems(const std::vector<std::string>& options);
 	static float SetNextInputWidth(const std::string& value, float minSize = 0.f, float maxSize = 400.f);
+	static std::string StringTrim(const std::string& str);
+	static bool IsCommentSection(const std::string& str);
 };
