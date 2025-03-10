@@ -2,10 +2,9 @@
 #include "TypeLoader.h"
 #include "Utils.h"
 
-KeyValue::KeyValue(::Node* node, std::string key, std::string value, int id) :
-	ValuePin(node, value,id),
-	Key(key) {
-}
+KeyValue::KeyValue(::Node* node, const std::string& key, const std::string& value, const std::string& comment, int id) :
+	ValuePin(node, value, id),
+	Key(key), Comment(comment) {}
 
 void KeyValue::Tooltip() {
 	if (!Node) return;
@@ -32,6 +31,10 @@ void KeyValue::Tooltip() {
 				std::get<ListType>(type.Data).MinLength,
 				std::get<ListType>(type.Data).MaxLength);
 			break;
+		}
+		if (!Comment.empty()) {
+			ImGui::Separator();
+			ImGui::TextUnformatted(Comment.c_str());
 		}
 		ImGui::EndTooltip();
 	}

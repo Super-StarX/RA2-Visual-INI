@@ -17,7 +17,7 @@ public:
 	virtual void LoadFromJson(const json& j) override;
 	virtual void UnFoldedKeyValues(KeyValue& kv, bool override) override;
 	virtual void AddKeyValue() override;
-	KeyValue* AddKeyValue(const std::string& key, const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
+	KeyValue* AddKeyValue(const std::string& key, const std::string& value, const std::string& comment = "", int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);

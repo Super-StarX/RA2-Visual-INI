@@ -28,7 +28,7 @@ void SectionNode::LoadFromJson(const json& j) {
 	VINode::LoadFromJson(j);
 
 	for (const auto& kvJson : j["KeyValues"])
-		AddKeyValue("", "", -1)->LoadFromJson(kvJson);
+		AddKeyValue("", "", "", -1)->LoadFromJson(kvJson);
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {
@@ -46,8 +46,8 @@ void SectionNode::AddKeyValue() {
 	}
 }
 
-KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
-	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value, pinid));
+KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& value, const std::string& comment, int pinid, bool isInherited, bool isComment, bool isFolded) {
+	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value, comment, pinid));
 	kv->IsInherited = isInherited;
 	kv->IsComment = isComment;
 	kv->IsFolded = isFolded;

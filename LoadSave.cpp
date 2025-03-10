@@ -5,6 +5,7 @@
 #include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
 #include "version.h"
+#include "Utils.h"
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -117,7 +118,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			break;
 		}
 		case NodeType::List: {
-			auto node = std::make_unique<SectionNode>("", -1);
+			auto node = std::make_unique<ListNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			break;
@@ -202,45 +203,75 @@ void MainWindow::SaveProject(const std::string& filePath) {
 
 void MainWindow::ImportINI(const std::string& path) {
 	ClearAll();
-	std::ifstream file(path);
-	std::string line, currentSection;
+	std::wifstream file(path);
+	std::string line, currentSection, comment;
+	std::wstring wline;
+	file.imbue(std::locale("zh_CN.UTF-8"));
+	auto fromWString = [](const std::wstring& wstr) {
+		int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+		std::string result(sizeNeeded - 1, 0); // -1 是为了去掉 null 终止符
+		WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &result[0], sizeNeeded, nullptr, nullptr);
+		return result;
+	};
 
-	std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> keyValuePairs;
+	while (std::getline(file, wline)) {
+		line = fromWString(wline);
 
-	// 第一次遍历：记录所有的 section 和 key-value 对
-	while (std::getline(file, line)) {
-		size_t bracketPos = line.find('[');
-		if (bracketPos != std::string::npos) {
-			size_t commentPos = line.find(';');
-			bool isComment = false;
-
-			// 判断分号是否在 '[' 之前
-			if (commentPos != std::string::npos && commentPos < bracketPos) {
-				isComment = true;
-				line = line.substr(commentPos + 1);
-				bracketPos = line.find('['); // 重新查找 '[' 的位置（因为 line 已被修改）
+		if (!Utils::IsCommentSection(line)) {
+			// 将注释与正文分隔开
+			auto commentPos = line.find(';');
+			if (commentPos != std::string::npos) {
+				comment = Utils::StringTrim(line.substr(commentPos + 1));
+				line = line.substr(0, commentPos);
+			}
+			else {
+				comment.clear();
 			}
 
-			// 确保 '[' 和 ']' 存在且顺序正确
-			size_t endBracketPos = line.find(']');
-			if (bracketPos != std::string::npos &&
-				endBracketPos != std::string::npos &&
-				endBracketPos > bracketPos) {
-				// 提取中括号之间的内容
-				currentSection = line.substr(bracketPos + 1, endBracketPos - bracketPos - 1);
-				auto sectionNode = SpawnSectionNode(currentSection);
-				if (isComment)
-					sectionNode->IsComment = true;
-			}
-			else
-				currentSection.clear(); // 格式错误时清空 section
+			// 去除注释后如果没有任何内容，则跳过
+			line = Utils::StringTrim(line);
+			if (line.empty())
+				continue;
 		}
-		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
-			// 处理键值对逻辑
-			std::istringstream iss(line);
-			std::string key, value;
-			if (std::getline(iss, key, '=') && std::getline(iss, value))
-				keyValuePairs[currentSection].emplace_back(key, value);
+
+		auto bracketPos = line.find("[");
+		if (bracketPos != std::string::npos) { // 新的Section开始了
+			auto inheritPos = line.find(":");
+			SectionNode* toConnect = nullptr;
+
+			// 提取Section Name的函数
+			auto substractSectionName = [](const std::string& str) -> std::string {
+				if (size_t l = str.find('['); l != str.npos)
+					if (size_t r = str.find(']', l + 1); r != str.npos)
+						return str.substr(l + 1, r - l - 1);
+				return "";
+			};
+
+			if (inheritPos == std::string::npos) { // 普通section
+				currentSection = substractSectionName(line);
+				if (currentSection.empty())
+					continue;
+				toConnect = nullptr;
+			}
+			else { // 有继承的Section []:[]
+				auto former = line.substr(0, inheritPos);
+				auto latter = line.substr(inheritPos + 1);
+				currentSection = substractSectionName(former);
+				if (currentSection.empty())
+					continue;
+
+				auto toConnectSection = substractSectionName(latter);
+				if (auto it = SectionNode::Map.find(toConnectSection); it != SectionNode::Map.end())
+					toConnect = it->second;
+				else
+					toConnect = nullptr;
+			}
+
+			auto sectionNode = SpawnSectionNode(currentSection);
+			if (Utils::IsCommentSection(line))
+				sectionNode->IsComment = true;
+			if (toConnect)
+				sectionNode->OutputPin->LinkTo(toConnect->InputPin.get());
 		}
 	}
 
@@ -248,39 +279,47 @@ void MainWindow::ImportINI(const std::string& path) {
 	file.clear();
 	file.seekg(0, std::ios::beg);
 
-	// 第二次遍历：处理所有的 key-value 对并进行连线
-	auto& map = SectionNode::Map;
-	while (std::getline(file, line)) {
-		// 处理 Section 标题
-		size_t bracketPos = line.find('[');
-		if (bracketPos != std::string::npos) {
-			size_t semicolonPos = line.find(';');
-			bool isComment = false;
+	auto it = Node::Array.begin();
+	auto current = it;
+	while (std::getline(file, wline)) {
+		auto currentNode = reinterpret_cast<SectionNode*>(current->get());
+		line = fromWString(wline);
 
-			// 如果分号存在且在 '[' 前面
-			if (semicolonPos != std::string::npos && semicolonPos < bracketPos) {
-				isComment = true;
-				line = line.substr(semicolonPos + 1);
-				bracketPos = line.find('['); // 重新定位 '[' 的位置（因为 line 已修改）
-			}
-
-			// 确保 '[' 和 ']' 存在且顺序正确
-			size_t endBracketPos = line.find(']');
-			if (bracketPos != std::string::npos &&
-				endBracketPos != std::string::npos &&
-				endBracketPos > bracketPos) {
-				currentSection = line.substr(bracketPos + 1, endBracketPos - bracketPos - 1);
-				// 如果当前 Section 是注释，需要同步到节点（根据需求决定是否处理）
+		if (!Utils::IsCommentSection(line) && !currentNode->IsComment) {
+			// 将注释与正文分隔开
+			auto commentPos = line.find(';');
+			if (commentPos != std::string::npos) {
+				comment = Utils::StringTrim(line.substr(commentPos + 1));
+				line = line.substr(0, commentPos);
 			}
 			else {
-				currentSection.clear(); // 格式错误时清空 section
+				comment.clear();
 			}
+
+			// 去除注释后如果没有任何内容，则跳过
+			line = Utils::StringTrim(line);
+			if (line.empty())
+				continue;
 		}
-		// 处理键值对逻辑保持不变
-		else if (!currentSection.empty() && line.find('=') != std::string::npos) {
+
+		auto bracketPos = line.find("[");
+		if (bracketPos != std::string::npos) { // 新的Section开始了
+			current = it++;
+			continue;
+		}
+		else {
+			// 如果当前节点是注释节点，移除所有语句前面的注释
+			if (currentNode->IsComment) {
+				if (line.find('=') == std::string::npos)
+					continue;
+				if (auto pos = line.find(';'); pos != std::string::npos)
+					line = line.replace(line.find(';'), 1, "");
+			}
+
+			// 处理键值对逻辑
 			std::istringstream iss(line);
 			std::string key, value;
-			if (std::getline(iss, key, '=')) {
+			if (std::getline(iss, key, '=') && std::getline(iss, value)) {
 				// 去除键中的注释（分号开头）
 				bool isComment = false;
 				if (!key.empty() && key[0] == ';') {
@@ -289,15 +328,13 @@ void MainWindow::ImportINI(const std::string& path) {
 					while (!key.empty() && key[0] == ';') // 去除后续可能的前导分号（如 ";;key"）
 						key = key.substr(1);
 				}
-
-				if (std::getline(iss, value)) {
-					auto currentNode = map[currentSection];
+				
+				if (currentNode) {
 					currentNode->SetPosition({ 0, 0 });
-					auto kv = currentNode->AddKeyValue(key, value, 0, false, isComment);
-
+					auto kv = currentNode->AddKeyValue(key, value, comment, 0, false, isComment);
 					// 如果场内有对应的 section 就连上 Link
-					if (map.contains(value)) {
-						auto targetNode = map[value];
+					if (SectionNode::Map.contains(value)) {
+						auto targetNode = SectionNode::Map[value];
 						if (targetNode->InputPin->CanCreateLink(kv)) {
 							auto link = kv->LinkTo(targetNode->InputPin.get());
 							link->TypeIdentifier = kv->GetLinkType();
@@ -308,22 +345,6 @@ void MainWindow::ImportINI(const std::string& path) {
 		}
 	}
 
-	// 遍历所有 key-value 对进行最终连线检查
-	for (const auto& [section, pairs] : keyValuePairs) {
-		for (const auto& [key, value] : pairs) {
-			auto currentNode = map[section];
-			if (map.contains(value)) {
-				auto targetNode = map[value];
-				if (currentNode->KeyValues.empty())
-					continue;
-				auto kv = currentNode->KeyValues.back().get(); // 假设每个 key-value 对都已添加到 KeyValues 中
-				if (targetNode->InputPin->CanCreateLink(kv)){
-					auto link = kv->LinkTo(targetNode->InputPin.get());
-					link->TypeIdentifier = kv->GetLinkType();
-				}
-			}
-		}
-	}
 	ApplyForceDirectedLayout();
 	ed::NavigateToContent();
 }

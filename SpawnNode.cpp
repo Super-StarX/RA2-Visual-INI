@@ -21,7 +21,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const st
 
 	// 填充键值对
 	for (const auto& kv : keyValues) {
-		auto newkv = newNode->AddKeyValue(kv.Key, kv.Value, GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
+		auto newkv = newNode->AddKeyValue(kv.Key, kv.Value, "", GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
 
 		// 如果场内有对应的section就连上Link
 		if (SectionNode::Map.contains(kv.Value)) {
