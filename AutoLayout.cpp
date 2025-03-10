@@ -64,7 +64,8 @@ void MainWindow::CreateTagNodesForMultiInputs() {
 	}
 }
 
-std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {std::unordered_map<Node*, std::vector<Node*>> childrenMap;
+std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {
+	std::unordered_map<Node*, std::vector<Node*>> childrenMap;
 	for (auto& node : Node::Array) {
 		// 处理所有具有输出引脚的节点类型
 		auto section = dynamic_cast<SectionNode*>(node.get());
