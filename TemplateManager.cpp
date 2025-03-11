@@ -1,4 +1,5 @@
 ﻿#include "TemplateManager.h"
+#include "Utils.h"
 #include <fstream>
 #include <sstream>
 
@@ -28,15 +29,34 @@ void TemplateManager::LoadTemplates(const std::string& iniPath) {
 		else if (currentSection) { // 解析键值对
 			auto eqPos = line.find('=');
 			if (eqPos != std::string::npos) {
-				TemplateSection::KeyValue kv;
-				kv.IsComment = kv.Key.find(";") == 0;
-				kv.IsInherited = kv.Key.find("@") == 0;
-				kv.IsFolded = kv.Key.find("#") == 0;
-				line.erase(0, line.find_first_not_of(";@#")); // 去除标识符
-				eqPos = line.find('='); // 去除之后再找一遍
-				kv.Key = line.substr(0, eqPos);
-				kv.Value = line.substr(eqPos + 1);
-				currentSection->KeyValues.push_back(kv);
+				if (auto lgPos = line.find(">"); lgPos != std::string::npos) {
+					auto key = line.substr(lgPos + 1, eqPos - lgPos - 1);
+					key = Utils::Trim(key);
+					auto value = line.substr(eqPos + 1);
+					if (key == "Color") {
+						std::istringstream iss(value);
+						int r, g, b;
+						iss >> r >> g >> b;
+						currentSection->Color = ImColor(r, g, b);
+					}
+					else if (key == "Type")
+						currentSection->Type = value;
+					else if (key == "Folded")
+						currentSection->IsFolded = value == "true";
+					else if (key == "Comment")
+						currentSection->IsComment = value == "true";
+				}
+				else {
+					TemplateSection::KeyValue kv;
+					kv.IsComment = kv.Key.find(";") == 0;
+					kv.IsInherited = kv.Key.find("@") == 0;
+					kv.IsFolded = kv.Key.find("#") == 0;
+					line.erase(0, line.find_first_not_of(";@#")); // 去除标识符
+					eqPos = line.find('='); // 去除之后再找一遍
+					kv.Key = line.substr(0, eqPos);
+					kv.Value = line.substr(eqPos + 1);
+					currentSection->KeyValues.push_back(kv);
+				}
 			}
 		}
 	}
@@ -46,7 +66,7 @@ void TemplateManager::ShowCreationMenu(NodeCreator creator) {
 	for (const auto& section : m_Templates) {
 		if (ImGui::MenuItem(section.Name.c_str())) {
 			const ImVec2 spawnPos = ImGui::GetMousePos();
-			creator(section.Name, section.KeyValues, spawnPos);
+			creator(section, spawnPos);
 		}
 	}
 }

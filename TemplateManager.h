@@ -13,22 +13,23 @@ struct TemplateSection {
 		bool IsFolded = false;
 	};
 
-	std::string Name;
+	std::string Name{};
+	std::string Type{};
+	ImColor Color{};
+	bool IsFolded{ false };
+	bool IsComment{ false };
 	std::vector<KeyValue> KeyValues;
 };
 
 class TemplateManager {
 public:
 	using NodeCreator = std::function<void(
-		const std::string& sectionName,
-		const std::vector<TemplateSection::KeyValue>& keyValues,
+		const TemplateSection& templa,
 		ImVec2 position
 	)>;
 
 	void LoadTemplates(const std::string& iniPath);
 	void ShowCreationMenu(NodeCreator creator);
-
-	const auto& GetTemplates() const { return m_Templates; }
 
 private:
 	std::vector<TemplateSection> m_Templates;

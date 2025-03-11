@@ -36,7 +36,7 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
-	Node* SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position);
+	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
 	SectionNode* SpawnSectionNode(const std::string& section = "");
 	GroupNode* SpawnGroupNode(const std::string& section = "");
 	CommentNode* SpawnCommentNode(const std::string& section = "");

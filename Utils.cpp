@@ -52,6 +52,14 @@ std::string Utils::JoinStrings(const std::vector<std::string>& elements, const s
 	return result;
 }
 
+std::string Utils::Trim(const std::string& str) {
+	static const std::string whitespace = " \t\n\r";
+	auto start = str.find_first_not_of(whitespace);
+	if (start == std::string::npos) return "";
+	auto end = str.find_last_not_of(whitespace);
+	return str.substr(start, end - start + 1);
+}
+
 int Utils::GetComboIndex(const std::string& value, const std::vector<std::string>& options) {
 	auto it = std::find(options.begin(), options.end(), value);
 	return (it != options.end()) ? static_cast<int>(it - options.begin()) : 0;
@@ -73,12 +81,6 @@ float Utils::SetNextInputWidth(const std::string& value, float minSize, float ma
 	float inputWidth = textWidth + 20.0f;
 	ImGui::SetNextItemWidth(inputWidth);
 	return inputWidth;
-}
-
-std::string Utils::StringTrim(const std::string& str) {
-	size_t start = str.find_first_not_of(" \t\r\n");
-	size_t end = str.find_last_not_of(" \t\r\n");
-	return (start == std::string::npos || end == std::string::npos) ? "" : str.substr(start, end - start + 1);
 }
 
 bool Utils::IsCommentSection(const std::string& str) {

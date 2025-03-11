@@ -11,16 +11,20 @@
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
 
-Node* MainWindow::SpawnNodeFromTemplate(const std::string& sectionName, const std::vector<TemplateSection::KeyValue>& keyValues, ImVec2 position) {
+Node* MainWindow::SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position) {
 	// 转换屏幕坐标到画布坐标
 	const auto canvasPos = ed::ScreenToCanvas(position);
 
 	// 创建节点
-	auto* newNode = SpawnSectionNode(sectionName);
+	auto* newNode = SpawnSectionNode(templa.Name);
 	ed::SetNodePosition(newNode->ID, canvasPos);
+	newNode->TypeName = templa.Type;
+	newNode->Color = templa.Color;
+	newNode->IsFolded = templa.IsFolded;
+	newNode->IsComment = templa.IsComment;
 
 	// 填充键值对
-	for (const auto& kv : keyValues) {
+	for (const auto& kv : templa.KeyValues) {
 		auto newkv = newNode->AddKeyValue(kv.Key, kv.Value, "", GetNextId(), kv.IsInherited, kv.IsComment, kv.IsFolded);
 
 		// 如果场内有对应的section就连上Link
