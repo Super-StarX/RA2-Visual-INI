@@ -19,6 +19,8 @@ enum class NodeType {
 	Comment,
 	List,
 	Module,
+	Input,
+	Output,
 };
 /*
 Node->INENode->HeaderNode->BlueprintNode

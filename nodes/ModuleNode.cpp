@@ -1,4 +1,8 @@
 ﻿#include "ModuleNode.h"
+#include "MainWindow.h"
+#include <fstream>
+#include <iostream>
+#include <unordered_set>
 #include <imgui_node_editor_internal.h>
 
 ModuleNode::ModuleNode(const char* name, int id) :
@@ -6,6 +10,11 @@ ModuleNode::ModuleNode(const char* name, int id) :
 }
 
 void ModuleNode::Update() {
+	// 双击进入模块
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+		MainWindow::Instance->LoadProject(FilePath);
+	}
+
 	const float rounding = 5.0f;
 	const float padding = 12.0f;
 
@@ -148,4 +157,64 @@ void ModuleNode::Update() {
 		contentRect.GetBR(),
 		IM_COL32(48, 128, 255, 100), 0.0f);
 	//ImGui::PopStyleVar();
+}
+
+void ModuleNode::LoadProject(std::string path) {
+	std::ifstream file(path);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file for reading.\n";
+		return;
+	}
+
+	InternalProject = json::parse(file);
+	file.close();
+}
+
+void ModuleNode::UpdatePins() {
+	std::vector<std::string> inputNames;
+	std::vector<std::string> outputNames;
+
+	if (InternalProject.contains("Inputs")) {
+		for (const auto& input : InternalProject["Inputs"]) {
+			inputNames.push_back(input["Name"]);
+		}
+	}
+
+	if (InternalProject.contains("Outputs")) {
+		for (const auto& output : InternalProject["Outputs"]) {
+			outputNames.push_back(output["Name"]);
+		}
+	}
+
+	UpdatePinSet(Inputs, inputNames, true);
+	UpdatePinSet(Outputs, outputNames, false);
+}
+
+void ModuleNode::UpdatePinSet(std::vector<Pin>& pinSet, const std::vector<std::string>& newNames, bool isInput) {
+	std::unordered_map<std::string, Pin*> existingPins;
+	for (auto& pin : pinSet) {
+		existingPins[pin.Name] = &pin;
+	}
+
+	std::vector<Pin> newPinSet;
+	newPinSet.reserve(newNames.size());
+
+	for (const auto& name : newNames) {
+		if (existingPins.find(name) != existingPins.end()) {
+			// 保留现有引脚（保持连接）
+			newPinSet.push_back(std::move(*existingPins[name]));
+			existingPins.erase(name);
+		}
+		else {
+			// 创建新引脚
+			newPinSet.emplace_back(this, name.c_str(), isInput ? PinKind::Input : PinKind::Output);
+		}
+	}
+
+	// 移除未使用的旧引脚（自动断开连接）
+	for (auto& [name, pin] : existingPins) {
+		pinSet.erase(std::remove_if(pinSet.begin(), pinSet.end(), [name](const Pin& p) { return p.Name == name; }), pinSet.end());
+	}
+
+	pinSet = std::move(newPinSet);
 }
