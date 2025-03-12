@@ -221,7 +221,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			// 将注释与正文分隔开
 			auto commentPos = line.find(';');
 			if (commentPos != std::string::npos) {
-				comment = Utils::StringTrim(line.substr(commentPos + 1));
+				comment = Utils::Trim(line.substr(commentPos + 1));
 				line = line.substr(0, commentPos);
 			}
 			else {
@@ -229,7 +229,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			}
 
 			// 去除注释后如果没有任何内容，则跳过
-			line = Utils::StringTrim(line);
+			line = Utils::Trim(line);
 			if (line.empty())
 				continue;
 		}
@@ -289,7 +289,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			// 将注释与正文分隔开
 			auto commentPos = line.find(';');
 			if (commentPos != std::string::npos) {
-				comment = Utils::StringTrim(line.substr(commentPos + 1));
+				comment = Utils::Trim(line.substr(commentPos + 1));
 				line = line.substr(0, commentPos);
 			}
 			else {
@@ -297,7 +297,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			}
 
 			// 去除注释后如果没有任何内容，则跳过
-			line = Utils::StringTrim(line);
+			line = Utils::Trim(line);
 			if (line.empty())
 				continue;
 		}

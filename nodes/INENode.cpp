@@ -1,9 +1,13 @@
 ﻿#include "INENode.h"
+#include "Pins/Pin.h"
+#include "Pins/ValuePin.h"
 
-INENode::INENode(const char* name, int id): Node(name, id) {
+template<typename T>
+INENode<T>::INENode(const char* name, int id): Node(name, id) {
 }
 
-Pin* INENode::GetFirstCompatiblePin(Pin* pin) {
+template<typename T>
+T* INENode<T>::GetFirstCompatiblePin(Pin* pin) {
 	if (pin->Kind == PinKind::Input) {
 		for (auto& output : Outputs) {
 			if (output.CanCreateLink(pin))
@@ -18,3 +22,6 @@ Pin* INENode::GetFirstCompatiblePin(Pin* pin) {
 	}
 	return nullptr;
 }
+
+template class INENode<Pin>;
+template class INENode<ValuePin>;

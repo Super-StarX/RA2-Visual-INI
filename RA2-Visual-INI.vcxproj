@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="AutoLayout.cpp" />
+    <ClCompile Include="Nodes\ModuleNode.cpp" />
     <ClCompile Include="Nodes\INENode.cpp" />
     <ClCompile Include="Nodes\ListNode.cpp" />
     <ClCompile Include="Nodes\CommentNode.cpp" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="Nodes\ModuleNode.h" />
     <ClInclude Include="Nodes\INENode.h" />
     <ClInclude Include="Nodes\ListNode.h" />
     <ClInclude Include="Nodes\CommentNode.h" />

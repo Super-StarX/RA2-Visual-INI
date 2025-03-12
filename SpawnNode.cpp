@@ -6,6 +6,7 @@
 #include "Nodes/GroupNode.h"
 #include "Nodes/HoudiniNode.h"
 #include "Nodes/ListNode.h"
+#include "Nodes/ModuleNode.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/SimpleNode.h"
 #include "Nodes/TagNode.h"
@@ -52,6 +53,13 @@ SectionNode* MainWindow::SpawnSectionNode(const std::string& section) {
 ListNode* MainWindow::SpawnListNode(const std::string& section) {
 	Node::Array.emplace_back(std::make_unique<ListNode>(section.c_str()));
 	auto node = reinterpret_cast<ListNode*>(Node::Array.back().get());
+
+	return node;
+}
+
+ModuleNode* MainWindow::SpawnModuleNode(const std::string& section) {
+	Node::Array.emplace_back(std::make_unique<ModuleNode>(section.c_str()));
+	auto node = reinterpret_cast<ModuleNode*>(Node::Array.back().get());
 
 	return node;
 }

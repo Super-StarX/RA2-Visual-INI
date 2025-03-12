@@ -60,6 +60,8 @@ void MainWindow::LayerMenu() {
 		node = (Node*)SpawnSectionNode();
 	else if (ImGui::MenuItem("Group"))
 		node = (Node*)SpawnGroupNode();
+	else if (ImGui::MenuItem("Module"))
+		node = (Node*)SpawnModuleNode();
 	else if (ImGui::MenuItem("InputTag"))
 		node = (Node*)SpawnTagNode(true);
 	else if (ImGui::MenuItem("OutputTag"))
