@@ -38,6 +38,16 @@ void ListNode::AddKeyValue() {
 		AddKeyValue("value");
 }
 
+std::string ListNode::GetValue() const {
+	std::string values;
+	for (const auto& valuePin : KeyValues) {
+		if (!values.empty())
+			values += ",";
+		values += valuePin->Value;
+	}
+	return values;
+}
+
 ValuePin* ListNode::AddKeyValue(const std::string& value, int pinid, bool isInherited, bool isComment, bool isFolded) {
 	auto& kv = KeyValues.emplace_back(std::make_unique<ValuePin>(this, value, pinid));
 	kv->IsInherited = isInherited;

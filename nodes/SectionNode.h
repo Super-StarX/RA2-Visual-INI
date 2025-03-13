@@ -8,9 +8,11 @@
 class SectionNode : public VINode<KeyValue> {
 public:
 	static std::unordered_map<std::string, SectionNode*> Map;
+	static std::vector<SectionNode*> Array;
 	using vector_kv = std::vector<std::unique_ptr<KeyValue>>;
 
 	SectionNode(const char* name, int id = 0);
+	virtual ~SectionNode();
 
 	virtual NodeType GetNodeType() const override { return NodeType::Section; }
 	virtual void SaveToJson(json& j) const override;

@@ -150,6 +150,17 @@ void TagNode::Menu() {
 		IsConstant = !IsConstant;
 }
 
+std::string TagNode::GetValue() const {
+	if (IsConstant) {
+		return Name;
+	}
+	else {
+		std::unordered_set<Node*> tagVisited;
+		auto pThis = const_cast<TagNode*>(this);
+		return pThis->ResolveTagPointer(pThis, tagVisited);
+	}
+}
+
 void TagNode::SaveToJson(json& j) const {
 	Node::SaveToJson(j);
 

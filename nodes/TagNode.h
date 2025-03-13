@@ -17,6 +17,7 @@ public:
 	virtual void LoadFromJson(const json& j) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
 	virtual void SetName(const std::string& str) override;
+	virtual std::string GetValue() const override;
 
 	// 维护全局标签注册表
 	static std::unordered_map<std::string, int> GlobalNames;

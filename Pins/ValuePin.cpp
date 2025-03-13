@@ -16,6 +16,13 @@ void ValuePin::SetValue(const std::string& str) {
 	Value = str; 
 }
 
+std::string ValuePin::GetValue() const {
+	if (auto pNode = this->GetLinkedNode())
+		return pNode->GetValue();
+
+	return Value;
+}
+
 float ValuePin::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	float width = 120.f;
 

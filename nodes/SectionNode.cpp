@@ -6,10 +6,17 @@
 #include <algorithm>
 
 std::unordered_map<std::string, SectionNode*> SectionNode::Map;
+std::vector<SectionNode*> SectionNode::Array;
 
 SectionNode::SectionNode(const char* name, int id) :
 	VINode(name, id) {
-	SectionNode::Map[name] = this;
+	Map[name] = this;
+	Array.push_back(this);
+}
+
+SectionNode::~SectionNode() {
+	Map.erase(Name);
+	Array.erase(std::find(Array.begin(), Array.end(), this));
 }
 
 void SectionNode::SaveToJson(json& j) const {

@@ -37,6 +37,10 @@ void Pin::SetValue(const std::string& str) {
 	Name = str; 
 }
 
+std::string Pin::GetValue() const {
+	return Name;
+}
+
 void Pin::SaveToJson(json& j) const {
 	j["ID"] = ID.Get();
 	j["Name"] = Name;

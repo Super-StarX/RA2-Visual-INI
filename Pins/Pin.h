@@ -39,6 +39,7 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	virtual void SetValue(const std::string& str);
+	virtual std::string GetValue() const;
 
 	void UpdateOutputLink(std::string value);
 	bool CanCreateLink(Pin* b);

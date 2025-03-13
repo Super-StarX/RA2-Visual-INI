@@ -13,6 +13,7 @@ public:
 	virtual void LoadFromJson(const json& j) override;
 	virtual void UnFoldedKeyValues(ValuePin& kv, bool override) override;
 	virtual void AddKeyValue() override;
+	virtual std::string GetValue() const override;
 
 	ValuePin* AddKeyValue(const std::string& value, int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 };

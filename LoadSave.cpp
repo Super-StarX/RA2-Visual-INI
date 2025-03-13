@@ -371,51 +371,30 @@ void MainWindow::ExportINI(const std::string& path) {
 			if (kv->IsComment)
 				continue;
 
-			auto linkedNode = kv->GetLinkedNode();
-			if (!linkedNode) {
-				output.emplace_back(kv->Key, kv->Value);
-				continue;
+			if (kv->IsInherited) {
+				if (auto sectionLinked = dynamic_cast<SectionNode*>(kv->GetLinkedNode())) {
+					Collect(sectionLinked, output, visited);
+					continue;
+				}
 			}
 
-			// 处理SectionNode链接
-			if (auto sectionLinked = dynamic_cast<SectionNode*>(linkedNode)) {
-				if (!kv->IsInherited) {
-					output.emplace_back(kv->Key, sectionLinked->Name);
-				}
-				else {
-					Collect(sectionLinked, output, visited);
-				}
-			}
-			// 处理TagNode链接
-			else if (auto tagLinked = dynamic_cast<TagNode*>(linkedNode)) {
-				if (tagLinked->IsConstant) {
-					output.emplace_back(kv->Key, tagLinked->Name);
-				}
-				else {
-					std::unordered_set<Node*> tagVisited;
-					std::string value = tagLinked->ResolveTagPointer(tagLinked, tagVisited);
-					output.emplace_back(kv->Key, value);
-				}
-			}
-			// 新增：处理ListNode链接
-			else if (auto listLinked = dynamic_cast<ListNode*>(linkedNode)) {
-				std::string values;
-				for (const auto& valuePin : listLinked->KeyValues) {
-					if (!values.empty())
-						values += ",";
-					values += valuePin->Value;
-				}
-				output.emplace_back(kv->Key, values);
-			}
+			output.emplace_back(kv->Key, kv->GetValue());
 		}
 	};
 
 	// 主逻辑
-	for (auto& [section, node] : SectionNode::Map) {
+	for (auto& node : SectionNode::Array) {
 		if (node->IsComment)
 			continue;
 
-		file << "[" << section << "]\n";
+		file << "[" << node->Name << "]";
+
+		if (auto output = node->OutputPin.get()->GetLinkedNode())
+			//if (node->Name != output->GetValue())
+				file << ":[" << output->GetValue() << "]";
+
+		file << "\n";
+			
 		std::vector<std::pair<std::string, std::string>> outputEntries;
 		std::unordered_set<SectionNode*> visited;
 

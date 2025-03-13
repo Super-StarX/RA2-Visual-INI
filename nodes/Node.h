@@ -54,6 +54,7 @@ public:
 	virtual void SetName(const std::string& str);
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	virtual KeyValue* ConvertToKeyValue(Pin* pin);
+	virtual std::string GetValue() const;
 
 	ImVec2 GetNodeSize() const;
 	ImVec2 GetPosition() const;

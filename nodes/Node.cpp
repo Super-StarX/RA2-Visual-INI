@@ -181,6 +181,10 @@ int Node::GetConnectedLinkCount() {
 	return count;
 }
 
+std::string Node::GetValue() const {
+	return Name;
+}
+
 void Node::SaveToJson(json& j) const {
 	auto pos = GetPosition();
 	// Inputs和Outputs暂时没存，因为目前没有实例
