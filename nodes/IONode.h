@@ -1,22 +1,22 @@
 ﻿// IONode.h
 #pragma once
 #include "Node.h"
-
-enum class IOMode { Input, Output };
+#include "Pins/Pin.h"
 
 class IONode : public Node {
 public:
-	IONode(const char* name, IOMode mode, int id = 0);
+	IONode(PinKind mode, const char* name = "", int id = 0);
 	virtual NodeType GetNodeType() const override {
-		return mode == IOMode::Input ? NodeType::Input : NodeType::Output;
+		return mode == PinKind::Input ? NodeType::Input : NodeType::Output;
 	}
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 
-	IOMode GetMode() const { return mode; }
+	PinKind GetMode() const { return mode; }
 	Pin* GetPin() const { return IOPin.get(); };
+	void Update() override;
 
 private:
-	IOMode mode;
+	PinKind mode;
 	std::unique_ptr<Pin> IOPin;
 };

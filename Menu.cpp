@@ -10,6 +10,7 @@
 #include "Nodes/SimpleNode.h"
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
+#include "Nodes/IONode.h"
 #include "Pins/PinType.h"
 #include "Pins/KeyValue.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -75,6 +76,10 @@ void MainWindow::LayerMenu() {
 		node = Node::Create<TagNode>(true);
 	else if (ImGui::MenuItem("OutputTag"))
 		node = Node::Create<TagNode>(false);
+	else if (ImGui::MenuItem("Input"))
+		node = Node::Create<IONode>(PinKind::Input);
+	else if (ImGui::MenuItem("Output"))
+		node = Node::Create<IONode>(PinKind::Output);
 	else if (ImGui::MenuItem("Comment"))
 		node = Node::Create<CommentNode>();
 	else if (ImGui::MenuItem("ListNode"))
