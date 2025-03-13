@@ -103,9 +103,9 @@ void MainWindow::OnStart() {
 	ed::SetCurrentEditor(m_Editor);
 	BuilderNode::CreateHeader();
 
-	auto node1 = SpawnSectionNode("Section A");
+	auto node1 = Node::Create<SectionNode>("Section A");
 	node1->AddKeyValue("key", "Section B");
-	auto node2 = SpawnSectionNode("Section B");
+	auto node2 = Node::Create<SectionNode>("Section B");
 	node2->AddKeyValue("key", "Value");
 	auto back = node1->KeyValues.back().get();
 	back->LinkTo(node2->InputPin.get());

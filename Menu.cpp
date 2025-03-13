@@ -1,8 +1,17 @@
 ﻿#include "MainWindow.h"
 #include "Utils.h"
+#include "Nodes/BlueprintNode.h"
+#include "Nodes/CommentNode.h"
+#include "Nodes/GroupNode.h"
+#include "Nodes/HoudiniNode.h"
+#include "Nodes/ListNode.h"
+#include "Nodes/ModuleNode.h"
+#include "Nodes/SectionNode.h"
+#include "Nodes/SimpleNode.h"
+#include "Nodes/TagNode.h"
+#include "Nodes/TreeNode.h"
 #include "Pins/PinType.h"
 #include "Pins/KeyValue.h"
-#include "Nodes/SectionNode.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <sstream>
 
@@ -57,19 +66,19 @@ void MainWindow::LayerMenu() {
 
 	Node* node = nullptr;
 	if (ImGui::MenuItem("Section"))
-		node = (Node*)SpawnSectionNode();
+		node = Node::Create<SectionNode>();
 	else if (ImGui::MenuItem("Group"))
-		node = (Node*)SpawnGroupNode();
+		node = Node::Create<GroupNode>();
 	else if (ImGui::MenuItem("Module"))
-		node = (Node*)SpawnModuleNode();
+		node = Node::Create<ModuleNode>();
 	else if (ImGui::MenuItem("InputTag"))
-		node = (Node*)SpawnTagNode(true);
+		node = Node::Create<TagNode>(true);
 	else if (ImGui::MenuItem("OutputTag"))
-		node = (Node*)SpawnTagNode(false);
+		node = Node::Create<TagNode>(false);
 	else if (ImGui::MenuItem("Comment"))
-		node = (Node*)SpawnCommentNode();
+		node = Node::Create<CommentNode>();
 	else if (ImGui::MenuItem("ListNode"))
-		node = (Node*)SpawnListNode();
+		node = Node::Create<ListNode>();
 	ImGui::Separator();
 	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
 		node = SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);

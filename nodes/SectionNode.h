@@ -11,7 +11,7 @@ public:
 	static std::vector<SectionNode*> Array;
 	using vector_kv = std::vector<std::unique_ptr<KeyValue>>;
 
-	SectionNode(const char* name, int id = 0);
+	SectionNode(const char* name = "", int id = 0);
 	virtual ~SectionNode();
 
 	virtual NodeType GetNodeType() const override { return NodeType::Section; }

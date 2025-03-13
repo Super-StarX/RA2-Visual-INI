@@ -8,7 +8,7 @@ template <typename T>
 class VINode : public Node, public BuilderNode {
 public:
 	using vector = std::vector<std::unique_ptr<T>>;
-	VINode(const char* name, int id = 0);
+	VINode(const char* name = "", int id = 0);
 	virtual void Update() override;
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;

@@ -8,7 +8,7 @@
 
 class TagNode : public Node, public BuilderNode {
 public:
-	TagNode(const char* name, bool input, int id = 0);
+	TagNode(bool input = true, const char* name = "", int id = 0);
 	virtual ~TagNode();
 
 	virtual NodeType GetNodeType() const override { return NodeType::Tag; }

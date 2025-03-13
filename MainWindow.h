@@ -38,13 +38,6 @@ public:
 	void UpdateTouch();
 
 	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
-	SectionNode* SpawnSectionNode(const std::string& section = "");
-	ModuleNode* SpawnModuleNode(const std::string& section = "");
-	GroupNode* SpawnGroupNode(const std::string& section = "");
-	CommentNode* SpawnCommentNode(const std::string& section = "");
-	TagNode* SpawnTagNode(bool input = true, const std::string& section = "");
-	ListNode* SpawnListNode(const std::string& section = "");
-
 
 	void Menu();
 	void ToolTip();

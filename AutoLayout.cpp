@@ -48,7 +48,7 @@ void MainWindow::CreateTagNodesForMultiInputs() {
 		std::string tagName = section->Name;
 
 		// 创建input标签节点
-		if (auto inputTag = SpawnTagNode(true, tagName)) {
+		if (auto inputTag = Node::Create<TagNode>(true, tagName.c_str())) {
 			inputTag->SetPosition(section->GetPosition() - ImVec2(200, 0));
 			section->OutputPin->LinkTo(inputTag->InputPin.get());
 		}
@@ -56,7 +56,7 @@ void MainWindow::CreateTagNodesForMultiInputs() {
 		// 创建output标签节点
 		for (auto link : links) {
 			auto pin = Pin::Get(link->StartPinID);
-			if (auto outputTag = SpawnTagNode(false, tagName)) {
+			if (auto outputTag = Node::Create<TagNode>(false, tagName.c_str())) {
 				outputTag->SetPosition(section->GetPosition() + ImVec2(200, 0));
 				pin->LinkTo(outputTag->InputPin.get());
 			}

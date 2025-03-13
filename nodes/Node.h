@@ -38,11 +38,20 @@ class Node : public Object {
 public:
 	static std::vector<std::unique_ptr<Node>> Array;
 
-	Node(const char* name, int id = 0);
+	Node(const char* name = "", int id = 0);
 	virtual ~Node() = default;
 
 	static Node* Get(ed::NodeId id);
 	static std::vector<Node*> GetSelectedNodes();
+
+	template<typename T, typename... Args>
+	static T* Create(Args&&... args) {
+		static_assert(std::is_base_of<Node, T>::value, "Must be Node derived type");
+		auto node = std::make_unique<T>(std::forward<Args>(args)...);
+		T* ptr = node.get();
+		Array.push_back(std::move(node));
+		return ptr;
+	}
 
 	virtual NodeType GetNodeType() const = 0;
 	virtual void Menu() override;
@@ -65,7 +74,7 @@ public:
 
 	ed::NodeId ID;
 	std::string Name{""};
-	ImColor Color{};
+	ImColor Color{ 0, 64, 128 };
 	int level;
 	bool IsFolded{false};
 	bool IsComment{false};

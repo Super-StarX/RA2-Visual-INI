@@ -4,7 +4,7 @@
 
 class ModuleNode : public INENode<Pin> {
 public:
-	ModuleNode(const char* name, int id = 0);
+	ModuleNode(const char* name = "", int id = 0);
 	virtual NodeType GetNodeType() const override { return NodeType::Module; }
 	virtual void Update();
 	void LoadProject(std::string path);

@@ -145,7 +145,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 				isInput = false;
 				isConst = false;
 			}
-			auto node = std::make_unique<TagNode>("", isInput, -1);
+			auto node = std::make_unique<TagNode>(isInput, "", -1);
 			node->IsInput = isInput;
 			node->IsConstant = isConst;
 			node->LoadFromJson(nodeJson);
@@ -267,7 +267,7 @@ void MainWindow::ImportINI(const std::string& path) {
 					toConnect = nullptr;
 			}
 
-			auto sectionNode = SpawnSectionNode(currentSection);
+			auto sectionNode = Node::Create<SectionNode>(currentSection.c_str());
 			if (Utils::IsCommentSection(line))
 				sectionNode->IsComment = true;
 			if (toConnect)

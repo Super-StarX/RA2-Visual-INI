@@ -14,7 +14,7 @@ std::unordered_map<std::string, int> TagNode::GlobalNames;
 std::unordered_map<std::string, TagNode*> TagNode::Inputs;
 bool TagNode::HasInputChanged = false;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
-TagNode::TagNode(const char* name, bool input, int id) :
+TagNode::TagNode(bool input, const char* name, int id) :
 	Node(name, id), IsInput(input){
 
 	if (IsInput) {
