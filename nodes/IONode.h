@@ -1,14 +1,13 @@
 ﻿// IONode.h
 #pragma once
 #include "Node.h"
+#include "BuilderNode.h"
 #include "Pins/Pin.h"
 
-class IONode : public Node {
+class IONode : public Node, public BuilderNode {
 public:
 	IONode(PinKind mode, const char* name = "", int id = 0);
-	virtual NodeType GetNodeType() const override {
-		return mode == PinKind::Input ? NodeType::Input : NodeType::Output;
-	}
+	virtual NodeType GetNodeType() const override { return NodeType::IO; }
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 

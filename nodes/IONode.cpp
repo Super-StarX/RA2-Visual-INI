@@ -16,15 +16,18 @@ IONode::IONode(PinKind mode, const char* name, int id)
 
 void IONode::SaveToJson(json& j) const {
 	Node::SaveToJson(j);
-	j["Mode"] = (mode == PinKind::Input) ? "Input" : "Output";
+	IOPin->SaveToJson(j);
 }
 
 void IONode::LoadFromJson(const json& j) {
 	Node::LoadFromJson(j);
-	mode = (j["Mode"] == "Input") ? PinKind::Input : PinKind::Output;
+	IOPin->LoadFromJson(j);
 }
 
 void IONode::Update() {
+	auto builder = GetBuilder();
+
+	builder->Begin(this->ID);
 	Utils::SetNextInputWidth(Name, 120.f);
 	ImGui::InputText("##Name", &Name);
 
@@ -35,4 +38,5 @@ void IONode::Update() {
 	IOPin->DrawPinIcon(IOPin->IsLinked(), (int)(alpha * 255));
 	ed::EndPin();
 	ImGui::PopStyleVar();
+	builder->End();
 }

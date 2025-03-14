@@ -17,7 +17,7 @@
 #include <filesystem>
 #include <shellapi.h>
 
-bool OpenFileDialog(LPCSTR fliter,char* path, int maxPath, bool isSaving) {
+bool OpenFileDialog(LPCSTR fliter, char* path, int maxPath, bool isSaving) {
 	OPENFILENAMEA ofn;
 	CHAR szFile[260] = { 0 };
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -179,7 +179,10 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	for (const auto& node : Node::Array) {
 		json nodeJson;
 		node->SaveToJson(nodeJson);
-		root["Nodes"].push_back(nodeJson);
+		if (node->GetNodeType() == NodeType::IO)
+			root["IO"].push_back(nodeJson);
+		else
+			root["Nodes"].push_back(nodeJson);
 	}
 
 	// 保存 Links
