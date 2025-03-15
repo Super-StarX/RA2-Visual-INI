@@ -8,10 +8,12 @@ public:
 	virtual NodeType GetNodeType() const override { return NodeType::Module; }
 	virtual void Update() override;
 	virtual void Menu() override;
+	virtual void Tooltip() override;
+	void LoadProject();
 	void LoadProject(std::string path);
 	void UpdatePins();
 	void UpdatePinSet(std::vector<Pin>& pinSet, const std::vector<std::string>& newNames, bool direction);
 
-	ImVec2 Size{ 300,200 };
+	std::string Path;
 	json InternalProject;
 };

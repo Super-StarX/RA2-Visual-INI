@@ -65,8 +65,6 @@ void Node::Menu() {
 }
 
 void Node::Tooltip() {
-	ImGui::BeginTooltip();
-
 	// 类型名称
 	ImGui::Text("Type:%s", TypeName.c_str());
 
@@ -100,8 +98,6 @@ void Node::Tooltip() {
 		}
 		break;
 	}
-
-	ImGui::EndTooltip();
 }
 
 void Node::HoverMenu(bool isHovered) {

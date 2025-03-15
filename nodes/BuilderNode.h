@@ -8,9 +8,9 @@ public:
 	static void CreateHeader();
 	static void DestroyHeader();
 
-	virtual void UpdateInput(Pin& input);
-	virtual void UpdateOutput(Pin& output);
+	static void UpdateInput(Pin& input);
+	static void UpdateOutput(Pin& output);
 
-	BlueprintNodeBuilder* GetBuilder();
+	static BlueprintNodeBuilder* GetBuilder();
 };
 

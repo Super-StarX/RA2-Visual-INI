@@ -448,7 +448,9 @@ void MainWindow::ToolTip() {
 		if (hoveredNode) {
 			hoveredNode->HoverTimer += ImGui::GetIO().DeltaTime;
 			if (hoveredNode->HoverTimer > 0.5f) {
+				ImGui::BeginTooltip();
 				hoveredNode->Tooltip();
+				ImGui::EndTooltip();
 			}
 		}
 	}
