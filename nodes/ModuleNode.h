@@ -9,6 +9,8 @@ public:
 	virtual void Update() override;
 	virtual void Menu() override;
 	virtual void Tooltip() override;
+	virtual void SaveToJson(json& j) const override;
+	virtual void LoadFromJson(const json& j) override;
 	void LoadProject();
 	void LoadProject(std::string path);
 	void UpdatePins();

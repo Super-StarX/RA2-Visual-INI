@@ -61,6 +61,17 @@ void ModuleNode::Tooltip() {
 	ImGui::Text(output.c_str());
 }
 
+void ModuleNode::SaveToJson(json& j) const {
+	INENode::SaveToJson(j);
+	j["Path"] = Path;
+}
+
+void ModuleNode::LoadFromJson(const json& j) {
+	INENode::LoadFromJson(j);
+	LoadProject(j["Path"]);
+	UpdatePins();
+}
+
 void ModuleNode::LoadProject() {
 	char path[MAX_PATH] = { 0 };
 	if (!Utils::OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0",

@@ -1,6 +1,7 @@
 ﻿#include "MainWindow.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
+#include "Nodes/ModuleNode.h"
 #include "Nodes/GroupNode.h"
 #include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
@@ -91,6 +92,12 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		}
 		case NodeType::List: {
 			auto node = std::make_unique<ListNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Module: {
+			auto node = std::make_unique<ModuleNode>("", -1);
 			node->LoadFromJson(nodeJson);
 			Node::Array.push_back(std::move(node));
 			break;
