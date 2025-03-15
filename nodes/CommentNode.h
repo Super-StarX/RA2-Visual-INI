@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "Node.h"
-#include "BuilderNode.h"
 
-class CommentNode : public Node, public BuilderNode {
+class CommentNode : public Node {
 public:
 	using Node::Node;
 	virtual NodeType GetNodeType() const override { return NodeType::Comment; }

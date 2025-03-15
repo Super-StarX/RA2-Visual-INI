@@ -1,4 +1,5 @@
 ﻿#include "IONode.h"
+#include "BuilderNode.h"
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -25,7 +26,7 @@ void IONode::LoadFromJson(const json& j) {
 }
 
 void IONode::Update() {
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 
 	builder->Begin(this->ID);
 	Utils::SetNextInputWidth(Name, 120.f);

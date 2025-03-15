@@ -1,4 +1,5 @@
 ﻿#include "TagNode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include "Pins/Pin.h"
@@ -80,7 +81,7 @@ void TagNode::SetName(const std::string& str) {
 
 void TagNode::Update() {
 	// 开始节点
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 
 	if (!IsConstant) {
 		// 冲突检测

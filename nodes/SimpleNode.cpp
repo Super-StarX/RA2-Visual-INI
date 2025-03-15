@@ -1,8 +1,9 @@
 ﻿#include "SimpleNode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 
 void SimpleNode::Update() {
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 
 	auto newLinkPin = MainWindow::newLinkPin;
 
@@ -14,7 +15,7 @@ void SimpleNode::Update() {
 	builder->Begin(this->ID);
 
 	for (auto& input : this->Inputs)
-		UpdateInput(input);
+		BuilderNode::UpdateInput(input);
 
 	builder->Middle();
 
@@ -23,7 +24,7 @@ void SimpleNode::Update() {
 	ImGui::Spring(1, 0);
 
 	for (auto& output : this->Outputs)
-		UpdateOutput(output);
+		BuilderNode::UpdateOutput(output);
 
 	builder->End();
 }

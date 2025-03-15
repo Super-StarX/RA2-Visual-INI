@@ -1,8 +1,9 @@
 ﻿#include "BlueprintNode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 
 void BlueprintNode::Update() {
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 
 	bool hasOutputDelegates = false;
 	for (auto& output : this->Outputs)
@@ -49,11 +50,11 @@ void BlueprintNode::Update() {
 	builder->EndHeader();
 
 	for (auto& input : this->Inputs)
-		UpdateInput(input);
+		BuilderNode::UpdateInput(input);
 
 	for (auto& output : this->Outputs)
 		if (output.TypeIdentifier != "delegate")
-			UpdateOutput(output);
+			BuilderNode::UpdateOutput(output);
 
 	if (ImGui::Button("+")) {
 		this->Inputs.emplace_back(this, "NewAddInput", PinKind::Input);

@@ -1,5 +1,6 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "CommentNode.h"
+#include "BuilderNode.h"
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
@@ -9,7 +10,7 @@ void CommentNode::Update() {
 	const float frameRounding = 6.0f;       // 圆角半径
 	const ImVec4 bgColor(1.0f, 1.0f, 1.0f, 0.2f); // RGBA背景色
 	const ImVec4 borderColor(1.0f, 1.0f, 1.0f, 0.4f); // 边框颜色
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 	builder->Begin(this->ID);
 
 	// 设置节点样式

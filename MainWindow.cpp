@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/ListNode.h"
+#include "Nodes/BuilderNode.h"
 #include "Pins/KeyValue.h"
 #include "Pins/PinType.h"
 #include "Nodes/TagNode.h"

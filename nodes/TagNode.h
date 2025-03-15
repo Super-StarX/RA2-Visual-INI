@@ -1,12 +1,11 @@
 ﻿#pragma once
 #include "Node.h"
-#include "BuilderNode.h"
 #include "Pins/Pin.h"
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
 
-class TagNode : public Node, public BuilderNode {
+class TagNode : public Node {
 public:
 	TagNode(bool input = true, const char* name = "", int id = 0);
 	virtual ~TagNode();

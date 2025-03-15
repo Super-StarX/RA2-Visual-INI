@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include "Node.h"
-#include "BuilderNode.h"
 #include <memory>
 #include <string>
 
 template <typename T>
-class VINode : public Node, public BuilderNode {
+class VINode : public Node {
 public:
 	using vector = std::vector<std::unique_ptr<T>>;
 	VINode(const char* name = "", int id = 0);

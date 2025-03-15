@@ -1,10 +1,9 @@
 ﻿// IONode.h
 #pragma once
 #include "Node.h"
-#include "BuilderNode.h"
 #include "Pins/Pin.h"
 
-class IONode : public Node, public BuilderNode {
+class IONode : public Node {
 public:
 	IONode(PinKind mode, const char* name = "", int id = 0);
 	virtual NodeType GetNodeType() const override { return NodeType::IO; }

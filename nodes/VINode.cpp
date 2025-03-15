@@ -1,4 +1,5 @@
 ﻿#include "VINode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include "Pins/KeyValue.h"
@@ -14,7 +15,7 @@ VINode<T>::VINode(const char* name, int id) :
 
 template<typename T>
 void VINode<T>::Update() {
-	auto builder = GetBuilder();
+	auto builder = BuilderNode::GetBuilder();
 
 	builder->Begin(ID);
 	builder->Header(Color);
