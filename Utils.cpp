@@ -1,6 +1,7 @@
 ﻿#include "Utils.h"
 #include <algorithm>
 #include <regex>
+#include <windows.h>
 
 void Utils::DrawTextOnCursor(const char* label, ImColor color) {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
@@ -86,4 +87,32 @@ float Utils::SetNextInputWidth(const std::string& value, float minSize, float ma
 bool Utils::IsCommentSection(const std::string& str) {
 	static std::regex pattern(R"(;\s*\[)");
 	return std::regex_search(str, pattern);
+}
+
+bool Utils::OpenFileDialog(const char* fliter, char* path, int maxPath, bool isSaving) {
+	OPENFILENAMEA ofn;
+	CHAR szFile[260] = { 0 };
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetActiveWindow();
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = fliter;
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	if (isSaving) {
+		ofn.Flags |= OFN_OVERWRITEPROMPT;
+		if (GetSaveFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	else {
+		if (GetOpenFileNameA(&ofn) == TRUE) {
+			strcpy_s(path, maxPath, szFile);
+			return true;
+		}
+	}
+	return false;
 }

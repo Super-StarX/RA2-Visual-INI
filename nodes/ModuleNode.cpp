@@ -1,9 +1,13 @@
 ﻿#include "ModuleNode.h"
 #include "MainWindow.h"
+#include <Utils.h>
+
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
 #include <imgui_node_editor_internal.h>
+#include <Windows.h>
+#include <filesystem>
 
 ModuleNode::ModuleNode(const char* name, int id) :
 	INENode(name, id) {
@@ -160,6 +164,21 @@ void ModuleNode::Update() {
 
 void ModuleNode::Menu() {
 	INENode::Menu();
+	ImGui::Separator();
+
+	if (ImGui::MenuItem("Load Project")) {
+		char path[MAX_PATH] = { 0 };
+		if (!Utils::OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0",
+			path, MAX_PATH, false)) {
+			return;
+		}
+		std::string str(path);
+		if (!str.ends_with(".viproj"))
+			str += ".viproj";
+
+		LoadProject(str);
+		UpdatePins();
+	}
 }
 
 void ModuleNode::LoadProject(std::string path) {

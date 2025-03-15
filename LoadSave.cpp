@@ -17,37 +17,9 @@
 #include <filesystem>
 #include <shellapi.h>
 
-bool OpenFileDialog(LPCSTR fliter, char* path, int maxPath, bool isSaving) {
-	OPENFILENAMEA ofn;
-	CHAR szFile[260] = { 0 };
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = GetActiveWindow();
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = fliter;
-	ofn.nFilterIndex = 1;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-	if (isSaving) {
-		ofn.Flags |= OFN_OVERWRITEPROMPT;
-		if (GetSaveFileNameA(&ofn) == TRUE) {
-			strcpy_s(path, maxPath, szFile);
-			return true;
-		}
-	}
-	else {
-		if (GetOpenFileNameA(&ofn) == TRUE) {
-			strcpy_s(path, maxPath, szFile);
-			return true;
-		}
-	}
-	return false;
-}
-
 void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
 	char path[MAX_PATH] = { 0 };
-	if (!OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0",
+	if (!Utils::OpenFileDialog("INI Files (*.ini)\0*.ini\0All Files (*.*)\0*.*\0",
 		path, MAX_PATH, isSaving)) {
 		return;
 	}
@@ -69,7 +41,7 @@ void LeftPanelClass::ShowINIFileDialog(bool isSaving) {
 
 void LeftPanelClass::ShowProjFileDialog(bool isSaving) {
 	char path[MAX_PATH] = { 0 };
-	if (OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
+	if (Utils::OpenFileDialog("Project Files (*.viproj)\0*.viproj\0All Files (*.*)\0*.*\0", path, MAX_PATH, isSaving)) {
 		std::string str(path);
 		if (!str.ends_with(".viproj"))
 			str += ".viproj";
