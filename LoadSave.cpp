@@ -6,6 +6,7 @@
 #include "Nodes/ListNode.h"
 #include "Pins/KeyValue.h"
 #include "version.h"
+#include "PlaceholderReplacer.h"
 #include "Utils.h"
 #include <nlohmann/json.hpp>
 
@@ -333,6 +334,7 @@ void MainWindow::ImportINI(const std::string& path) {
 
 void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
+	PlaceholderReplacer replacer({ .projectName = std::filesystem::path(path).stem().string() });
 
 	// 递归处理继承节点
 	// 处理流程：
@@ -369,11 +371,11 @@ void MainWindow::ExportINI(const std::string& path) {
 		if (node->IsComment)
 			continue;
 
-		file << "[" << node->Name << "]";
+		file << "[" << replacer.replace(node->Name) << "]";
 
 		if (auto output = node->OutputPin.get()->GetLinkedNode())
 			//if (node->Name != output->GetValue())
-				file << ":[" << output->GetValue() << "]";
+				file << ":[" << replacer.replace(output->GetValue()) << "]";
 
 		file << "\n";
 			
@@ -394,7 +396,7 @@ void MainWindow::ExportINI(const std::string& path) {
 		});
 
 		for (auto& [key, val] : vec)
-			file << key << "=" << outputEntries[val].second << "\n";
+			file << key << "=" << replacer.replace(outputEntries[val].second) << "\n";
 
 		file << "\n";
 	}

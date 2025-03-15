@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
+#include <misc/cpp/imgui_stdlib.h>
 #include <imgui_node_editor_internal.h>
 #include <Windows.h>
 #include <filesystem>
@@ -20,9 +21,11 @@ void ModuleNode::Update() {
 	builder->Begin(this->ID);
 	builder->Header(this->Color);
 	ImGui::Spring(0);
-	ImGui::TextUnformatted(this->Name.c_str());
-	ImGui::Spring(1);
-	ImGui::Dummy(ImVec2(0, 28));
+	ImGui::PushID(this);
+	Utils::SetNextInputWidth(Name, 130.f);
+	ImGui::InputText("##SectionName", &Name);
+	ImGui::PopID();
+
 	ImGui::Spring(0);
 	builder->EndHeader();
 
@@ -30,8 +33,7 @@ void ModuleNode::Update() {
 		BuilderNode::UpdateInput(input);
 
 	for (auto& output : this->Outputs)
-		if (output.TypeIdentifier != "delegate")
-			BuilderNode::UpdateOutput(output);
+		BuilderNode::UpdateOutput(output);
 
 	builder->End();
 }
@@ -47,17 +49,22 @@ void ModuleNode::Menu() {
 void ModuleNode::Tooltip() {
 	INENode::Tooltip();
 	ImGui::Separator();
-	std::string input = "Inputs: ";
-	for (const auto& pin : Inputs)
-		input += pin.Name + ", ";
-	input.pop_back();
-	input.pop_back();
+	std::string input;
+	for (const auto& valuePin : Inputs) {
+		if (!input.empty())
+			input += ",";
+		input += valuePin.Name;
+	}
+	input = "Inputs: " + input;
 	ImGui::Text(input.c_str());
-	std::string output = "Outputs: ";
-	for (const auto& pin : Outputs)
-		output += pin.Name + ", ";
-	output.pop_back();
-	output.pop_back();
+
+	std::string output;
+	for (const auto& valuePin : Outputs) {
+		if (!output.empty())
+			output += ",";
+		output += valuePin.Name;
+	}
+	output = "Outputs: " + output;
 	ImGui::Text(output.c_str());
 }
 
@@ -69,7 +76,6 @@ void ModuleNode::SaveToJson(json& j) const {
 void ModuleNode::LoadFromJson(const json& j) {
 	INENode::LoadFromJson(j);
 	LoadProject(j["Path"]);
-	UpdatePins();
 }
 
 void ModuleNode::LoadProject() {
@@ -83,7 +89,6 @@ void ModuleNode::LoadProject() {
 		str += ".viproj";
 
 	LoadProject(str);
-	UpdatePins();
 }
 
 void ModuleNode::LoadProject(std::string path) {
@@ -96,6 +101,7 @@ void ModuleNode::LoadProject(std::string path) {
 	Name = std::filesystem::path(path).stem().string();
 	InternalProject = json::parse(file);
 	file.close();
+	UpdatePins();
 }
 
 void ModuleNode::UpdatePins() {

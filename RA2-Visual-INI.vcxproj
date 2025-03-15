@@ -213,6 +213,7 @@
     <ClInclude Include="Pins\PinType.h" />
     <ClInclude Include="Nodes\TagNode.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="PlaceholderReplacer.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="Pins\ValuePin.h" />
