@@ -175,6 +175,7 @@
     <ClCompile Include="Pins\Pin.cpp" />
     <ClCompile Include="Nodes\SimpleNode.cpp" />
     <ClCompile Include="Pins\PinType.cpp" />
+    <ClCompile Include="PlaceholderReplacer.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="Nodes\TagNode.cpp" />
     <ClCompile Include="TemplateManager.cpp" />
