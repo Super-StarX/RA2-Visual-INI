@@ -74,7 +74,7 @@ public:
 	ed::NodeId ID;
 	std::string Name{""};
 	ImColor Color{ 0, 64, 128 };
-	int level;
+	int level{};
 	bool IsFolded{false};
 	bool IsComment{false};
 	float HoverTimer = 0.0f;

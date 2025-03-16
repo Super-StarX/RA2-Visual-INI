@@ -4,6 +4,14 @@
 
 std::vector<std::unique_ptr<Link>> Link::Array;
 
+Link::Link(int id, ed::PinId startPinId, ed::PinId endPinId) :
+	ID(id), StartPinID(startPinId), EndPinID(endPinId) {
+	if (!id)
+		ID = MainWindow::GetNextId();
+	else
+		ID = MainWindow::GetIdOffset() + id;
+}
+
 Link::~Link() {
 	if (auto pin = Pin::Get(StartPinID))
 		pin->Links.erase(ID);

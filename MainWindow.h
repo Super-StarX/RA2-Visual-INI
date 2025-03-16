@@ -32,6 +32,8 @@ public:
 	static int GetNextId();
 	static void SetNextId(int id);
 	static void ClearAll();
+	static int GetIdOffset();
+	static void SetIdOffset(int id);
 
 	float GetTouchProgress(ed::NodeId id);
 	void TouchNode(ed::NodeId id);

@@ -10,8 +10,7 @@ class Link : public Object {
 public:
 	static std::vector<std::unique_ptr<Link>> Array;
 
-	Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-		ID(id), StartPinID(startPinId), EndPinID(endPinId) {}
+	Link(int id, ed::PinId startPinId, ed::PinId endPinId);
 	~Link();
 
 	static Link* Get(ed::LinkId id);

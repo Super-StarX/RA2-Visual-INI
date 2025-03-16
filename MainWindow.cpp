@@ -19,6 +19,7 @@ float MainWindow::leftPaneWidth = 400.0f;
 float MainWindow::rightPaneWidth = 800.0f;
 
 static int m_NextId = 1;
+static int IdOffset = 0;
 
 int MainWindow::GetNextId() {
 	return m_NextId++;
@@ -26,6 +27,14 @@ int MainWindow::GetNextId() {
 
 void MainWindow::SetNextId(int id) {
 	m_NextId = id;
+}
+
+int MainWindow::GetIdOffset() {
+	return IdOffset;
+}
+
+void MainWindow::SetIdOffset(int id) {
+	IdOffset = id;
 }
 
 void MainWindow::ClearAll() {

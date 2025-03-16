@@ -7,8 +7,12 @@
 std::vector<std::unique_ptr<Node>> Node::Array;
 
 Node::Node(const char* name, int id) :
-	Owner(MainWindow::Instance), Name(name),
-	ID(id ? id : MainWindow::Instance->GetNextId()) {
+	Owner(MainWindow::Instance), Name(name) {
+
+	if (!id)
+		ID = MainWindow::GetNextId();
+	else
+		ID = MainWindow::GetIdOffset() + id;
 }
 
 Node* Node::Get(ed::NodeId id) {

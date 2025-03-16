@@ -9,9 +9,11 @@
 std::map<ed::PinId, Pin*, ComparePinId> Pin::Array;
 
 Pin::Pin(::Node* node, const char* name, PinKind kind, int id) :
-	Node(node), Name(name), Kind(kind), ID(id){
+	Node(node), Name(name), Kind(kind){
 	if (!id)
 		ID = MainWindow::GetNextId();
+	else
+		ID = MainWindow::GetIdOffset() + id;
 	Array[ID] = this;
 }
 
