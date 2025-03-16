@@ -1,13 +1,8 @@
 ﻿#pragma once
-#include <iostream>
-#include <string>
-#include <regex>
-#include <chrono>
-#include <random>
-#include <ctime>
 #include <map>
+#include <string>
+#include <random>
 #include <functional>
-#include <cstdlib>
 
 struct ReplaceConfig {
 	std::string projectName = "";
