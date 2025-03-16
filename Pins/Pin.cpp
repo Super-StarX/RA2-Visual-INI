@@ -38,6 +38,10 @@ void Pin::SetValue(const std::string& str) {
 }
 
 std::string Pin::GetValue() const {
+	if (Kind == PinKind::Output)
+		if (auto pNode = this->GetLinkedNode())
+			return pNode->GetValue();
+
 	return Name;
 }
 

@@ -144,3 +144,39 @@ void ModuleNode::UpdatePinSet(std::vector<Pin>& pinSet, const std::vector<std::s
 
 	pinSet = std::move(newPinSet);
 }
+
+std::string ModuleNode::GetValue(Pin* from) const {
+	if(!from)
+		return Node::GetValue();
+
+	bool isInput = false;
+	const Pin* outputPin = nullptr;
+
+	for (const auto& Pin : Inputs) {
+		if (Pin.Name == from->Name) {
+			isInput = true;
+			break;
+		}
+	}
+
+	if (!isInput) {
+		for (const auto& Pin : Outputs) {
+			if (Pin.Name == from->Name) {
+				outputPin = &Pin;
+				break;
+			}
+		}
+	}
+
+	if (isInput) {
+		for (const auto& Node : Nodes)
+			if (Node.get()->GetNodeType() == NodeType::IO && Node.get()->Name == from->Name)
+				return Node.get()->GetValue();
+
+	}
+	else if (outputPin) {
+		return outputPin->GetValue();
+	}
+
+	return Node::GetValue();
+}

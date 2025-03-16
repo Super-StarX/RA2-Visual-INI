@@ -151,7 +151,7 @@ void TagNode::Menu() {
 		IsConstant = !IsConstant;
 }
 
-std::string TagNode::GetValue() const {
+std::string TagNode::GetValue(Pin* from) const {
 	if (IsConstant) {
 		return Name;
 	}

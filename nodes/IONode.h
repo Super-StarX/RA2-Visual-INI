@@ -3,18 +3,21 @@
 #include "Node.h"
 #include "Pins/Pin.h"
 
+class ModuleNode;
 class IONode : public Node {
 public:
-	IONode(PinKind mode, const char* name = "", int id = 0);
+	IONode(PinKind mode, const char* name = "", int id = 0, ModuleNode* parent = nullptr);
 	virtual NodeType GetNodeType() const override { return NodeType::IO; }
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual std::string GetValue(Pin* from = nullptr) const override;
 
-	PinKind GetMode() const { return mode; }
+	PinKind GetMode() const { return Mode; }
 	Pin* GetPin() const { return IOPin.get(); };
 	void Update() override;
 
 private:
-	PinKind mode;
+	PinKind Mode;
 	std::unique_ptr<Pin> IOPin;
+	ModuleNode* Parent;
 };

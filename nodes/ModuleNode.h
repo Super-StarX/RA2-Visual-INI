@@ -11,6 +11,7 @@ public:
 	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
+	virtual std::string GetValue(Pin* from = nullptr) const override;
 	void LoadProject();
 	void LoadProject(std::string path);
 	void UpdatePins();
@@ -18,4 +19,5 @@ public:
 
 	std::string Path;
 	json InternalProject;
+	std::vector<std::unique_ptr<Node>> Nodes;
 };

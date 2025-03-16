@@ -38,7 +38,7 @@ void ListNode::AddKeyValue() {
 		AddKeyValue("value");
 }
 
-std::string ListNode::GetValue() const {
+std::string ListNode::GetValue(Pin* from) const {
 	std::string values;
 	for (const auto& valuePin : KeyValues) {
 		if (!values.empty())

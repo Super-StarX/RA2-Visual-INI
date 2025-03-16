@@ -177,7 +177,7 @@ int Node::GetConnectedLinkCount() {
 	return count;
 }
 
-std::string Node::GetValue() const {
+std::string Node::GetValue(Pin* from) const {
 	return Name;
 }
 

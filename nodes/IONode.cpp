@@ -1,10 +1,11 @@
 ﻿#include "IONode.h"
 #include "BuilderNode.h"
 #include "Utils.h"
+#include "ModuleNode.h"
 #include <misc/cpp/imgui_stdlib.h>
 
-IONode::IONode(PinKind mode, const char* name, int id)
-	: Node(name, id), mode(mode) {
+IONode::IONode(PinKind mode, const char* name, int id, ModuleNode* parent)
+	: Node(name, id), Mode(mode), Parent(parent) {
 	Color = (mode == PinKind::Input) ? ImColor(0, 255, 0) : ImColor(255, 0, 0);
 
 	if (mode == PinKind::Input) {
@@ -40,4 +41,16 @@ void IONode::Update() {
 	ed::EndPin();
 	ImGui::PopStyleVar();
 	builder->End();
+}
+
+std::string IONode::GetValue(Pin* from) const {
+	if (GetMode() == PinKind::Input) {
+		return GetPin()->GetLinkedNode()->GetValue();
+	}
+	else {
+		if(Parent)
+			return Parent->GetValue();
+
+		return Node::GetValue();
+	}
 }
