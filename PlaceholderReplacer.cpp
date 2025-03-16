@@ -1,5 +1,6 @@
 ﻿#include "PlaceholderReplacer.h"
 #include <stack>
+#include <regex>
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
@@ -71,6 +72,7 @@ std::string PlaceholderReplacer::replace(const std::string& input) {
 
 	return result;
 }
+
 void PlaceholderReplacer::registerHandlers() {
 	// 时间相关
 	handlers["TIMESTAMP"] = [this](const std::string&) {
@@ -134,10 +136,8 @@ void PlaceholderReplacer::registerHandlers() {
 	};
 
 	// 计数器
-	handlers["COUNTER"] = [this](const std::string& name) {
-		std::string key = name.empty() ? "" : name;
-		unsigned int& count = counters[key];
-		return key + std::to_string(++count);
+	handlers["COUNTER"] = [this](const std::string& arg) {
+		return handleCounter(arg);
 	};
 
 	handlers["HASH"] = [](const std::string& input) {
@@ -180,4 +180,99 @@ std::string PlaceholderReplacer::generateUUID() {
 	uuid[14] = '4'; // UUID version 4
 	uuid[19] = "89ab"[gen() % 4]; // variant
 	return uuid;
+}
+
+// 添加计数器处理函数
+std::string PlaceholderReplacer::handleCounter(const std::string& params) {
+	// 解析参数格式示例: "name=mycounter,step=2,width=4,base=hex,format={DATE}-%04x"
+	std::string name = "default";
+	CounterState state;
+
+	std::regex param_re(R"((\w+)=([^,]+))");
+	std::sregex_iterator it(params.begin(), params.end(), param_re);
+
+	for (; it != std::sregex_iterator(); ++it) {
+		std::smatch match = *it;
+		std::string key = match[1];
+		std::string value = match[2];
+
+		if (key == "name") {
+			name = value;
+		}
+		else if (key == "step") {
+			state.step = std::stoi(value);
+		}
+		else if (key == "width") {
+			state.width = std::stoi(value);
+		}
+		else if (key == "base") {
+			state.base = value;
+		}
+		else if (key == "format") {
+			state.format = value;
+		}
+	}
+
+	// 获取或初始化计数器
+	CounterState& counter = counters[name];
+	if (counter.value == 0) { // 初始化默认值
+		counter = state;
+		counter.value = 1;
+	}
+
+	// 生成计数器值
+	unsigned int current = counter.value;
+	counter.value += counter.step;
+
+	// 处理格式
+	std::string output = counter.format.empty() ?
+		formatDefault(current, counter) :
+		parseCounterFormat(counter.format, current);
+
+	return output;
+}
+
+std::string PlaceholderReplacer::formatDefault(unsigned int value, const CounterState& state) {
+	std::stringstream ss;
+	if (state.base == "hex") {
+		ss << std::hex << std::setw(state.width) << std::setfill('0') << value;
+	}
+	else if (state.base == "oct") {
+		ss << std::oct << std::setw(state.width) << std::setfill('0') << value;
+	}
+	else {
+		ss << std::dec << std::setw(state.width) << std::setfill('0') << value;
+	}
+	return ss.str();
+}
+
+std::string PlaceholderReplacer::parseCounterFormat(const std::string& format, unsigned int value) {
+	std::string temp = format;
+
+	// 替换内部占位符
+	size_t pos = 0;
+	while ((pos = temp.find("{", pos)) != std::string::npos) {
+		size_t end = temp.find("}", pos);
+		if (end == std::string::npos) break;
+
+		std::string placeholder = temp.substr(pos + 1, end - pos - 1);
+		std::string replacement;
+
+		// 处理特殊标记
+		if (placeholder == "VALUE") {
+			replacement = std::to_string(value);
+		}
+		else {
+			// 递归处理其他占位符
+			replacement = replace("${" + placeholder + "}");
+		}
+
+		temp.replace(pos, end - pos + 1, replacement);
+		pos += replacement.length();
+	}
+
+	// 处理格式说明符
+	char buffer[256];
+	snprintf(buffer, sizeof(buffer), temp.c_str(), value);
+	return buffer;
 }
