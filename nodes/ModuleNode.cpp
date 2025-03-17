@@ -1,4 +1,4 @@
-﻿#include "ModuleNode.h"
+#include "ModuleNode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include <Utils.h>
@@ -36,6 +36,12 @@ void ModuleNode::Update() {
 		BuilderNode::UpdateOutput(output);
 
 	builder->End();
+
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		LoadProject();
+		ImGui::GetIO().MouseDown[ImGuiMouseButton_Left] = false;
+		ImGui::GetIO().MouseDown[ImGuiMouseButton_Right] = false;
+	}
 }
 
 void ModuleNode::Menu() {
