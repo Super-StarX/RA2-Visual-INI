@@ -42,27 +42,12 @@ std::string PlaceholderReplacer::replace(const std::string& input) {
 				// 处理占位符
 				size_t colon_pos = content.find(':');
 				std::string var = content.substr(0, colon_pos);
-				std::string arg = (colon_pos != std::string::npos) ?
-					content.substr(colon_pos + 1) : "";
+				std::string arg = (colon_pos != std::string::npos) ? content.substr(colon_pos + 1) : "";
 
-				std::string replacement;
-
-				if (handlers.find(var) != handlers.end()) {
-					replacement = handlers[var](arg);
-				}
-				else if (var.find("RANDOM_") == 0) {
-					int length = std::stoi(var.substr(7));
-					replacement = generateRandom(length);
-				}
-				else {
-					replacement = full; // 保持原样
-				}
-
-				// 执行替换
+				std::string replacement = handleVariable(var, arg);
 				result.replace(start, pos - start + 1, replacement);
 				pos = start + replacement.length();
 				changed = true;
-
 			}
 			else {
 				++pos;
@@ -182,56 +167,61 @@ std::string PlaceholderReplacer::generateUUID() {
 	return uuid;
 }
 
+std::string PlaceholderReplacer::handleVariable(const std::string& var, const std::string& params) {
+	if (var == "COUNTER") {
+		return handleCounter(params);
+	}
+	else if (var.find("RANDOM_") == 0) {
+		int length = std::stoi(var.substr(7));
+		return generateRandom(length);
+	}
+	else if (handlers.count(var)) {
+		return handlers[var](params);
+	}
+	return ""; // 未知变量保持原样
+}
+
 // 添加计数器处理函数
 std::string PlaceholderReplacer::handleCounter(const std::string& params) {
-	// 解析参数格式示例: "name=mycounter,step=2,width=4,base=hex,format={DATE}-%04x"
-	std::string name = "default";
+	// 默认计数器配置
+        // 默认计数器配置
 	CounterState state;
-
-	std::regex param_re(R"((\w+)=([^,]+))");
-	std::sregex_iterator it(params.begin(), params.end(), param_re);
-
-	for (; it != std::sregex_iterator(); ++it) {
-		std::smatch match = *it;
-		std::string key = match[1];
-		std::string value = match[2];
-
-		if (key == "name") {
-			name = value;
-		}
-		else if (key == "step") {
-			state.step = std::stoi(value);
-		}
-		else if (key == "width") {
-			state.width = std::stoi(value);
-		}
-		else if (key == "base") {
-			state.base = value;
-		}
-		else if (key == "format") {
-			state.format = value;
-		}
-	}
+	parseParams(params, state);
 
 	// 获取或初始化计数器
-	CounterState& counter = counters[name];
+	CounterState& counter = counters[state.format.empty() ? "default" : state.format];
 	if (counter.value == 0) { // 初始化默认值
 		counter = state;
-		counter.value = 1;
 	}
 
 	// 生成计数器值
-	unsigned int current = counter.value;
 	counter.value += counter.step;
+	unsigned int current = counter.value;
 
-	// 处理格式
-	std::string output = counter.format.empty() ?
-		formatDefault(current, counter) :
-		parseCounterFormat(counter.format, current);
-
-	return output;
+	// 格式化输出
+	return formatValue(current, counter);
 }
 
+std::string PlaceholderReplacer::formatValue(unsigned int value, const CounterState& state) {
+	if (!state.format.empty()) {
+		char buffer[256];
+		snprintf(buffer, sizeof(buffer), state.format.c_str(), value);
+		return buffer;
+	}
+
+	// 默认格式化逻辑
+	std::stringstream ss;
+	ss << std::setfill('0') << std::setw(state.width);
+
+	if (state.base == "hex")
+		ss << std::hex << value;
+	else if (state.base == "oct")
+		ss << std::oct << value;
+	else
+		ss << std::dec << value;
+
+	return ss.str();
+}
 std::string PlaceholderReplacer::formatDefault(unsigned int value, const CounterState& state) {
 	std::stringstream ss;
 	if (state.base == "hex") {
@@ -244,6 +234,23 @@ std::string PlaceholderReplacer::formatDefault(unsigned int value, const Counter
 		ss << std::dec << std::setw(state.width) << std::setfill('0') << value;
 	}
 	return ss.str();
+}
+
+void PlaceholderReplacer::parseParams(const std::string& params, CounterState& state) {
+	std::istringstream iss(params);
+	std::string param;
+	while (std::getline(iss, param, ',')) {
+		size_t eq_pos = param.find('=');
+		if (eq_pos == std::string::npos) continue;
+
+		std::string key = param.substr(0, eq_pos);
+		std::string value = param.substr(eq_pos + 1);
+
+		if (key == "step") state.step = std::stoi(value);
+		else if (key == "width") state.width = std::stoi(value);
+		else if (key == "base") state.base = value;
+		else if (key == "format") state.format = value;
+	}
 }
 
 std::string PlaceholderReplacer::parseCounterFormat(const std::string& format, unsigned int value) {

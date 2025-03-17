@@ -27,8 +27,11 @@ private:
 	void registerHandlers();
 	std::string generateRandom(int length);
 	std::string generateUUID();
+	std::string handleVariable(const std::string& var, const std::string& params);
 	std::string handleCounter(const std::string& params);
 	std::string formatDefault(unsigned int value, const CounterState& state);
+	std::string formatValue(unsigned int value, const CounterState& state);
+	void parseParams(const std::string& params, CounterState& state);
 	std::string parseCounterFormat(const std::string& format, unsigned int value);
 
 	ReplaceConfig config;
