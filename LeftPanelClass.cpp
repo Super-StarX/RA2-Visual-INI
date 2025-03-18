@@ -8,19 +8,21 @@
 #include <imgui_internal.h>
 
 LeftPanelClass::LeftPanelClass(MainWindow* owner) :Owner(owner) {
-	m_RestoreIcon = Owner->LoadTexture("data/ic_restore_white_24dp.png");
-	m_SaveIcon = Owner->LoadTexture("data/ic_save_white_24dp.png");
+	//m_RestoreIcon = Owner->LoadTexture("data/ic_restore_white_24dp.png");
+	//m_SaveIcon = Owner->LoadTexture("data/ic_save_white_24dp.png");
 }
 
 LeftPanelClass::~LeftPanelClass() {
+	/*
 	auto releaseTexture = [this](ImTextureID& id) {
 		if (id) {
 			Owner->DestroyTexture(id);
 			id = nullptr;
 		}
 	};
-	releaseTexture(m_RestoreIcon);
-	releaseTexture(m_SaveIcon);
+	*/
+	//releaseTexture(m_RestoreIcon);
+	//releaseTexture(m_SaveIcon);
 }
 
 void LeftPanelClass::ShowStyleEditor(bool* show) {
@@ -166,6 +168,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		auto textPos = ImVec2(iconPanelX - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y);
 		ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
 
+		/*
 		auto drawList = ImGui::GetWindowDrawList();
 		ImGui::SetCursorScreenPos(iconPanelPos);
 		ImGui::SetItemAllowOverlap();
@@ -199,7 +202,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		ImGui::SameLine(0, 0);
 		ImGui::SetItemAllowOverlap();
 		ImGui::Dummy(ImVec2(0, (float)restoreIconHeight));
-
+		*/
 		ImGui::PopID();
 	}
 	ImGui::Unindent();
