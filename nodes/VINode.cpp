@@ -41,10 +41,11 @@ void VINode<T>::Update() {
 			Name = inputBuffer;
 			isEditing = false;
 			// 更新关联Pin的值（保持原有逻辑）
-			for (const auto& [_, pLink] : InputPin->Links) {
-				if (auto pPin = Pin::Get(pLink->StartPinID))
-					pPin->SetValue(Name);
-			}
+			if (this->PinNameSyncable())
+				for (const auto& [_, pLink] : InputPin->Links)
+					if (auto pPin = Pin::Get(pLink->StartPinID))
+						if (pPin->Node->PinNameChangable())
+							pPin->SetValue(Name);
 		}
 
 		// 失去焦点时保存

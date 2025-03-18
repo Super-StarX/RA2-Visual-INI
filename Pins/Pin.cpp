@@ -104,8 +104,7 @@ Link* Pin::LinkTo(Pin* pin) {
 
 	// 生成新的链接
 	auto& link = Link::Array.emplace_back(std::make_unique<Link>(MainWindow::GetNextId(), this->ID, pin->ID));
-	if (this->Node && this->Node->GetNodeType() != NodeType::Module && this->Node->GetNodeType() != NodeType::IO)
-		if (pin->Node && pin->Node->GetNodeType() == NodeType::Section)
+	if (this->Node->PinNameChangable() && pin->Node->PinNameSyncable())
 			this->SetValue(pin->Node->Name);
 	this->Links[link->ID] = link.get();
 	pin->Links[link->ID] = link.get();

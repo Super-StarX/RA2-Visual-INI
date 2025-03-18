@@ -12,6 +12,7 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	virtual std::string GetValue(Pin* from = nullptr) const override;
+	virtual bool PinNameChangable() const override { return false; }
 	void LoadProject();
 	void LoadProject(std::string path);
 	void UpdatePins();

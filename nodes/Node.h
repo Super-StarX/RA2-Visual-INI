@@ -63,6 +63,8 @@ public:
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
 	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 	virtual std::string GetValue(Pin* from = nullptr) const;
+	virtual bool PinNameChangable() const { return true; } // Link是否会影响Pin的名字
+	virtual bool PinNameSyncable() const { return false; } // 名字是否会通过Link同步
 
 	ImVec2 GetNodeSize() const;
 	ImVec2 GetPosition() const;
