@@ -9,10 +9,10 @@ IONode::IONode(PinKind mode, const char* name, int id, ModuleNode* parent)
 	Color = (mode == PinKind::Input) ? ImColor(0, 255, 0) : ImColor(255, 0, 0);
 
 	if (mode == PinKind::Input) {
-		IOPin = std::make_unique<Pin>(this, "input", PinKind::Input);
+		IOPin = std::make_unique<Pin>(this, name, PinKind::Input);
 	}
 	else {
-		IOPin = std::make_unique<Pin>(this, "output", PinKind::Output);
+		IOPin = std::make_unique<Pin>(this, name, PinKind::Output);
 	}
 }
 
@@ -33,7 +33,8 @@ void IONode::Update() {
 
 	builder->Begin(this->ID);
 	Utils::SetNextInputWidth(Name, 120.f);
-	ImGui::InputText("##Name", &Name);
+	if(ImGui::InputText("##Name", &Name))
+		IOPin->SetValue(Name);
 
 	ImGui::SameLine();
 	auto alpha = IOPin->GetAlpha();
@@ -46,12 +47,12 @@ void IONode::Update() {
 }
 
 std::string IONode::GetValue(Pin* from) const {
-	if (GetMode() == PinKind::Input) {
+	if (GetMode() == PinKind::Output) {
 		return GetPin()->GetLinkedNode()->GetValue();
 	}
 	else {
 		if(Parent)
-			return Parent->GetValue();
+			return Parent->GetValue(from);
 
 		return Node::GetValue();
 	}

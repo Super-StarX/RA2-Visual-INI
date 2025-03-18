@@ -1,4 +1,4 @@
-#include "ModuleNode.h"
+﻿#include "ModuleNode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include <Utils.h>
@@ -220,9 +220,9 @@ void ModuleNode::UpdatePins() {
 
 	for (const auto& ioNode : InternalProject["IO"]) {
 		if (ioNode["Kind"] == PinKind::Output)
-			inputNames.push_back(ioNode["Name"]);  // 工程的input node的pinkind是output, 对于模块Node来说, 就需要一个input的pin
+			inputNames.push_back(ioNode["Section"]);  // 工程的input node的pinkind是output, 对于模块Node来说, 就需要一个input的pin
 		else
-			outputNames.push_back(ioNode["Name"]);
+			outputNames.push_back(ioNode["Section"]);
 	}
 
 	UpdatePinSet(Inputs, inputNames, true);
@@ -259,33 +259,33 @@ std::string ModuleNode::GetValue(Pin* from) const {
 	if(!from)
 		return Node::GetValue();
 
-	bool isInput = false;
-	const Pin* outputPin = nullptr;
+	bool isOutput = false;
+	const Pin* inputPin = nullptr;
 
 	for (const auto& Pin : Inputs) {
 		if (Pin.Name == from->Name) {
-			isInput = true;
+			isOutput = true;
 			break;
 		}
 	}
 
-	if (!isInput) {
+	if (!isOutput) {
 		for (const auto& Pin : Outputs) {
 			if (Pin.Name == from->Name) {
-				outputPin = &Pin;
+				inputPin = &Pin;
 				break;
 			}
 		}
 	}
 
-	if (isInput) {
+	if (isOutput) {
 		for (const auto& Node : Nodes)
 			if (Node.get()->GetNodeType() == NodeType::IO && Node.get()->Name == from->Name)
 				return Node.get()->GetValue();
 
 	}
-	else if (outputPin) {
-		return outputPin->GetValue();
+	else if (inputPin) {
+		return inputPin->GetValue();
 	}
 
 	return Node::GetValue();
