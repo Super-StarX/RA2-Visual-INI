@@ -32,11 +32,45 @@ void VINode<T>::Update() {
 
 	ImGui::PushID(this);
 	Utils::SetNextInputWidth(Name, 130.f);
-	if (ImGui::InputText("##SectionName", &Name)) {
-		for (const auto& [_, pLink] : InputPin->Links) {
-			if (auto pPin = Pin::Get(pLink->StartPinID))
-				pPin->SetValue(Name);
+	if (isEditing) {
+		// 编辑模式：显示InputText
+		if (ImGui::InputText("##SectionName", inputBuffer, sizeof(inputBuffer),
+			ImGuiInputTextFlags_EnterReturnsTrue |
+			ImGuiInputTextFlags_AutoSelectAll)) {
+			// 按下回车：保存修改
+			Name = inputBuffer;
+			isEditing = false;
+			// 更新关联Pin的值（保持原有逻辑）
+			for (const auto& [_, pLink] : InputPin->Links) {
+				if (auto pPin = Pin::Get(pLink->StartPinID))
+					pPin->SetValue(Name);
+			}
 		}
+
+		// 失去焦点时保存
+		if (!ImGui::IsItemActive() && !ImGui::IsItemFocused()) {
+			Name = inputBuffer;
+			isEditing = false;
+		}
+	}
+	else {
+		// 普通模式：显示静态文本
+		ImGui::Text("%s", Name.c_str());
+
+		// 检测双击事件
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			// 进入编辑模式前保存原始值
+			pendingName = Name;
+			strcpy_s(inputBuffer, sizeof(inputBuffer), Name.c_str());
+			isEditing = true;
+			ImGui::SetKeyboardFocusHere(); // 确保InputText获得焦点
+		}
+	}
+
+	// 处理ESC取消编辑
+	if (isEditing && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+		Name = pendingName; // 恢复原始值
+		isEditing = false;
 	}
 	ImGui::PopID();
 

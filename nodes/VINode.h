@@ -9,6 +9,7 @@ public:
 	using vector = std::vector<std::unique_ptr<T>>;
 	VINode(const char* name = "", int id = 0);
 	virtual void Update() override;
+	void DrawHeader();
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
@@ -19,6 +20,9 @@ public:
 	vector KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
+	bool isEditing{ false };
+	char inputBuffer[256] = ""; // 临时缓冲区
+	std::string pendingName;     // 保存编辑前的原始值
 	float maxSize{ 0 };
 	float lastMaxSize{ 0 };
 };

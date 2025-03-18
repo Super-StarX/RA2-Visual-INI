@@ -115,7 +115,6 @@ void TagNode::Update() {
 		Utils::SetNextInputWidth(name, 120.f);
 		if (ImGui::InputText("##Name", &name))
 			SetName(name);
-		builder->End();
 	}
 	else {
 		if (HighlightedNodes.contains(Name))
@@ -138,10 +137,9 @@ void TagNode::Update() {
 			ed::EndPin();
 			ImGui::PopStyleVar();
 		}
-
-		builder->End();
 	}
 
+	builder->End();
 }
 
 void TagNode::Menu() {
