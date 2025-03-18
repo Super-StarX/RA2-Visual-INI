@@ -3,6 +3,12 @@
 #include "MainWindow.h"
 #include <Utils.h>
 
+#include "SectionNode.h"
+#include "ListNode.h"
+#include "GroupNode.h"
+#include "TagNode.h"
+#include "IONode.h"
+
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
@@ -10,6 +16,7 @@
 #include <imgui_node_editor_internal.h>
 #include <Windows.h>
 #include <filesystem>
+#include <version.h>
 
 ModuleNode::ModuleNode(const char* name, int id) :
 	INENode(name, id) {
@@ -106,8 +113,105 @@ void ModuleNode::LoadProject(std::string path) {
 	Path = path;
 	Name = std::filesystem::path(path).stem().string();
 	InternalProject = json::parse(file);
-	file.close();
+
+	{
+		std::string version = InternalProject["Version"];
+		int major, minor, revision, patch;
+		sscanf_s(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &patch);
+		if (VERSION_PATCH != patch) {
+			wchar_t buffer[0x100] = { 0 };
+			swprintf_s(buffer, L"当前版本：%hs\n项目版本：%hs\n\n要继续读取吗？", FILE_VERSION_STR, version.c_str());
+			if (MessageBox(NULL, buffer, L"警告：版本不同，项目可能不兼容！", MB_YESNO | MB_ICONWARNING) == IDNO) {
+				InternalProject.clear();
+				return;
+			}
+		}
+	}
+
 	UpdatePins();
+}
+
+void ModuleNode::OpenProject() {
+	if (InternalProject.empty())
+		return;
+
+	auto& root = InternalProject;
+	MainWindow::SetIdOffset(MainWindow::GetIdOffset() + root["Totals"] + 10);
+
+	// 加载 Nodes
+	for (const auto& nodeJson : root["Nodes"]) {
+		switch (static_cast<NodeType>(nodeJson["Type"])) {
+		case NodeType::Section: {
+			auto node = std::make_unique<SectionNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+			break;
+		}
+		case NodeType::List: {
+			auto node = std::make_unique<ListNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Module: {
+			auto node = std::make_unique<ModuleNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Group: {
+			auto node = std::make_unique<GroupNode>("", -1);
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+			break;
+		}
+		case NodeType::Tag: {
+			std::string type = nodeJson["TagType"];
+			bool isInput = false;
+			bool isConst = false;
+			if (type == "Input") {
+				isInput = true;
+				isConst = false;
+			}
+			else if (type == "Const") {
+				isInput = false;
+				isConst = true;
+			}
+			else if (type == "Output") {
+				isInput = false;
+				isConst = false;
+			}
+			auto node = std::make_unique<TagNode>(isInput, "", -1);
+			node->IsInput = isInput;
+			node->IsConstant = isConst;
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+			break;
+		}
+		default:
+			throw "Unsupported node!";
+		}
+	}
+
+	if (root.contains("IO")) {
+		for (const auto& nodeJson : root["IO"]) {
+			auto node = std::make_unique<IONode>(static_cast<PinKind>(nodeJson["Mode"]), "", -1, this);
+			node->LoadFromJson(nodeJson);
+			Nodes.push_back(std::move(node));
+		}
+	}
+
+	// 加载 Links
+	for (const auto& linkJson : root["Links"]) {
+		auto link = std::make_unique<Link>(-1, 0, 0);
+		link->LoadFromJson(linkJson);
+		Links.push_back(std::move(link));
+	}
+}
+
+void ModuleNode::CloseProject() {
+	Nodes.clear();
+	Links.clear();
 }
 
 void ModuleNode::UpdatePins() {

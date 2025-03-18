@@ -4,6 +4,7 @@
 #include "Nodes/ModuleNode.h"
 #include "Nodes/GroupNode.h"
 #include "Nodes/ListNode.h"
+#include "Nodes/IONode.h"
 #include "Pins/KeyValue.h"
 #include "version.h"
 #include "PlaceholderReplacer.h"
@@ -72,8 +73,8 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		sscanf_s(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &patch);
 		if (VERSION_PATCH != patch) {
 			wchar_t buffer[0x100] = { 0 };
-			swprintf_s(buffer, L"当前版本：%hs\n存档版本：%hs\n\n要继续读取吗？", FILE_VERSION_STR, version.c_str());
-			if (MessageBox(NULL, buffer, L"警告：版本不同，存档可能不兼容！", MB_YESNO | MB_ICONWARNING) == IDNO) {
+			swprintf_s(buffer, L"当前版本：%hs\n项目版本：%hs\n\n要继续读取吗？", FILE_VERSION_STR, version.c_str());
+			if (MessageBox(NULL, buffer, L"警告：版本不同，项目可能不兼容！", MB_YESNO | MB_ICONWARNING) == IDNO) {
 				return;
 			}
 		}
@@ -134,6 +135,14 @@ void MainWindow::LoadProject(const std::string& filePath) {
 		}
 		default:
 			throw "Unsupported node!";
+		}
+	}
+
+	if (root.contains("IO")) {
+		for (const auto& nodeJson : root["IO"]) {
+			auto node = std::make_unique<IONode>(static_cast<PinKind>(nodeJson["Mode"]),"", -1);
+			node->LoadFromJson(nodeJson);
+			Node::Array.push_back(std::move(node));
 		}
 	}
 
@@ -332,9 +341,34 @@ void MainWindow::ImportINI(const std::string& path) {
 	ed::NavigateToContent();
 }
 
+static void ParseNode(std::vector<SectionNode*>& ret, const std::vector<std::unique_ptr<Node>>& array) {
+	for (auto& node : array) {
+		if (auto sectionNode = dynamic_cast<SectionNode*>(node.get())) {
+			ret.push_back(sectionNode);
+		}
+		else if (auto moduleNode = dynamic_cast<ModuleNode*>(node.get())) {
+			moduleNode->OpenProject();
+			ParseNode(ret, moduleNode->Nodes);
+		}
+	}
+}
+
+static void UnparseNode() {
+	for (auto& node : Node::Array) {
+		if (auto moduleNode = dynamic_cast<ModuleNode*>(node.get())) {
+			moduleNode->CloseProject();
+		}
+	}
+}
+
 void MainWindow::ExportINI(const std::string& path) {
 	std::ofstream file(path);
 	PlaceholderReplacer replacer({ .projectName = std::filesystem::path(path).stem().string() });
+
+	int id = MainWindow::GetNextId();
+	MainWindow::SetIdOffset(id + 10);
+	std::vector<SectionNode*> Array;
+	ParseNode(Array, Node::Array);
 
 	// 递归处理继承节点
 	// 处理流程：
@@ -367,7 +401,7 @@ void MainWindow::ExportINI(const std::string& path) {
 	};
 
 	// 主逻辑
-	for (auto& node : SectionNode::Array) {
+	for (auto& node : Array) {
 		if (node->IsComment)
 			continue;
 
@@ -400,4 +434,8 @@ void MainWindow::ExportINI(const std::string& path) {
 
 		file << "\n";
 	}
+
+	MainWindow::SetNextId(id);
+	MainWindow::SetIdOffset(0);
+	UnparseNode();
 }

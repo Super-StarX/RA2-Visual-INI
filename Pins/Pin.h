@@ -45,6 +45,7 @@ public:
 	bool CanCreateLink(Pin* b);
 	bool IsLinked() const;
 	Link* LinkTo(Pin* pin);
+	Pin* GetLinkedPin() const;
 	Node* GetLinkedNode() const;
 	SectionNode* GetLinkedSection() const;
 	ImColor GetIconColor() const;

@@ -16,8 +16,11 @@ public:
 	void LoadProject(std::string path);
 	void UpdatePins();
 	void UpdatePinSet(std::vector<Pin>& pinSet, const std::vector<std::string>& newNames, bool direction);
+	void OpenProject();
+	void CloseProject();
 
 	std::string Path;
 	json InternalProject;
 	std::vector<std::unique_ptr<Node>> Nodes;
+	std::vector<std::unique_ptr<Link>> Links;
 };

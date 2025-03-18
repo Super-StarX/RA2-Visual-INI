@@ -41,8 +41,8 @@ void Pin::SetValue(const std::string& str) {
 
 std::string Pin::GetValue() const {
 	if (Kind == PinKind::Output)
-		if (auto pNode = this->GetLinkedNode())
-			return pNode->GetValue();
+		if (auto pNode = GetLinkedNode())
+			return pNode->GetValue(GetLinkedPin());
 
 	return Name;
 }
@@ -56,7 +56,7 @@ void Pin::SaveToJson(json& j) const {
 
 void Pin::LoadFromJson(const json& j) {
 	Array.erase(ID);
-	ID = ed::PinId(j["ID"]);
+	ID = ed::PinId(j["ID"] + MainWindow::GetIdOffset());
 	Array[ID] = this;
 	Name = j["Name"];
 	TypeIdentifier = j["TypeIdentifier"];
@@ -111,13 +111,20 @@ Link* Pin::LinkTo(Pin* pin) {
 	return link.get();
 }
 
-Node* Pin::GetLinkedNode() const {
+Pin* Pin::GetLinkedPin() const {
 	if (!IsLinked())
 		return nullptr;
 
 	for (auto& [id, link] : Links)
 		if (auto otherPin = link->StartPinID == ID ? Get(link->EndPinID) : Get(link->StartPinID))
-			return otherPin->Node;
+			return otherPin;
+
+	return nullptr;
+}
+
+Node* Pin::GetLinkedNode() const {
+	if (auto pPin = GetLinkedPin())
+		return pPin->Node;
 
 	return nullptr;
 }

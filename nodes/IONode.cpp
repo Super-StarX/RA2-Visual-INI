@@ -19,11 +19,13 @@ IONode::IONode(PinKind mode, const char* name, int id, ModuleNode* parent)
 void IONode::SaveToJson(json& j) const {
 	Node::SaveToJson(j);
 	IOPin->SaveToJson(j);
+	j["Mode"] = static_cast<int>(Mode);
 }
 
 void IONode::LoadFromJson(const json& j) {
 	Node::LoadFromJson(j);
 	IOPin->LoadFromJson(j);
+	Mode = static_cast<PinKind>(j["Mode"]);
 }
 
 void IONode::Update() {

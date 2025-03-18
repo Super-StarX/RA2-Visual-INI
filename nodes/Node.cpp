@@ -199,7 +199,7 @@ void Node::SaveToJson(json& j) const {
 }
 
 void Node::LoadFromJson(const json& j) {
-	ID = ed::NodeId(j["ID"]);
+	ID = ed::NodeId(j["ID"] + MainWindow::GetIdOffset());
 	SetName(j["Section"]);
 	this->SetPosition({
 		j["Position"][0].get<float>(),
