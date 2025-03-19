@@ -1,4 +1,4 @@
-#include "VINode.h"
+﻿#include "VINode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
@@ -30,23 +30,11 @@ void VINode<T>::Update() {
 		ImGui::PopStyleVar();
 	}
 
-	ImGui::PushID(this);
-	Utils::SetNextInputWidth(Name, 130.f);
-	if (isEditing) {
-		if (ImGui::InputText("##SectionName", inputBuffer, sizeof(inputBuffer),
-			ImGuiInputTextFlags_EnterReturnsTrue |
-			ImGuiInputTextFlags_AutoSelectAll)) {
-			// 按下回车：保存修改
-			Name = inputBuffer;
-			isEditing = false;
-			// 更新关联Pin的值（保持原有逻辑）
-			if (this->PinNameSyncable())
-				for (const auto& [_, pLink] : InputPin->Links)
-					if (auto pPin = Pin::Get(pLink->StartPinID))
-						if (pPin->Node->PinNameChangable())
-							pPin->SetValue(Name);
-		}
-		// 编辑模式：显示InputText
+	if (Name.Render() && this->PinNameSyncable())
+		for (const auto& [_, pLink] : InputPin->Links)
+			if (auto pPin = Pin::Get(pLink->StartPinID))
+				if (pPin->Node->PinNameChangable())
+					pPin->SetValue(Name);
 
 	{
 		auto alpha = OutputPin->GetAlpha();
