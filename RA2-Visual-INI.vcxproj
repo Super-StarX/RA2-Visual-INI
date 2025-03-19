@@ -186,6 +186,7 @@
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Pins\ValuePin.cpp" />
     <ClCompile Include="Nodes\VINode.cpp" />
+    <ClCompile Include="Nodes\VIWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
@@ -225,6 +226,7 @@
     <ClInclude Include="utilities\widgets.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Nodes\VINode.h" />
+    <ClInclude Include="Nodes\VIWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc" />

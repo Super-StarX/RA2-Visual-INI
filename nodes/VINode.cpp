@@ -1,4 +1,4 @@
-﻿#include "VINode.h"
+#include "VINode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
@@ -33,7 +33,6 @@ void VINode<T>::Update() {
 	ImGui::PushID(this);
 	Utils::SetNextInputWidth(Name, 130.f);
 	if (isEditing) {
-		// 编辑模式：显示InputText
 		if (ImGui::InputText("##SectionName", inputBuffer, sizeof(inputBuffer),
 			ImGuiInputTextFlags_EnterReturnsTrue |
 			ImGuiInputTextFlags_AutoSelectAll)) {
@@ -47,33 +46,7 @@ void VINode<T>::Update() {
 						if (pPin->Node->PinNameChangable())
 							pPin->SetValue(Name);
 		}
-
-		// 失去焦点时保存
-		if (!ImGui::IsItemActive() && !ImGui::IsItemFocused()) {
-			Name = inputBuffer;
-			isEditing = false;
-		}
-	}
-	else {
-		// 普通模式：显示静态文本
-		ImGui::Text("%s", Name.c_str());
-
-		// 检测双击事件
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-			// 进入编辑模式前保存原始值
-			pendingName = Name;
-			strcpy_s(inputBuffer, sizeof(inputBuffer), Name.c_str());
-			isEditing = true;
-			ImGui::SetKeyboardFocusHere(); // 确保InputText获得焦点
-		}
-	}
-
-	// 处理ESC取消编辑
-	if (isEditing && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-		Name = pendingName; // 恢复原始值
-		isEditing = false;
-	}
-	ImGui::PopID();
+		// 编辑模式：显示InputText
 
 	{
 		auto alpha = OutputPin->GetAlpha();

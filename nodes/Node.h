@@ -1,7 +1,8 @@
 ﻿#pragma once
-#include "Pins/Pin.h"
+#include "VIWidget.h"
 #include "Link.h"
 #include "Object.h"
+#include "Pins/Pin.h"
 #include "utilities/builders.h"
 
 #include <vector>
@@ -74,7 +75,7 @@ public:
 	MainWindow* Owner = nullptr;
 
 	ed::NodeId ID;
-	std::string Name{""};
+	VIInputText Name;
 	ImColor Color{ 0, 64, 128 };
 	int level{};
 	bool IsFolded{false};

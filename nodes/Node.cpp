@@ -7,7 +7,7 @@
 std::vector<std::unique_ptr<Node>> Node::Array;
 
 Node::Node(const char* name, int id) :
-	Owner(MainWindow::Instance), Name(name) {
+	Owner(MainWindow::Instance), Name(name, this) {
 
 	if (!id)
 		ID = MainWindow::GetNextId();

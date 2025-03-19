@@ -20,9 +20,6 @@ public:
 	vector KeyValues;
 	std::unique_ptr<Pin> InputPin;
 	std::unique_ptr<Pin> OutputPin;
-	bool isEditing{ false };
-	char inputBuffer[256] = ""; // 临时缓冲区
-	std::string pendingName;     // 保存编辑前的原始值
 	float maxSize{ 0 };
 	float lastMaxSize{ 0 };
 };
