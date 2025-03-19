@@ -31,6 +31,7 @@ bool VIInputText::Render() {
 			Editing = true;
 			strcpy_s(Buffer, this->c_str());
 			Temp = *this;
+			ImGui::SetKeyboardFocusHere();
 		}
 	}
 	// 处理ESC取消编辑

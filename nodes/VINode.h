@@ -9,7 +9,6 @@ public:
 	using vector = std::vector<std::unique_ptr<T>>;
 	VINode(const char* name = "", int id = 0);
 	virtual void Update() override;
-	void DrawHeader();
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
