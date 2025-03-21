@@ -8,6 +8,7 @@
 #include "Pins/KeyValue.h"
 #include "Pins/PinType.h"
 #include "Nodes/TagNode.h"
+#include "Log.h"
 
 #include <imgui_internal.h>
 
@@ -79,6 +80,10 @@ void MainWindow::OnFrameEnd() {
 void MainWindow::OnStart() {
 	ed::Config config;
 
+	Log::Init();
+	LOG_INFO("=================================================================");
+	LOG_INFO("正在进行初始化...");
+
 	config.SettingsFile = "RA2VI.json";
 
 	config.UserPointer = this;
@@ -107,11 +112,14 @@ void MainWindow::OnStart() {
 		return true;
 	};
 	PinTypeManager::Get().LoadFromFile("custom_types.json");
+	LOG_INFO("载入自定义Pin类型完毕");
 	TypeSystem::Get().LoadFromINI("INICodingCheck.ini");
+	LOG_INFO("载入INI配置完毕");
 	m_TemplateManager.LoadTemplates("templates.ini");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 	BuilderNode::CreateHeader();
+	LOG_INFO("组件初始化完毕");
 
 	auto node1 = Node::Create<SectionNode>("Section A");
 	node1->AddKeyValue("key", "Section B");
@@ -127,6 +135,7 @@ void MainWindow::OnStart() {
 }
 
 void MainWindow::OnStop() {
+	LOG_INFO("程序关闭，正在保存自定义数据信息...");
 	PinTypeManager::Get().SaveToFile("custom_types.json");
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
@@ -134,6 +143,8 @@ void MainWindow::OnStop() {
 	}
 	BuilderNode::DestroyHeader();
 	ClearAll();
+	Log::GetLogger()->info("保存完毕!");
+	LOG_INFO("=================================================================");
 }
 
 void MainWindow::OnFrame(float deltaTime) {

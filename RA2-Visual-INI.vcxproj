@@ -120,6 +120,7 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalModuleDependencies>
       </AdditionalModuleDependencies>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,6 +140,7 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalModuleDependencies>
       </AdditionalModuleDependencies>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,6 +184,7 @@
     <ClCompile Include="TypeLoader.cpp" />
     <ClCompile Include="utilities\builders.cpp" />
     <ClCompile Include="utilities\drawing.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="utilities\widgets.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Pins\ValuePin.cpp" />
@@ -219,6 +222,7 @@
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="Pins\ValuePin.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="TypeLoader.h" />
     <ClInclude Include="utilities\builders.h" />
