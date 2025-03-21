@@ -8,7 +8,20 @@
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
 #include <memory>
-
+/*
+Constant: 可重复
+───╮	╭────────────────────────╮
+kv-│----│---→    Value           │
+───╯	╰────────────────────────╯
+InputTag: 可重复
+───╮	╭────────────────────────╮
+kv-│----│---→    Name            │
+───╯	╰────────────────────────╯
+OutputTag: 不可重复
+		╭────────────────────────╮	  ╭───
+		│		    Name    ----→│----│-kv
+		╰────────────────────────╯	  ╰───
+*/
 namespace ed = ax::NodeEditor;
 
 std::unordered_map<std::string, int> TagNode::GlobalNames;
@@ -23,7 +36,9 @@ TagNode::TagNode(bool input, const char* name, int id) :
 		HasInputChanged = true;
 	}
 
-	InputPin = std::make_unique<Pin>(this, input ? "input" : "output", PinKind::Input);
+	InputPin = input ?
+		std::make_unique<Pin>(this, "input", PinKind::Input) :
+		std::make_unique<Pin>(this, "output", PinKind::Output);
 }
 
 TagNode::~TagNode() {
@@ -92,6 +107,17 @@ void TagNode::Update() {
 			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
 
 		builder->Begin(this->ID);
+
+		if (IsInput) {
+			auto alpha = InputPin->GetAlpha();
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
+			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
+			ed::EndPin();
+			ImGui::PopStyleVar();
+			ImGui::SameLine();
+		}
+
 		if (hasInputConflict) {
 			ed::PopStyleColor();
 			// 绘制标题（带冲突提示）
@@ -100,35 +126,13 @@ void TagNode::Update() {
 		else if (HighlightedNodes.contains(Name))
 			ed::PopStyleColor();
 
-		{
-			auto alpha = InputPin->GetAlpha();
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255), IsInput);
-			ed::EndPin();
-			ImGui::PopStyleVar();
-			ImGui::SameLine();
-		}
-
 		// 名称输入
 		std::string name = Name;
 		Utils::SetNextInputWidth(name, 120.f);
 		if (ImGui::InputText("##Name", &name))
 			SetName(name);
-	}
-	else {
-		if (HighlightedNodes.contains(Name))
-			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
 
-		builder->Begin(this->ID);
-
-		if (HighlightedNodes.contains(Name))
-			ed::PopStyleColor();
-
-		Utils::SetNextInputWidth(Name, 120.f);
-		ImGui::InputText("##Name", &Name);
-
-		{
+		if (!IsInput) {
 			ImGui::SameLine();
 			auto alpha = InputPin->GetAlpha();
 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
@@ -137,6 +141,28 @@ void TagNode::Update() {
 			ed::EndPin();
 			ImGui::PopStyleVar();
 		}
+	}
+	else {
+		if (HighlightedNodes.contains(Name))
+			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
+
+		builder->Begin(this->ID);
+
+		{
+			auto alpha = InputPin->GetAlpha();
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
+			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
+			ed::EndPin();
+			ImGui::PopStyleVar();
+			ImGui::SameLine();
+		}
+		if (HighlightedNodes.contains(Name))
+			ed::PopStyleColor();
+
+		Utils::SetNextInputWidth(Name, 120.f);
+		ImGui::InputText("##Name", &Name);
+
 	}
 
 	builder->End();
