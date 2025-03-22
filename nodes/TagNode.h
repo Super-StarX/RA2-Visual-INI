@@ -7,7 +7,8 @@
 
 class TagNode : public Node {
 public:
-	TagNode(bool input = true, const char* name = "", int id = 0);
+	TagNode(const char* name = "", int id = 0); // constant
+	TagNode(bool input, const char* name = "", int id = 0);
 	virtual ~TagNode();
 
 	virtual NodeType GetNodeType() const override { return NodeType::Tag; }
@@ -35,6 +36,6 @@ public:
 
 	// 引脚管理
 	void UpdatePins();
-	bool CheckInputConflicts() const;
+	bool CheckOutputConflicts() const;
 	TagNode* GetInputTagNode() const;
 };

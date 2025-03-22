@@ -28,10 +28,17 @@ std::unordered_map<std::string, int> TagNode::GlobalNames;
 std::unordered_map<std::string, TagNode*> TagNode::Inputs;
 bool TagNode::HasInputChanged = false;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
+TagNode::TagNode(const char* name, int id) :
+	Node(name, id), IsInput(true){
+
+	IsInput = true;
+	InputPin = std::make_unique<Pin>(this, "constant", PinKind::Input);
+}
+
 TagNode::TagNode(bool input, const char* name, int id) :
 	Node(name, id), IsInput(input){
 
-	if (IsInput) {
+	if (!IsInput) {
 		GlobalNames[Name]++;
 		HasInputChanged = true;
 	}
@@ -42,7 +49,7 @@ TagNode::TagNode(bool input, const char* name, int id) :
 }
 
 TagNode::~TagNode() {
-	if (!IsInput)
+	if (IsInput)
 		return;
 
 	GlobalNames[Name]--;
@@ -79,7 +86,7 @@ void TagNode::SetName(const std::string& str) {
 	if (Name == str)
 		return;
 
-	if (!IsInput)
+	if (IsInput)
 		return Node::SetName(str);
 
 	// 旧名字-1
@@ -98,9 +105,31 @@ void TagNode::Update() {
 	// 开始节点
 	auto builder = BuilderNode::GetBuilder();
 
-	if (!IsConstant) {
+	if (IsConstant) {
+		if (HighlightedNodes.contains(Name))
+			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
+
+		builder->Begin(this->ID);
+
+		{
+			auto alpha = InputPin->GetAlpha();
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
+			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
+			ed::EndPin();
+			ImGui::PopStyleVar();
+			ImGui::SameLine();
+		}
+		if (HighlightedNodes.contains(Name))
+			ed::PopStyleColor();
+
+		Utils::SetNextInputWidth(Name, 120.f);
+		ImGui::InputText("##Name", &Name);
+
+	}
+	else {
 		// 冲突检测
-		bool hasInputConflict = CheckInputConflicts();
+		bool hasInputConflict = CheckOutputConflicts();
 		if (hasInputConflict)
 			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 0, 0, 1));
 		else if (HighlightedNodes.contains(Name))
@@ -142,48 +171,12 @@ void TagNode::Update() {
 			ImGui::PopStyleVar();
 		}
 	}
-	else {
-		if (HighlightedNodes.contains(Name))
-			ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(1, 1, 0, 1));
-
-		builder->Begin(this->ID);
-
-		{
-			auto alpha = InputPin->GetAlpha();
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-			ed::BeginPin(InputPin->ID, ed::PinKind::Input);
-			InputPin->DrawPinIcon(InputPin->IsLinked(), (int)(alpha * 255));
-			ed::EndPin();
-			ImGui::PopStyleVar();
-			ImGui::SameLine();
-		}
-		if (HighlightedNodes.contains(Name))
-			ed::PopStyleColor();
-
-		Utils::SetNextInputWidth(Name, 120.f);
-		ImGui::InputText("##Name", &Name);
-
-	}
 
 	builder->End();
 }
 
 void TagNode::Menu() {
 	Node::Menu();
-
-	if (ImGui::MenuItem(IsConstant ? "Set Variable" : "Set Constant"))
-		IsConstant = !IsConstant;
-}
-
-std::string TagNode::GetValue(Pin* from) const {
-	if (IsConstant) {
-		return Name;
-	}
-	else {
-		std::unordered_set<Node*> tagVisited;
-		auto pThis = const_cast<TagNode*>(this);
-		return pThis->ResolveTagPointer(pThis, tagVisited);
-	}
 }
 
 void TagNode::SaveToJson(json& j) const {
@@ -201,6 +194,16 @@ void TagNode::LoadFromJson(const json& j) {
 	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input);
 	InputPin->Node = this;
 	InputPin->LoadFromJson(j["Input"]);
+}
+
+std::string TagNode::GetValue(Pin* from) const {
+	if (IsConstant)
+		return Name;
+	else {
+		std::unordered_set<Node*> tagVisited;
+		auto pThis = const_cast<TagNode*>(this);
+		return pThis->ResolveTagPointer(pThis, tagVisited);
+	}
 }
 
 // 递归解析指针类型TagNode的值
@@ -230,8 +233,8 @@ std::string TagNode::ResolveTagPointer(TagNode* tagNode, std::unordered_set<Node
 	return "";
 }
 
-bool TagNode::CheckInputConflicts() const {
-	if (IsInput && GlobalNames.contains(Name))
+bool TagNode::CheckOutputConflicts() const {
+	if (!IsInput && GlobalNames.contains(Name))
 		return GlobalNames[Name] > 1;
 
 	return false;
