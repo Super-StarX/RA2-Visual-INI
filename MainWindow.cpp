@@ -69,6 +69,22 @@ void MainWindow::UpdateTouch() {
 	}
 }
 
+void MainWindow::InitDefaultLayout() {
+	if (std::filesystem::exists("DefaultLayout.ini")) {
+		ImportINI("DefaultLayout.ini");
+	}
+	else {
+		auto node1 = Node::Create<SectionNode>("Section A");
+		node1->AddKeyValue("Key", "Section B");
+		auto node2 = Node::Create<SectionNode>("Section B");
+		node2->AddKeyValue("Key", "Value");
+		auto back = node1->KeyValues.back().get();
+		back->LinkTo(node2->InputPin.get());
+
+		ExportINI("DefaultLayout.ini");
+	}
+}
+
 void MainWindow::OnFrameStart() {
 	TagNode::UpdateSelectedName();
 }
@@ -121,12 +137,7 @@ void MainWindow::OnStart() {
 	BuilderNode::CreateHeader();
 	LOG_INFO("组件初始化完毕");
 
-	auto node1 = Node::Create<SectionNode>("Section A");
-	node1->AddKeyValue("key", "Section B");
-	auto node2 = Node::Create<SectionNode>("Section B");
-	node2->AddKeyValue("key", "Value");
-	auto back = node1->KeyValues.back().get();
-	back->LinkTo(node2->InputPin.get());
+	InitDefaultLayout();
 
 	ed::NavigateToContent();
 

@@ -40,6 +40,7 @@ public:
 	void UpdateTouch();
 
 	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
+	void InitDefaultLayout();
 
 	void Menu();
 	void ToolTip();
