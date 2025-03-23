@@ -86,6 +86,11 @@ void GroupNode::Update() {
 		//ImGui::PopStyleVar();
 	}
 	ed::EndGroupHint();
+
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		IsEditingName = true;
+		NameBuffer = Name;
+	}
 }
 
 void GroupNode::Menu() {
