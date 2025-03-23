@@ -4,7 +4,7 @@
 
 KeyValue::KeyValue(::Node* node, const std::string& key, const std::string& value, const std::string& comment, int id) :
 	ValuePin(node, value, id),
-	Key(key), Comment(comment) {}
+	Key(key), Comment(comment), InputPin(node, "", PinKind::Input) {}
 
 void KeyValue::Tooltip() {
 	if (!Node) return;

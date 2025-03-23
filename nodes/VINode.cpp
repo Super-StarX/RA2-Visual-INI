@@ -60,20 +60,7 @@ void VINode<T>::Update() {
 
 		auto& kv = this->KeyValues[i];
 		if (!kv->IsFolded) {
-			builder->Output(kv->ID);
-			auto alpha = kv->GetAlpha();
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-			ImGui::PushID(&kv);
-
-			const bool isDisabled = kv->IsInherited || kv->IsComment || IsComment;
-			UnFoldedKeyValues(*kv, isDisabled); // 展开状态下的渲染
-
-			ImGui::Spring(0);
-			kv->DrawPinIcon(kv->IsLinked(), (int)(alpha * 255));
-
-			ImGui::PopID();
-			ImGui::PopStyleVar();
-			builder->EndOutput();
+			UnFoldedKeyValues(*kv); // 展开状态下的渲染
 			i++;
 		}
 		else

@@ -1,4 +1,5 @@
 ﻿#include "ListNode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include "Pins/KeyValue.h"
@@ -57,7 +58,14 @@ ValuePin* ListNode::AddKeyValue(const std::string& value, int pinid, bool isInhe
 	return kv.get();
 }
 
-void ListNode::UnFoldedKeyValues(ValuePin& kv, bool isDisabled) {
+void ListNode::UnFoldedKeyValues(ValuePin& kv) {
+	auto builder = BuilderNode::GetBuilder();
+	builder->Output(kv.ID);
+	auto alpha = kv.GetAlpha();
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+	ImGui::PushID(&kv);
+
+	const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 	if (isDisabled) {
 		ImGui::TextDisabled("; %s", kv.Value.c_str());
 	}
@@ -74,4 +82,11 @@ void ListNode::UnFoldedKeyValues(ValuePin& kv, bool isDisabled) {
 		maxSize = std::max(maxSize, ms);
 		ImGui::PopItemWidth();
 	}
+
+	ImGui::Spring(0);
+	kv.DrawPinIcon(kv.IsLinked(), (int)(alpha * 255));
+
+	ImGui::PopID();
+	ImGui::PopStyleVar();
+	builder->EndOutput();
 }

@@ -17,9 +17,8 @@ void ValuePin::SetValue(const std::string& str) {
 }
 
 std::string ValuePin::GetValue() const {
-	if (auto pNode = this->GetLinkedNode()) {
+	if (auto pNode = this->GetLinkedNode())
 		return pNode->GetValue(GetLinkedPin());
-	}
 
 	return Value;
 }

@@ -1,4 +1,5 @@
 ﻿#include "SectionNode.h"
+#include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
 #include "Pins/KeyValue.h"
@@ -62,7 +63,20 @@ KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& va
 	return kv.get();
 }
 
-void SectionNode::UnFoldedKeyValues(KeyValue& kv, bool isDisabled) {
+void SectionNode::UnFoldedKeyValues(KeyValue& kv) {
+	auto builder = BuilderNode::GetBuilder();
+
+	builder->Input(kv.InputPin.ID);
+	auto& inputPin = kv.InputPin;
+	inputPin.DrawPinIcon(inputPin.IsLinked(), (int)(inputPin.GetAlpha() * 255));
+	builder->EndInput();
+
+	builder->Output(kv.ID);
+	auto alpha = kv.GetAlpha();
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+	ImGui::PushID(&kv);
+
+	const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 	if (isDisabled) {
 		ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.Value.c_str());
 	}
@@ -82,4 +96,11 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, bool isDisabled) {
 		maxSize = std::max(maxSize + w1, ms);
 		ImGui::PopItemWidth();
 	}
+
+	ImGui::Spring(0);
+	kv.DrawPinIcon(kv.IsLinked(), (int)(alpha * 255));
+
+	ImGui::PopID();
+	ImGui::PopStyleVar();
+	builder->EndOutput();
 }

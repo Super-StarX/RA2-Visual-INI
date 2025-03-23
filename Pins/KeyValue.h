@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 #include "ValuePin.h"
 #include "MainWindow.h"
 #include "Nodes/Node.h"
+#include <memory>
 
 class KeyValue : public ValuePin {
 public:
@@ -11,6 +12,7 @@ public:
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
 
+	Pin InputPin;
 	std::string Key;
 	std::string Comment;
 };

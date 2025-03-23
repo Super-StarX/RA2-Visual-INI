@@ -17,7 +17,7 @@ public:
 	virtual NodeType GetNodeType() const override { return NodeType::Section; }
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
-	virtual void UnFoldedKeyValues(KeyValue& kv, bool override) override;
+	virtual void UnFoldedKeyValues(KeyValue& kv) override;
 	virtual void AddKeyValue() override;
 	virtual bool PinNameSyncable() const override { return true; }
 	KeyValue* AddKeyValue(const std::string& key, const std::string& value, const std::string& comment = "", int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
