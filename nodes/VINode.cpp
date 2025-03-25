@@ -54,17 +54,31 @@ void VINode<T>::Update() {
 	size_t i = 0;
 	lastMaxSize = maxSize + 40.f;
 	maxSize = 0;
-	while (i < this->KeyValues.size()) {
-		if (IsFolded)
-			break;
 
-		auto& kv = this->KeyValues[i];
-		if (!kv->IsFolded) {
-			UnFoldedKeyValues(*kv); // 展开状态下的渲染
-			i++;
+
+	if (!IsFolded) {
+		while (i < this->KeyValues.size()) {
+			auto& kv = this->KeyValues[i];
+			if (!kv->IsFolded) {
+				UnFoldedKeyValues(*kv, 0); // 展开状态下的渲染
+				i++;
+			}
+			else {
+				while (i < this->KeyValues.size() && this->KeyValues[i]->IsFolded)
+					i++;
+				ImGui::Dummy(ImVec2(0, 2.4f));
+			}
 		}
-		else
-			FoldedKeyValues(i); // 检测连续折叠的区域
+		i = 0;
+		while (i < this->KeyValues.size()) {
+			auto& kv = this->KeyValues[i];
+			if (!kv->IsFolded) {
+				UnFoldedKeyValues(*kv, 1); // 展开状态下的渲染
+				i++;
+			}
+			else
+				FoldedKeyValues(i); // 检测连续折叠的区域
+		}
 	}
 
 	ImGui::PushID(this);

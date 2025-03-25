@@ -195,6 +195,7 @@ void MainWindow::SaveProject(const std::string& filePath) {
 
 void MainWindow::ImportINI(const std::string& path) {
 	ClearAll();
+	SetNextId(1);
 	std::wifstream file(path);
 	std::string line, currentSection, comment;
 	std::wstring wline;

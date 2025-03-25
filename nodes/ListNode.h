@@ -11,7 +11,7 @@ public:
 	virtual NodeType GetNodeType() const override { return NodeType::List; }
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j) override;
-	virtual void UnFoldedKeyValues(ValuePin& kv) override;
+	virtual void UnFoldedKeyValues(ValuePin& kv, int mode = 0) override;
 	virtual void AddKeyValue() override;
 	virtual std::string GetValue(Pin* from = nullptr) const override;
 

@@ -58,7 +58,10 @@ ValuePin* ListNode::AddKeyValue(const std::string& value, int pinid, bool isInhe
 	return kv.get();
 }
 
-void ListNode::UnFoldedKeyValues(ValuePin& kv) {
+void ListNode::UnFoldedKeyValues(ValuePin& kv, int mode) {
+	if (mode == 0) // List没有input，不涉及
+		return;
+
 	auto builder = BuilderNode::GetBuilder();
 	builder->Output(kv.ID);
 	auto alpha = kv.GetAlpha();
