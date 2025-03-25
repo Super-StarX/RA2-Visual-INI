@@ -21,7 +21,8 @@ static ed::NodeId contextNodeId;
 static ed::LinkId contextLinkId;
 static ed::PinId  contextPinId;
 static Pin* newNodeLinkPin = nullptr;
-SectionNode* m_SectionEditorNode{ nullptr };
+static ImVec2 newNodePosition;
+static SectionNode* m_SectionEditorNode{ nullptr };
 void MainWindow::Menu() {
 	ed::Suspend();
 	if (ed::ShowNodeContextMenu(&contextNodeId))
@@ -37,6 +38,7 @@ void MainWindow::Menu() {
 	else if (ed::ShowBackgroundContextMenu()) {
 		ImGui::OpenPopup("Create New Node");
 		newNodeLinkPin = nullptr;
+		newNodePosition = ImGui::GetMousePos(); // 记录右键点击位置
 	}
 	ed::Resume();
 
@@ -59,7 +61,6 @@ void MainWindow::Menu() {
 }
 
 void MainWindow::LayerMenu() {
-	auto openPopupPosition = ImGui::GetMousePos();
 	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
 
 	//auto drawList = ImGui::GetWindowDrawList();
@@ -92,7 +93,7 @@ void MainWindow::LayerMenu() {
 	if (node) {
 		createNewNode = false;
 		
-		const ImVec2 canvasPos = ed::ScreenToCanvas(openPopupPosition);
+		const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
 		ed::SetNodePosition(node->ID, canvasPos);
 
 		if (auto startPin = newNodeLinkPin)
