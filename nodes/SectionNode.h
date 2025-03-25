@@ -20,8 +20,10 @@ public:
 	virtual void UnFoldedKeyValues(KeyValue& kv) override;
 	virtual void AddKeyValue() override;
 	virtual bool PinNameSyncable() const override { return true; }
+	virtual void Menu() override;
 	KeyValue* AddKeyValue(const std::string& key, const std::string& value, const std::string& comment = "", int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 
 	vector_kv::iterator FindPin(const Pin& key);
 	vector_kv::iterator FindPin(const std::string& key);
+	void AutoSelectType();
 };

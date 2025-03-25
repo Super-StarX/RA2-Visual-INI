@@ -47,11 +47,63 @@ std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const std:
 	return std::find_if(KeyValues.begin(), KeyValues.end(), [&key](const std::unique_ptr<KeyValue>& kv) { return kv->Key == key; });
 }
 
+void SectionNode::AutoSelectType() {
+	auto& typeSystem = TypeSystem::Get();
+	int maxMatchCount = 0;
+	std::string bestType;
+
+	// 预处理当前节点的key集合
+	std::unordered_set<std::string> nodeKeys;
+	for (const auto& kv : KeyValues) {
+		nodeKeys.insert(kv->Key);
+	}
+
+	// 遍历所有预定义Section类型
+	for (const auto& [sectionName, section] : typeSystem.Sections) {
+		// 获取该Section类型的所有key
+		const auto& sectionKeys = section.section; // 假设已预先生成key集合
+
+		// 计算匹配度（考虑双向包含）
+		int matchCount = 0;
+		for (const auto& key : nodeKeys) {
+			if (sectionKeys.count(key)) {
+				matchCount++;
+			}
+		}
+
+		// 优化：优先完全匹配
+		bool isFullMatch = (matchCount == sectionKeys.size()) &&
+			(nodeKeys.size() == sectionKeys.size());
+
+		// 评分规则：基础分 + 完全匹配奖励分
+		int finalScore = matchCount * 100 + (isFullMatch ? 500 : 0);
+
+		// 更新最佳匹配（分数相同则取更具体/更新的类型）
+		if (finalScore > maxMatchCount ||
+		   (finalScore == maxMatchCount && typeSystem.Sections.contains(bestType) &&
+			   section.inheritanceLevel > typeSystem.Sections.at(bestType).inheritanceLevel)) {
+			maxMatchCount = finalScore;
+			bestType = sectionName;
+		}
+	}
+
+	// 设置最终类型（至少有1个匹配才生效）
+	if (maxMatchCount >= 100) { // 至少匹配1个key
+		this->TypeName = bestType;  // 假设SectionNode有Type成员
+	}
+}
+
 void SectionNode::AddKeyValue() {
 	ImVec2 buttonSize(lastMaxSize, 4.0f);
 	if (ImGui::Button("##Add Key Value", buttonSize)) {
 		AddKeyValue("key", "value");
 	}
+}
+
+void SectionNode::Menu() {
+	VINode::Menu();
+	if (ImGui::MenuItem("Auto Select Type"))
+		AutoSelectType();
 }
 
 KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& value, const std::string& comment, int pinid, bool isInherited, bool isComment, bool isFolded) {

@@ -296,6 +296,8 @@ void MainWindow::ImportINI(const std::string& path) {
 
 		auto bracketPos = line.find("[");
 		if (bracketPos != std::string::npos) { // 新的Section开始了
+			if (currentNode)
+				currentNode->AutoSelectType();
 			current = it++;
 			continue;
 		}
