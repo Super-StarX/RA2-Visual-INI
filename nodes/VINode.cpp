@@ -89,6 +89,18 @@ void VINode<T>::Update() {
 	ImGui::PopID();
 
 	builder->End();
+
+	// 注释节点绘制斜线
+	if (this->IsComment) {
+		ImVec2 min = ImGui::GetItemRectMin();
+		ImVec2 max = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddLine(
+			ImVec2(min.x + 5, min.y + 5),
+			ImVec2(max.x - 5, max.y - 5),
+			IM_COL32(255, 0, 0, 255),
+			2.0f
+		);
+	}
 }
 
 template<typename T>
