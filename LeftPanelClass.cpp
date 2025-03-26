@@ -221,9 +221,11 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	for (int i = 0; i < linkCount; ++i) ImGui::Text("Link (%p)", selectedLinks[i].AsPointer());
 	ImGui::Unindent();
 
-	if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F)))
 		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
+		Owner->Duplicate();
 
 	ImGui::EndChild();
 }

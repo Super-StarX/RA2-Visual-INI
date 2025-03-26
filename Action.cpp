@@ -1,7 +1,19 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "Action.h"
 #include "MainWindow.h"
+#include "Pins/KeyValue.h"
 #include "Nodes/Node.h"
+#include "Nodes/BlueprintNode.h"
+#include "Nodes/CommentNode.h"
+#include "Nodes/GroupNode.h"
+#include "Nodes/HoudiniNode.h"
+#include "Nodes/ListNode.h"
+#include "Nodes/ModuleNode.h"
+#include "Nodes/SectionNode.h"
+#include "Nodes/SimpleNode.h"
+#include "Nodes/TagNode.h"
+#include "Nodes/TreeNode.h"
+#include "Nodes/IONode.h"
 
 void MainWindow::Copy() {
 	clipboard.links.clear();
@@ -67,15 +79,75 @@ void MainWindow::Paste() {
 }
 
 void MainWindow::Duplicate() {
-	// 获取选中的节点和链接
-	std::vector<ed::NodeId> selectedNodes;
-	ed::GetSelectedNodes(selectedNodes.data(), ed::GetSelectedObjectCount());
-	/*
-	for (auto& nodeId : selectedNodes) {
-		if (auto node = Node::Get(nodeId)) {
-			// 复制节点
-			auto newNode = SpawnNodeFromTemplate(node->Name, {});
-			ed::SelectNode(newNode->ID);
+	// 改进后的节点复制逻辑
+	auto selectedNodes = Node::GetSelectedNodes();
+	std::vector<Node*> newNodes;
+
+	// 分两阶段处理保证引用完整性
+	for (size_t i = 0; i < selectedNodes.size(); ++i) {
+		Node* original = selectedNodes[i];
+		json nodeData;
+		original->SaveToJson(nodeData);
+
+		// 生成新ID并更新数据
+		const auto pos = ImGui::GetMousePos();
+		nodeData["ID"] = GetNextId();
+		nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
+		nodeData["Position"] = { pos.x,pos.y };
+
+		// 创建新节点
+		Node* newNode = nullptr;
+		switch (original->GetNodeType()) {
+		case NodeType::Blueprint:
+		case NodeType::Tree:
+		case NodeType::Houdini:
+		case NodeType::Simple:
+			break;
+		case NodeType::Tag:
+			newNode = Node::Create<TagNode>(true);
+			break;
+		case NodeType::Group:
+			newNode = Node::Create<GroupNode>();
+			break;
+		case NodeType::Section:
+		{
+			// 递归复制键值对
+			auto& sectionNode = static_cast<SectionNode&>(*original);
+			auto& keyValues = nodeData["KeyValues"];
+			keyValues = json::array();
+			for (auto& kv : sectionNode.KeyValues) {
+				json kvData;
+				kv->SaveToJson(kvData);
+				kvData["ID"] = GetNextId(); // 为每个KeyValue生成新ID
+				keyValues.push_back(kvData);
+			}
+			newNode = Node::Create<SectionNode>();
+			break;
 		}
-	}*/
+		case NodeType::Comment:
+			newNode = Node::Create<CommentNode>();
+			break;
+		case NodeType::List:
+			newNode = Node::Create<ListNode>();
+			break;
+		case NodeType::Module:
+			newNode = Node::Create<ModuleNode>();
+			break;
+		case NodeType::IO:
+			newNode = Node::Create<IONode>(PinKind::Input);
+			break;
+		default:
+			break;
+		}
+		if (newNode) {
+			newNode->LoadFromJson(nodeData);
+			newNodes.push_back(newNode);
+		}
+	}
+
+	// 更新编辑器状态
+	ed::ClearSelection();
+	for (auto node : newNodes) {
+		ed::SelectNode(node->ID, true);
+	}
 }

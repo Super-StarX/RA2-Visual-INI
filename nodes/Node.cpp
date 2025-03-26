@@ -189,7 +189,7 @@ void Node::SaveToJson(json& j) const {
 	auto pos = GetPosition();
 	// Inputs和Outputs暂时没存，因为目前没有实例
 	j["ID"] = ID.Get();
-	j["Section"] = Name;
+	j["Name"] = Name;
 	j["Position"] = { pos.x, pos.y };
 	j["Color"] = { Color.Value.x,Color.Value.y,Color.Value.z };
 	j["Type"] = static_cast<int>(GetNodeType());
@@ -200,7 +200,7 @@ void Node::SaveToJson(json& j) const {
 
 void Node::LoadFromJson(const json& j) {
 	ID = ed::NodeId(j["ID"] + MainWindow::GetIdOffset());
-	SetName(j["Section"]);
+	SetName(j["Name"]);
 	this->SetPosition({
 		j["Position"][0].get<float>(),
 		j["Position"][1].get<float>()
