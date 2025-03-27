@@ -77,7 +77,7 @@ public:
 	virtual void OnStop() override;
 	virtual void OnFrame(float deltaTime) override;
 
-	ClipboardData clipboard;
+	ClipboardData m_Clipboard;
 	LeftPanelClass m_LeftPanel;
 	TemplateManager m_TemplateManager;
 	const float							m_TouchTime = 1.0f;

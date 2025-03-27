@@ -62,6 +62,9 @@ public:
 	virtual void Update() = 0;
 	virtual void SetName(const std::string& str);
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
+	virtual std::vector<Pin*> GetAllPins() { return std::vector<Pin*>(); }
+	virtual std::vector<Pin*> GetInputPins() { return std::vector<Pin*>(); }
+	virtual std::vector<Pin*> GetOutputPins() { return std::vector<Pin*>(); }
 	virtual KeyValue* ConvertToKeyValue(Pin* pin);
 	virtual std::string GetValue(Pin* from = nullptr) const;
 	virtual bool PinNameChangable() const { return true; } // Link是否会影响Pin的名字
@@ -71,6 +74,7 @@ public:
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
+	bool HasPin(ed::PinId pinId);
 	
 	MainWindow* Owner = nullptr;
 

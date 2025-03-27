@@ -181,6 +181,14 @@ int Node::GetConnectedLinkCount() {
 	return count;
 }
 
+bool Node::HasPin(ed::PinId pinId) {
+	for (auto pin : GetAllPins()) {
+		if (pin->ID == pinId)
+			return true;
+	}
+	return false;
+}
+
 std::string Node::GetValue(Pin* from) const {
 	return Name;
 }

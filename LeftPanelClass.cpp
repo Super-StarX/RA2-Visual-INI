@@ -224,6 +224,10 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F)))
 		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)))
+		Owner->Copy();
+	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)))
+		Owner->Paste();
 	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
 		Owner->Duplicate();
 

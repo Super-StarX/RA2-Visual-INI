@@ -106,6 +106,37 @@ void SectionNode::Menu() {
 		AutoSelectType();
 }
 
+std::vector<Pin*> SectionNode::GetAllPins() {
+	std::vector<Pin*> pins;
+	if (InputPin) pins.push_back(InputPin.get());
+	if (OutputPin) pins.push_back(OutputPin.get());
+
+	// 添加KeyValues中的引脚
+	for (auto& kv : KeyValues) {
+		pins.push_back(&kv->InputPin);
+		pins.push_back(kv.get());
+	}
+	return pins;
+}
+
+std::vector<Pin*> SectionNode::GetInputPins() {
+	std::vector<Pin*> pins;
+	if (InputPin) 
+		pins.push_back(InputPin.get());
+	for (auto& kv : KeyValues)
+		pins.push_back(&kv->InputPin);
+	return pins;
+}
+
+std::vector<Pin*> SectionNode::GetOutputPins() {
+	std::vector<Pin*> pins;
+	if (OutputPin) 
+		pins.push_back(OutputPin.get());
+	for (auto& kv : KeyValues)
+		pins.push_back(kv.get());
+	return pins;
+}
+
 KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& value, const std::string& comment, int pinid, bool isInherited, bool isComment, bool isFolded) {
 	auto& kv = KeyValues.emplace_back(std::make_unique<KeyValue>(this, key, value, comment, pinid));
 	kv->IsInherited = isInherited;

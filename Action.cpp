@@ -17,67 +17,109 @@
 #include <imgui_internal.h>
 
 void MainWindow::Copy() {
-	clipboard.links.clear();
-	clipboard.nodes.clear();
+	auto selectedNodes = Node::GetSelectedNodes();
+	if (selectedNodes.empty())
+		return;
 
-	// 收集选中元素
-	std::vector<ed::NodeId> selectedNodes;
-	std::vector<ed::LinkId> selectedLinks;
-	ed::GetSelectedNodes(selectedNodes.data(), ed::GetSelectedObjectCount());
-	ed::GetSelectedLinks(selectedLinks.data(), ed::GetSelectedObjectCount());
-	/*
-	// 深拷贝节点
-	for (auto& nodeId : selectedNodes) {
-		auto node = Node::Get(nodeId);
-		auto clonedNode = node->Clone(); // 实现深拷贝方法
-		clipboard.nodes.push_back(clonedNode);
+	m_Clipboard = {}; // 清空剪贴板
+
+	// 计算几何中心
+	ImVec2 center(0, 0);
+	for (Node* node : selectedNodes) {
+		center += node->GetPosition();
 	}
+	center.x /= selectedNodes.size();
+	center.y /= selectedNodes.size();
+	m_Clipboard.copyCenter = center;
 
-	// 深拷贝关联连接
-	for (auto& linkId : selectedLinks) {
-		auto link = Link::Get(linkId);
-		auto clonedLink = link->Clone();
-		clipboard.links.push_back(clonedLink);
-	}*/
+	// 序列化节点
+	for (Node* node : selectedNodes) {
+		json nodeData;
+		node->SaveToJson(nodeData);
+		m_Clipboard.nodes.push_back(nodeData);
+
+		// 收集相关连线
+		/*for (auto& pin : node->GetAllPins()) {
+			for (auto& [_, link] : pin->Links) {
+				// 确保只保存两端都在选中节点中的连线
+				if (std::find_if(selectedNodes.begin(), selectedNodes.end(),
+					[&](Node* n) { return n->HasPin(link->StartPinID) || n->HasPin(link->EndPinID); }) != selectedNodes.end()) {
+					json linkData;
+					link->SaveToJson(linkData);
+					m_Clipboard.links.push_back(linkData);
+				}
+			}
+		}*/
+	}
+	// 去重连线
+	std::sort(m_Clipboard.links.begin(), m_Clipboard.links.end());
+	m_Clipboard.links.erase(std::unique(m_Clipboard.links.begin(), m_Clipboard.links.end()), m_Clipboard.links.end());
+
+	m_Clipboard.hasData = true;
 }
 
 void MainWindow::Paste() {
-	if (clipboard.nodes.empty())
+	if (!m_Clipboard.hasData)
 		return;
-	// 计算粘贴偏移量
-	static ImVec2 s_PasteOffset = ImVec2(20, 20);
-	const ImVec2 mousePos = ed::ScreenToCanvas(ImGui::GetMousePos());
 
-	// 生成新ID并建立映射
-	/*std::unordered_map<ed::NodeId, ed::NodeId> idMap;
-	for (auto& node : clipboard.nodes) {
-		auto originalId = node->ID;
-		node->ID = ed::NodeId::Generate(); // 生成新ID
-		idMap[originalId] = node->ID;
+	const ImVec2 pastePos = ed::ScreenToCanvas(ImGui::GetMousePos());
+	std::vector<Node*> newNodes;
+	std::unordered_map<int, int> idMap; // 旧ID到新ID的映射
 
-		// 设置新位置
-		node->Position = mousePos + s_PasteOffset;
-		AddNode(node);
+	// 第一阶段：创建所有新节点
+	for (auto& nodeData : m_Clipboard.nodes) {
+		// 创建新ID并建立映射
+		const int oldId = nodeData["ID"];
+		const int newId = GetNextId();
+		idMap[oldId] = newId;
+		nodeData["ID"] = newId;
 
-		s_PasteOffset += ImVec2(20, 20); // 下次粘贴偏移
+		// 计算新位置
+		ImVec2 originalPos(nodeData["Position"][0], nodeData["Position"][1]);
+		ImVec2 offset = originalPos - m_Clipboard.copyCenter;
+		ImVec2 newPos = pastePos + offset;
+		nodeData["Position"] = { newPos.x, newPos.y };
+
+		// 修改名称避免冲突
+		if (nodeData.contains("Name")) {
+			nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
+		}
+
+		// 创建节点
+		NodeType type = static_cast<NodeType>(nodeData["Type"].get<int>());
+		Node* newNode = CreateNodeByType(type);
+		if (newNode) {
+			newNode->LoadFromJson(nodeData);
+			newNodes.push_back(newNode);
+		}
 	}
 
-	// 重新映射连接
-	for (auto& link : clipboard.links) {
-		link->ID = ed::LinkId::Generate();
-		link->StartPin.ID = idMap[link->StartPin.NodeId].Get()
-			? context.FindPin(idMap[link->StartPin.NodeId], link->StartPin.Name)
-			: ed::PinId::Invalid;
-		link->EndPin.ID = idMap[link->EndPin.NodeId].Get()
-			? context.FindPin(idMap[link->EndPin.NodeId], link->EndPin.Name)
-			: ed::PinId::Invalid;
+	// 第二阶段：重建连线
+	for (auto& linkData : m_Clipboard.links) {
+		int oldStartId = linkData["StartPin"];
+		int oldEndId = linkData["EndPin"];
 
-		if (link->StartPin.ID && link->EndPin.ID)
-			context.AddLink(link);
-	}*/
+		// 查找映射后的新ID
+		auto startIt = idMap.find(oldStartId);
+		auto endIt = idMap.find(oldEndId);
 
-	ed::NavigateToSelection(); // 聚焦到新粘贴内容
+		if (startIt != idMap.end() && endIt != idMap.end()) {
+			Pin* startPin = Pin::Get(startIt->second);
+			Pin* endPin = Pin::Get(endIt->second);
+
+			if (startPin && endPin) {
+				startPin->LinkTo(endPin);
+			}
+		}
+	}
+
+	// 更新选择状态
+	ed::ClearSelection();
+	for (Node* node : newNodes) {
+		ed::SelectNode(node->ID, true);
+	}
 }
+
 void MainWindow::Duplicate() {
 	auto selectedNodes = Node::GetSelectedNodes();
 	if (selectedNodes.empty())
