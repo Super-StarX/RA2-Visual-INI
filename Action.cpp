@@ -14,6 +14,7 @@
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
+#include <imgui_internal.h>
 
 void MainWindow::Copy() {
 	clipboard.links.clear();
@@ -77,77 +78,75 @@ void MainWindow::Paste() {
 
 	ed::NavigateToSelection(); // 聚焦到新粘贴内容
 }
-
 void MainWindow::Duplicate() {
-	// 改进后的节点复制逻辑
 	auto selectedNodes = Node::GetSelectedNodes();
-	std::vector<Node*> newNodes;
+	if (selectedNodes.empty())
+		return;
 
-	// 分两阶段处理保证引用完整性
-	for (size_t i = 0; i < selectedNodes.size(); ++i) {
-		Node* original = selectedNodes[i];
+	std::vector<Node*> newNodes;
+	const ImVec2 mousePos = ed::ScreenToCanvas(ImGui::GetMousePos());
+
+	// 第一阶段：计算原始几何中心
+	ImVec2 originalCenter(0, 0);
+	for (Node* node : selectedNodes) {
+		originalCenter = originalCenter + node->GetPosition();
+	}
+	originalCenter.x /= selectedNodes.size();
+	originalCenter.y /= selectedNodes.size();
+
+	// 第二阶段：复制节点并计算新位置
+	for (Node* original : selectedNodes) {
 		json nodeData;
 		original->SaveToJson(nodeData);
 
-		// 生成新ID并更新数据
-		const auto pos = ImGui::GetMousePos();
+		// 计算相对位置偏移
+		ImVec2 originalPos = original->GetPosition();
+		ImVec2 relativeOffset = originalPos - originalCenter;
+
+		// 设置新位置（鼠标位置+相对偏移）
+		ImVec2 newPos = mousePos + relativeOffset;
+		nodeData["Position"] = { newPos.x, newPos.y };
 		nodeData["ID"] = GetNextId();
 		nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
-		nodeData["Position"] = { pos.x,pos.y };
 
-		// 创建新节点
-		Node* newNode = nullptr;
-		switch (original->GetNodeType()) {
-		case NodeType::Blueprint:
-		case NodeType::Tree:
-		case NodeType::Houdini:
-		case NodeType::Simple:
-			break;
-		case NodeType::Tag:
-			newNode = Node::Create<TagNode>(true);
-			break;
-		case NodeType::Group:
-			newNode = Node::Create<GroupNode>();
-			break;
-		case NodeType::Section:
-		{
-			// 递归复制键值对
+		// 创建新节点（优化后的工厂方法）
+		Node* newNode = CreateNodeByType(original->GetNodeType());
+		if (!newNode)
+			continue;
+
+		// 特殊类型处理
+		if (original->GetNodeType() == NodeType::Section) {
 			auto& sectionNode = static_cast<SectionNode&>(*original);
 			auto& keyValues = nodeData["KeyValues"];
 			keyValues = json::array();
 			for (auto& kv : sectionNode.KeyValues) {
 				json kvData;
 				kv->SaveToJson(kvData);
-				kvData["ID"] = GetNextId(); // 为每个KeyValue生成新ID
+				kvData["ID"] = GetNextId();
 				keyValues.push_back(kvData);
 			}
-			newNode = Node::Create<SectionNode>();
-			break;
 		}
-		case NodeType::Comment:
-			newNode = Node::Create<CommentNode>();
-			break;
-		case NodeType::List:
-			newNode = Node::Create<ListNode>();
-			break;
-		case NodeType::Module:
-			newNode = Node::Create<ModuleNode>();
-			break;
-		case NodeType::IO:
-			newNode = Node::Create<IONode>(PinKind::Input);
-			break;
-		default:
-			break;
-		}
-		if (newNode) {
-			newNode->LoadFromJson(nodeData);
-			newNodes.push_back(newNode);
-		}
+
+		newNode->LoadFromJson(nodeData);
+		newNodes.push_back(newNode);
 	}
 
 	// 更新编辑器状态
 	ed::ClearSelection();
-	for (auto node : newNodes) {
+	for (Node* node : newNodes) {
 		ed::SelectNode(node->ID, true);
+	}
+}
+
+Node* MainWindow::CreateNodeByType(NodeType type) {
+	switch (type) {
+	case NodeType::Tag:      return Node::Create<TagNode>(true);
+	case NodeType::Group:    return Node::Create<GroupNode>();
+	case NodeType::Section:  return Node::Create<SectionNode>();
+	case NodeType::Comment:  return Node::Create<CommentNode>();
+	case NodeType::List:     return Node::Create<ListNode>();
+	case NodeType::Module:   return Node::Create<ModuleNode>();
+	case NodeType::IO:      return Node::Create<IONode>(PinKind::Input);
+	default:                return nullptr;
 	}
 }

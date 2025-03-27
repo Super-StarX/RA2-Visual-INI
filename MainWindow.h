@@ -39,6 +39,7 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
+	Node* CreateNodeByType(NodeType type);
 	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
 	void InitDefaultLayout();
 
