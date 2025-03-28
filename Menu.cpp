@@ -14,6 +14,7 @@
 #include "Pins/PinType.h"
 #include "Pins/KeyValue.h"
 #include <misc/cpp/imgui_stdlib.h>
+#include "Log.h"
 #include <sstream>
 
 static bool createNewNode = false;
@@ -92,7 +93,8 @@ void MainWindow::LayerMenu() {
 
 	if (node) {
 		createNewNode = false;
-		
+		LOG_INFO("创建新空白节点，节点类型为{}", static_cast<int>(node->GetNodeType()));
+
 		const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
 		ed::SetNodePosition(node->ID, canvasPos);
 
@@ -108,7 +110,8 @@ void MainWindow::LayerMenu() {
 void MainWindow::NodeMenu() {
 	auto node = Node::Get(contextNodeId);
 
-	ImGui::TextUnformatted("Node Context Menu");
+	//ImGui::TextUnformatted("Node Context Menu");
+	ImGui::TextUnformatted("中文测试");
 	ImGui::Separator();
 	if (node) {
 		node->Menu();

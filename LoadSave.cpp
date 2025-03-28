@@ -9,6 +9,7 @@
 #include "version.h"
 #include "PlaceholderReplacer.h"
 #include "Utils.h"
+#include "Log.h"
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -56,10 +57,12 @@ void LeftPanelClass::ShowProjFileDialog(bool isSaving) {
 }
 
 void MainWindow::LoadProject(const std::string& filePath) {
+	LOG_INFO("正在载入工程[{}]", filePath);
 	using json = nlohmann::json;
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
 		std::cerr << "Failed to open file for reading.\n";
+		LOG_WARN("无法打开文件[{}]!", filePath);
 		return;
 	}
 
@@ -69,6 +72,7 @@ void MainWindow::LoadProject(const std::string& filePath) {
 
 	{
 		std::string version = root["Version"];
+		LOG_INFO("目标工程版本：{}", version);
 		int major, minor, revision, patch;
 		sscanf_s(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &patch);
 		if (VERSION_PATCH != patch) {
@@ -133,8 +137,9 @@ void MainWindow::LoadProject(const std::string& filePath) {
 			Node::Array.push_back(std::move(node));
 			break;
 		}
-		default:
-			throw "Unsupported node!";
+		default: {
+			LOG_WARN("未知节点类型！节点是[{}]", nodeJson["Name"].get<std::string>());
+		}
 		}
 	}
 
@@ -155,16 +160,18 @@ void MainWindow::LoadProject(const std::string& filePath) {
 	SetNextId(root["Totals"].get<int>() + 1);
 
 	std::cout << "Data loaded from " << filePath << "\n";
+	LOG_INFO("工程载入完毕!");
 	ed::NavigateToContent();
 }
 
 void MainWindow::SaveProject(const std::string& filePath) {
 	using json = nlohmann::json;
 	json root;
-
+	LOG_INFO("正在保存工程[{}]", filePath);
 	// 保存 Nodes
 	root["Totals"] = GetNextId() - 1;
 	root["Version"] = FILE_VERSION_STR;
+	LOG_INFO("当前版本：{}", FILE_VERSION_STR);
 	for (const auto& node : Node::Array) {
 		json nodeJson;
 		node->SaveToJson(nodeJson);
@@ -185,15 +192,16 @@ void MainWindow::SaveProject(const std::string& filePath) {
 	std::ofstream file(filePath);
 	if (file.is_open()) {
 		file << root.dump(4); // 格式化输出
-		file.close();
-		std::cout << "Data saved to " << filePath << "\n";
+		LOG_INFO("工程保存完毕!");
 	}
 	else {
+		LOG_ERROR("文件[{}]打开失败，保存中止", filePath);
 		std::cerr << "Failed to open file for writing.\n";
 	}
 }
 
 void MainWindow::ImportINI(const std::string& path) {
+	LOG_INFO("正在准备载入[{}]", path);
 	ClearAll();
 	SetNextId(1);
 	std::wifstream file(path);
@@ -339,7 +347,7 @@ void MainWindow::ImportINI(const std::string& path) {
 			}
 		}
 	}
-
+	LOG_INFO("载入完毕");
 	ApplyForceDirectedLayout();
 	ed::NavigateToContent();
 }

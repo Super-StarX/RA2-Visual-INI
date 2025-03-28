@@ -100,10 +100,10 @@ void MainWindow::OnStart() {
 	LOG_INFO("=================================================================");
 	LOG_INFO("正在进行初始化...");
 
+	SetTitle(L"Visual INI - 可视化INI编辑器");
+
 	config.SettingsFile = "RA2VI.json";
-
 	config.UserPointer = this;
-
 	config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void*) -> size_t {
 		auto node = Node::Get(nodeId);
 		if (!node)

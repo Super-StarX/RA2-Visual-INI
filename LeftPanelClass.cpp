@@ -4,6 +4,7 @@
 #include "Nodes/SectionNode.h"
 #include "utilities/builders.h"
 #include "utilities/widgets.h"
+#include "Log.h"
 #include <ImGui.h>
 #include <imgui_internal.h>
 
@@ -242,18 +243,25 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 	static bool showStyleEditor = false;
 	ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
 	ImGui::Spring(0.0f, 0.0f);
-	if (ImGui::Button("Zoom to Content"))
+	if (ImGui::Button("Zoom to Content")) {
+		LOG_INFO("居中布局");
 		ed::NavigateToContent();
+	}
 	ImGui::Spring(0.0f);
 	if (ImGui::Button("Show Flow")) {
+		LOG_INFO("显示数据流");
 		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
 	}
 	ImGui::Spring();
-	if (ImGui::Button("Edit Style"))
+	if (ImGui::Button("Edit Style")) {
+		LOG_INFO("打开样式编辑器");
 		showStyleEditor = true;
+	}
 	ImGui::EndHorizontal();
-	ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals);
+	if (ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals)) {
+		LOG_INFO("显示序号");
+	}
 
 	if (showStyleEditor)
 		ShowStyleEditor(&showStyleEditor);
@@ -283,8 +291,10 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 		ShowProjFileDialog(true);
 	ImGui::EndHorizontal();
 
-	if (ImGui::Button("rebuild layout"))
+	if (ImGui::Button("Rebuild Layout")) {
+		LOG_INFO("自动重设布局");
 		Owner->ApplyForceDirectedLayout();
+	}
 
 	NodesPanel(paneWidth, selectedNodes);
 	SelectionPanel(paneWidth, nodeCount, selectedNodes, linkCount, selectedLinks);

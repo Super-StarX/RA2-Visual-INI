@@ -1,4 +1,4 @@
-# pragma once
+﻿# pragma once
 # include <imgui.h>
 # include <string>
 # include <memory>
@@ -16,7 +16,7 @@ struct Application
 
     int Run();
 
-    void SetTitle(const char* title);
+    void SetTitle(const wchar_t* title);
 
     bool Close();
     void Quit();
