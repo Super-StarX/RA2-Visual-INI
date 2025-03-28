@@ -32,11 +32,11 @@ void SectionNode::SaveToJson(json& j) const {
 	j["KeyValues"] = keyValuesJson;
 }
 
-void SectionNode::LoadFromJson(const json& j) {
-	VINode::LoadFromJson(j);
+void SectionNode::LoadFromJson(const json& j, bool newId) {
+	VINode::LoadFromJson(j, newId);
 
 	for (const auto& kvJson : j["KeyValues"])
-		AddKeyValue("", "", "", -1)->LoadFromJson(kvJson);
+		AddKeyValue("", "", "", -1)->LoadFromJson(kvJson, newId);
 }
 
 std::vector<std::unique_ptr<KeyValue>>::iterator SectionNode::FindPin(const Pin& key) {

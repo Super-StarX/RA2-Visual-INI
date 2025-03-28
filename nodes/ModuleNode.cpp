@@ -86,8 +86,8 @@ void ModuleNode::SaveToJson(json& j) const {
 	j["Path"] = Path;
 }
 
-void ModuleNode::LoadFromJson(const json& j) {
-	INENode::LoadFromJson(j);
+void ModuleNode::LoadFromJson(const json& j, bool newId) {
+	INENode::LoadFromJson(j, newId);
 	LoadProject(j["Path"]);
 }
 

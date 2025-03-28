@@ -9,7 +9,7 @@ public:
 	IONode(PinKind mode, const char* name = "", int id = 0, ModuleNode* parent = nullptr);
 	virtual NodeType GetNodeType() const override { return NodeType::IO; }
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual std::string GetValue(Pin* from = nullptr) const override;
 	virtual bool PinNameChangable() const override { return false; }
 

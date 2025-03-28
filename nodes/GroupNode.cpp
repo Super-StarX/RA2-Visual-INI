@@ -108,8 +108,8 @@ void GroupNode::SaveToJson(json& j) const {
 	j["Size"] = { Size.x, Size.y };
 }
 
-void GroupNode::LoadFromJson(const json& j) {
-	Node::LoadFromJson(j);
+void GroupNode::LoadFromJson(const json& j, bool newId) {
+	Node::LoadFromJson(j, newId);
 
 	Size = {
 		j["Size"][0].get<float>(),

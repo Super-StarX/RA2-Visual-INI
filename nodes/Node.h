@@ -58,7 +58,7 @@ public:
 	virtual void Tooltip() override;
 	virtual void HoverMenu(bool isHovered);
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual void Update() = 0;
 	virtual void SetName(const std::string& str);
 	virtual Pin* GetFirstCompatiblePin(Pin* pin);
@@ -74,6 +74,7 @@ public:
 	ImVec2 GetPosition() const;
 	void SetPosition(ImVec2 pos) const;
 	int GetConnectedLinkCount();
+	Pin* GetPin(ed::PinId pinId);
 	bool HasPin(ed::PinId pinId);
 	
 	MainWindow* Owner = nullptr;

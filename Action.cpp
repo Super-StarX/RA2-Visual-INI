@@ -69,15 +69,12 @@ void MainWindow::Paste() {
 	ImVec2 oldCenter = m_Clipboard.copyCenter;
 
 	std::vector<Node*> newNodes;
-	std::unordered_map<int, int> idMap;
+	std::unordered_map<int, Node*> idMap;
+	std::unordered_map<int, int> pinMap;    // 旧Pin ID → 新Pin ID
 
 	// 创建新节点并建立ID映射
 	for (auto& originalNodeData : m_Clipboard.nodes) {
 		json nodeData = originalNodeData;
-		int oldId = nodeData["ID"];
-		int newId = GetNextId();
-		idMap[oldId] = newId;
-		nodeData["ID"] = newId;
 
 		ImVec2 originalPos(nodeData["Position"][0], nodeData["Position"][1]);
 		ImVec2 offset = originalPos - oldCenter;
@@ -91,34 +88,51 @@ void MainWindow::Paste() {
 		NodeType type = static_cast<NodeType>(nodeData["Type"].get<int>());
 		Node* newNode = CreateNodeByType(type);
 		if (newNode) {
-			newNode->LoadFromJson(nodeData);
+			newNode->LoadFromJson(nodeData, true);
 			newNodes.push_back(newNode);
+		}
+		idMap[nodeData["ID"]] = newNode;
+		// 建立Pin ID映射
+		for (Pin* pin : newNode->GetAllPins()) {
+			// 在序列化数据中找到对应的旧Pin ID
+			bool found = false;
+			int oldPinId = -1;
+
+			// 遍历序列化数据中的所有Pin字段
+			for (auto& [key, value] : nodeData.items()) {
+				if (value.is_object() && value.contains("ID") && value.contains("Name")) {
+					std::string pinName = value["Name"];
+					if (pinName == pin->Name) {
+						oldPinId = value["ID"];
+						found = true;
+						break;
+					}
+				}
+			}
+
+			// 如果找到了旧Pin ID，则建立映射
+			if (found) {
+				pinMap[oldPinId] = pin->ID.Get();
+			}
 		}
 	}
 
 	// 重建连线（智能处理新旧节点连接）
 	for (auto& linkData : m_Clipboard.links) {
-		int oldStartId = linkData["StartID"];
-		int oldEndId = linkData["EndID"];
+		int oldStartPinId = linkData["StartID"];
+		int oldEndPinId = linkData["EndID"];
 
-		bool startCopied = idMap.count(oldStartId) > 0;
-		bool endCopied = idMap.count(oldEndId) > 0;
+		bool startCopied = idMap.contains(Pin::Get(oldStartPinId)->Node->ID.Get());
+		bool endCopied = idMap.contains(Pin::Get(oldEndPinId)->Node->ID.Get());
 
-		// 核心逻辑：只处理起点被复制的情况
 		if (startCopied) {
-			ed::PinId newStartId = idMap[oldStartId];
-			ed::PinId newEndId = endCopied ? idMap[oldEndId] : oldEndId;
+			// 两侧都被复制：新(起点)连新(终点)
+			// 仅起点被复制：新(起点)连旧(终点)
+			// 仅终点被复制：不管
+			Pin* startPin = Pin::Get(oldStartPinId);
+			Pin* endPin = Pin::Get(endCopied ? pinMap[oldEndPinId] : oldEndPinId);
 
-			Pin* startPin = Pin::Get(newStartId);
-			Pin* endPin = Pin::Get(newEndId);
-
-			// 确保方向正确：输出Pin连接到输入Pin
-			if (startPin && endPin) {
-				if (startPin->Kind == PinKind::Output && endPin->Kind == PinKind::Input) {
-					startPin->LinkTo(endPin);
-				}
-				// 忽略反向连接（保持原有单向连接）
-			}
+			startPin->LinkTo(endPin);
 		}
 	}
 
@@ -178,7 +192,7 @@ void MainWindow::Duplicate() {
 			}
 		}
 
-		newNode->LoadFromJson(nodeData);
+		newNode->LoadFromJson(nodeData, true);
 		newNodes.push_back(newNode);
 	}
 

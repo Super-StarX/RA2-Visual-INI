@@ -37,7 +37,7 @@ public:
 
 	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual void SetValue(const std::string& str);
 	virtual std::string GetValue() const;
 

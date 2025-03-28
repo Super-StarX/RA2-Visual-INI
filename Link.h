@@ -16,7 +16,7 @@ public:
 	static Link* Get(ed::LinkId id);
 
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual void Tooltip() override;
 
 	void Draw() const;

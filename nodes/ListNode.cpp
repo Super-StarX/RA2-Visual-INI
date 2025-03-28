@@ -20,17 +20,17 @@ void ListNode::SaveToJson(json& j) const {
 	j["KeyValues"] = keyValuesJson;
 }
 
-void ListNode::LoadFromJson(const json& j) {
-	Node::LoadFromJson(j);
+void ListNode::LoadFromJson(const json& j, bool newId) {
+	Node::LoadFromJson(j, newId);
 
 	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input, -1);
-	InputPin->LoadFromJson(j["Input"]);
+	InputPin->LoadFromJson(j["Input"], newId);
 
 	OutputPin = std::make_unique<Pin>(this, "output", PinKind::Input, -1);
-	OutputPin->LoadFromJson(j["Output"]);
+	OutputPin->LoadFromJson(j["Output"], newId);
 
 	for (const auto& kvJson : j["KeyValues"])
-		AddKeyValue("", -1)->LoadFromJson(kvJson);
+		AddKeyValue("", -1)->LoadFromJson(kvJson, newId);
 }
 
 void ListNode::AddKeyValue() {

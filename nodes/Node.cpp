@@ -189,6 +189,14 @@ bool Node::HasPin(ed::PinId pinId) {
 	return false;
 }
 
+Pin* Node::GetPin(ed::PinId pinId) {
+	for (auto pin : GetAllPins()) {
+		if (pin->ID == pinId)
+			return pin;
+	}
+	return nullptr;
+}
+
 std::string Node::GetValue(Pin* from) const {
 	return Name;
 }
@@ -206,8 +214,8 @@ void Node::SaveToJson(json& j) const {
 	j["IsComment"] = IsComment;
 }
 
-void Node::LoadFromJson(const json& j) {
-	ID = ed::NodeId(j["ID"] + MainWindow::GetIdOffset());
+void Node::LoadFromJson(const json& j, bool newId) {
+	ID = newId ? MainWindow::GetNextId() : ed::NodeId(j["ID"] + MainWindow::GetIdOffset());
 	SetName(j["Name"]);
 	this->SetPosition({
 		j["Position"][0].get<float>(),

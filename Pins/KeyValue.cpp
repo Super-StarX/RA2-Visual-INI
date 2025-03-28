@@ -49,8 +49,8 @@ void KeyValue::SaveToJson(json& j) const {
 	j["IsFolded"] = IsFolded;
 }
 
-void KeyValue::LoadFromJson(const json& j) {
-	Pin::LoadFromJson(j);
+void KeyValue::LoadFromJson(const json& j, bool newId) {
+	Pin::LoadFromJson(j, newId);
 	Key = j["Key"];
 	Value = j["value"];
 	IsInherited = j["IsInherited"];

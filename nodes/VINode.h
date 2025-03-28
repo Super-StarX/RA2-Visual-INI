@@ -10,7 +10,7 @@ public:
 	VINode(const char* name = "", int id = 0);
 	virtual void Update() override;
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
 	virtual void AddKeyValue() = 0;
 	virtual void UnFoldedKeyValues(T& kv, int mode = 0) = 0;

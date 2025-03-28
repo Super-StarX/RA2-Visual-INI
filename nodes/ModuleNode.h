@@ -10,7 +10,7 @@ public:
 	virtual void Menu() override;
 	virtual void Tooltip() override;
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual std::string GetValue(Pin* from = nullptr) const override;
 	virtual bool PinNameChangable() const override { return false; }
 	void LoadProject();

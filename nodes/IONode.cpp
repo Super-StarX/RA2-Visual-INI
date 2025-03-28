@@ -22,9 +22,9 @@ void IONode::SaveToJson(json& j) const {
 	j["Mode"] = static_cast<int>(Mode);
 }
 
-void IONode::LoadFromJson(const json& j) {
-	Node::LoadFromJson(j);
-	IOPin->LoadFromJson(j);
+void IONode::LoadFromJson(const json& j, bool newId) {
+	Node::LoadFromJson(j, newId);
+	IOPin->LoadFromJson(j, newId);
 	Mode = static_cast<PinKind>(j["Mode"]);
 }
 

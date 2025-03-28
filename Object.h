@@ -10,5 +10,5 @@ public:
 	virtual void Menu() = 0;
 	virtual void Tooltip() = 0;
 	virtual void SaveToJson(json& j) const = 0;
-	virtual void LoadFromJson(const json& j) = 0;
+	virtual void LoadFromJson(const json& j, bool newId = false) = 0;
 };

@@ -14,7 +14,7 @@ public:
 	virtual NodeType GetNodeType() const override { return NodeType::Tag; }
 	virtual void Menu();
 	virtual void SaveToJson(json& j) const override;
-	virtual void LoadFromJson(const json& j) override;
+	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
 	virtual void SetName(const std::string& str) override;
 	virtual std::string GetValue(Pin* from = nullptr) const override;

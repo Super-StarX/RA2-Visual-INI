@@ -70,8 +70,8 @@ void Link::SaveToJson(json& j) const {
 	j["TypeIdentifier"] = TypeIdentifier;
 }
 
-void Link::LoadFromJson(const json& j) {
-	ID = ed::LinkId(j["ID"] + MainWindow::GetIdOffset());
+void Link::LoadFromJson(const json& j, bool newId) {
+	ID = newId ? MainWindow::GetNextId() : ed::LinkId(j["ID"] + MainWindow::GetIdOffset());
 	StartPinID = ed::PinId(j["StartID"] + MainWindow::GetIdOffset());
 	EndPinID = ed::PinId(j["EndID"] + MainWindow::GetIdOffset());
 	TypeIdentifier = j["TypeIdentifier"];

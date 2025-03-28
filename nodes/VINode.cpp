@@ -122,14 +122,14 @@ void VINode<T>::SaveToJson(json& j) const {
 }
 
 template<typename T>
-void VINode<T>::LoadFromJson(const json& j) {
-	Node::LoadFromJson(j);
+void VINode<T>::LoadFromJson(const json& j, bool newId) {
+	Node::LoadFromJson(j, newId);
 
 	InputPin = std::make_unique<Pin>(this, "input", PinKind::Input, -1);
-	InputPin->LoadFromJson(j["Input"]);
+	InputPin->LoadFromJson(j["Input"], newId);
 
 	OutputPin = std::make_unique<Pin>(this, "output", PinKind::Output, -1);
-	OutputPin->LoadFromJson(j["Output"]);
+	OutputPin->LoadFromJson(j["Output"], newId);
 }
 
 template<typename T>
