@@ -1,4 +1,4 @@
-#define IMGUI_DEFINE_MATH_OPERATORS
+﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "Action.h"
 #include "MainWindow.h"
 #include "Pins/KeyValue.h"
@@ -15,7 +15,6 @@
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
 #include <imgui_internal.h>
-
 void MainWindow::Copy() {
 	auto selectedNodes = Node::GetSelectedNodes();
 	if (selectedNodes.empty())
@@ -37,20 +36,24 @@ void MainWindow::Copy() {
 		json nodeData;
 		node->SaveToJson(nodeData);
 		m_Clipboard.nodes.push_back(nodeData);
+	}
 
-		// 收集相关连线
-		/*for (auto& pin : node->GetAllPins()) {
+	// 收集相关连线（包含至少一个端点在选中节点中的连线）
+	for (Node* node : selectedNodes) {
+		for (auto& pin : node->GetAllPins()) {
 			for (auto& [_, link] : pin->Links) {
-				// 确保只保存两端都在选中节点中的连线
-				if (std::find_if(selectedNodes.begin(), selectedNodes.end(),
-					[&](Node* n) { return n->HasPin(link->StartPinID) || n->HasPin(link->EndPinID); }) != selectedNodes.end()) {
+				// 收集所有与选中节点有关联的连线（任意一端在选中节点中）
+				if (std::any_of(selectedNodes.begin(), selectedNodes.end(), [&](Node* n) {
+					return n->HasPin(link->StartPinID) || n->HasPin(link->EndPinID);
+				})) {
 					json linkData;
 					link->SaveToJson(linkData);
 					m_Clipboard.links.push_back(linkData);
 				}
 			}
-		}*/
+		}
 	}
+
 	// 去重连线
 	std::sort(m_Clipboard.links.begin(), m_Clipboard.links.end());
 	m_Clipboard.links.erase(std::unique(m_Clipboard.links.begin(), m_Clipboard.links.end()), m_Clipboard.links.end());
@@ -62,35 +65,29 @@ void MainWindow::Paste() {
 	if (!m_Clipboard.hasData)
 		return;
 
-	// 使用当前鼠标位置作为新中心
 	ImVec2 newCenter = ed::ScreenToCanvas(ImGui::GetMousePos());
 	ImVec2 oldCenter = m_Clipboard.copyCenter;
 
 	std::vector<Node*> newNodes;
 	std::unordered_map<int, int> idMap;
 
-	// 创建节点副本进行操作（避免污染剪贴板数据）
+	// 创建新节点并建立ID映射
 	for (auto& originalNodeData : m_Clipboard.nodes) {
-		json nodeData = originalNodeData; // 创建副本
-
-		// 创建新ID
+		json nodeData = originalNodeData;
 		int oldId = nodeData["ID"];
 		int newId = GetNextId();
 		idMap[oldId] = newId;
 		nodeData["ID"] = newId;
 
-		// 计算新位置（基于原始剪贴板数据）
 		ImVec2 originalPos(nodeData["Position"][0], nodeData["Position"][1]);
 		ImVec2 offset = originalPos - oldCenter;
 		ImVec2 newPos = newCenter + offset;
 		nodeData["Position"] = { newPos.x, newPos.y };
 
-		// 修改名称避免冲突
 		if (nodeData.contains("Name")) {
 			nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
 		}
 
-		// 创建节点
 		NodeType type = static_cast<NodeType>(nodeData["Type"].get<int>());
 		Node* newNode = CreateNodeByType(type);
 		if (newNode) {
@@ -99,19 +96,28 @@ void MainWindow::Paste() {
 		}
 	}
 
-	// 重建连线（使用原始剪贴板链接数据）
+	// 重建连线（智能处理新旧节点连接）
 	for (auto& linkData : m_Clipboard.links) {
-		int oldStartId = linkData["StartPin"];
-		int oldEndId = linkData["EndPin"];
+		int oldStartId = linkData["StartID"];
+		int oldEndId = linkData["EndID"];
 
-		auto startIt = idMap.find(oldStartId);
-		auto endIt = idMap.find(oldEndId);
+		bool startCopied = idMap.count(oldStartId) > 0;
+		bool endCopied = idMap.count(oldEndId) > 0;
 
-		if (startIt != idMap.end() && endIt != idMap.end()) {
-			Pin* startPin = Pin::Get(startIt->second);
-			Pin* endPin = Pin::Get(endIt->second);
+		// 核心逻辑：只处理起点被复制的情况
+		if (startCopied) {
+			ed::PinId newStartId = idMap[oldStartId];
+			ed::PinId newEndId = endCopied ? idMap[oldEndId] : oldEndId;
+
+			Pin* startPin = Pin::Get(newStartId);
+			Pin* endPin = Pin::Get(newEndId);
+
+			// 确保方向正确：输出Pin连接到输入Pin
 			if (startPin && endPin) {
-				startPin->LinkTo(endPin);
+				if (startPin->Kind == PinKind::Output && endPin->Kind == PinKind::Input) {
+					startPin->LinkTo(endPin);
+				}
+				// 忽略反向连接（保持原有单向连接）
 			}
 		}
 	}
