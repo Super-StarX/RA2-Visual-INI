@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "Action.h"
 #include "MainWindow.h"
 #include "Pins/KeyValue.h"
@@ -62,22 +62,27 @@ void MainWindow::Paste() {
 	if (!m_Clipboard.hasData)
 		return;
 
-	const ImVec2 pastePos = ed::ScreenToCanvas(ImGui::GetMousePos());
-	std::vector<Node*> newNodes;
-	std::unordered_map<int, int> idMap; // 旧ID到新ID的映射
+	// 使用当前鼠标位置作为新中心
+	ImVec2 newCenter = ed::ScreenToCanvas(ImGui::GetMousePos());
+	ImVec2 oldCenter = m_Clipboard.copyCenter;
 
-	// 第一阶段：创建所有新节点
-	for (auto& nodeData : m_Clipboard.nodes) {
-		// 创建新ID并建立映射
-		const int oldId = nodeData["ID"];
-		const int newId = GetNextId();
+	std::vector<Node*> newNodes;
+	std::unordered_map<int, int> idMap;
+
+	// 创建节点副本进行操作（避免污染剪贴板数据）
+	for (auto& originalNodeData : m_Clipboard.nodes) {
+		json nodeData = originalNodeData; // 创建副本
+
+		// 创建新ID
+		int oldId = nodeData["ID"];
+		int newId = GetNextId();
 		idMap[oldId] = newId;
 		nodeData["ID"] = newId;
 
-		// 计算新位置
+		// 计算新位置（基于原始剪贴板数据）
 		ImVec2 originalPos(nodeData["Position"][0], nodeData["Position"][1]);
-		ImVec2 offset = originalPos - m_Clipboard.copyCenter;
-		ImVec2 newPos = pastePos + offset;
+		ImVec2 offset = originalPos - oldCenter;
+		ImVec2 newPos = newCenter + offset;
 		nodeData["Position"] = { newPos.x, newPos.y };
 
 		// 修改名称避免冲突
@@ -94,19 +99,17 @@ void MainWindow::Paste() {
 		}
 	}
 
-	// 第二阶段：重建连线
+	// 重建连线（使用原始剪贴板链接数据）
 	for (auto& linkData : m_Clipboard.links) {
 		int oldStartId = linkData["StartPin"];
 		int oldEndId = linkData["EndPin"];
 
-		// 查找映射后的新ID
 		auto startIt = idMap.find(oldStartId);
 		auto endIt = idMap.find(oldEndId);
 
 		if (startIt != idMap.end() && endIt != idMap.end()) {
 			Pin* startPin = Pin::Get(startIt->second);
 			Pin* endPin = Pin::Get(endIt->second);
-
 			if (startPin && endPin) {
 				startPin->LinkTo(endPin);
 			}
