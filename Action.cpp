@@ -15,6 +15,32 @@
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
 #include <imgui_internal.h>
+void RebuildLink(std::unordered_map<int, Node*>& nodeMap, int& oldStartPinId, int& oldEndPinId, std::unordered_map<int, int>& pinMap) {
+	bool startCopied = nodeMap.contains(Pin::Get(oldStartPinId)->Node->ID.Get());
+	bool endCopied = nodeMap.contains(Pin::Get(oldEndPinId)->Node->ID.Get());
+
+	if (startCopied) {
+		// 两侧都被复制：新(起点)连新(终点)
+		// 仅起点被复制：新(起点)连旧(终点)
+		// 仅终点被复制：不管
+		Pin* startPin = Pin::Get(pinMap[oldStartPinId]);
+		Pin* endPin = Pin::Get(endCopied ? pinMap[oldEndPinId] : oldEndPinId);
+
+		startPin->LinkTo(endPin);
+	}
+}
+
+void CollectPinMap(Node* original, Node* newNode, std::unordered_map<int, int>& pinMap) {
+	// 建立Pin ID映射（通过名称匹配）
+	auto oldPins = original->GetAllPins();
+	auto newPins = newNode->GetAllPins();
+	for (size_t i = 0; i < oldPins.size(); ++i) {
+		if (i < newPins.size()) {
+			pinMap[oldPins[i]->ID.Get()] = newPins[i]->ID.Get();
+		}
+	}
+}
+
 void MainWindow::Copy() {
 	auto selectedNodes = Node::GetSelectedNodes();
 	if (selectedNodes.empty())
@@ -80,24 +106,15 @@ void MainWindow::Paste() {
 		ImVec2 offset = originalPos - oldCenter;
 		ImVec2 newPos = newCenter + offset;
 		nodeData["Position"] = { newPos.x, newPos.y };
-
-		if (nodeData.contains("Name")) {
-			nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
-		}
+		nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
 
 		NodeType type = static_cast<NodeType>(nodeData["Type"].get<int>());
 		Node* newNode = CreateNodeByType(type);
-		if (newNode) {
-			newNode->LoadFromJson(nodeData, true);
-			newNodes.push_back(newNode);
-		}
+		newNode->LoadFromJson(nodeData, true);
+		newNodes.push_back(newNode);
 		idMap[nodeData["ID"]] = newNode;
-		// 建立Pin ID映射
-		auto oldPins = Node::Get(nodeData["ID"].get<int>())->GetAllPins();
-		auto newPins = newNode->GetAllPins();
-		for (int i = 0; i < oldPins.size(); i++) {
-			pinMap[oldPins[i]->ID.Get()] = newPins[i]->ID.Get();
-		}
+
+		CollectPinMap(Node::Get(nodeData["ID"].get<int>()), newNode, pinMap);
 	}
 
 	// 重建连线（智能处理新旧节点连接）
@@ -105,25 +122,13 @@ void MainWindow::Paste() {
 		int oldStartPinId = linkData["StartID"];
 		int oldEndPinId = linkData["EndID"];
 
-		bool startCopied = idMap.contains(Pin::Get(oldStartPinId)->Node->ID.Get());
-		bool endCopied = idMap.contains(Pin::Get(oldEndPinId)->Node->ID.Get());
-
-		if (startCopied) {
-			// 两侧都被复制：新(起点)连新(终点)
-			// 仅起点被复制：新(起点)连旧(终点)
-			// 仅终点被复制：不管
-			Pin* startPin = Pin::Get(pinMap[oldStartPinId]);
-			Pin* endPin = Pin::Get(endCopied ? pinMap[oldEndPinId] : oldEndPinId);
-
-			startPin->LinkTo(endPin);
-		}
+		RebuildLink(idMap, oldStartPinId, oldEndPinId, pinMap);
 	}
 
 	// 更新选择状态
 	ed::ClearSelection();
-	for (Node* node : newNodes) {
+	for (Node* node : newNodes)
 		ed::SelectNode(node->ID, true);
-	}
 }
 
 void MainWindow::Duplicate() {
@@ -132,58 +137,56 @@ void MainWindow::Duplicate() {
 		return;
 
 	std::vector<Node*> newNodes;
-	const ImVec2 mousePos = ed::ScreenToCanvas(ImGui::GetMousePos());
+	std::unordered_map<int, Node*> nodeMap;    // 旧Node ID → 新Node
+	std::unordered_map<int, int> pinMap;       // 旧Pin ID → 新Pin ID
+	ImVec2 mousePos = ed::ScreenToCanvas(ImGui::GetMousePos());
 
-	// 第一阶段：计算原始几何中心
+	// 计算原始几何中心
 	ImVec2 originalCenter(0, 0);
-	for (Node* node : selectedNodes) {
-		originalCenter = originalCenter + node->GetPosition();
-	}
-	originalCenter.x /= selectedNodes.size();
-	originalCenter.y /= selectedNodes.size();
+	for (Node* node : selectedNodes)
+		originalCenter += node->GetPosition();
+	originalCenter /= static_cast<float>(selectedNodes.size());
 
-	// 第二阶段：复制节点并计算新位置
+	// 收集需要复制的连线
+	std::vector<Link*> linksToCopy;
+	for (Node* node : selectedNodes)
+		for (Pin* pin : node->GetAllPins())
+			for (auto& [_, link] : pin->Links)
+				if (std::find(linksToCopy.begin(), linksToCopy.end(), link) == linksToCopy.end()) // 只处理未处理过的连线
+					linksToCopy.push_back(link);
+
+	// 第一阶段：复制节点并建立映射
 	for (Node* original : selectedNodes) {
 		json nodeData;
 		original->SaveToJson(nodeData);
 
-		// 计算相对位置偏移
+		// 计算新位置
 		ImVec2 originalPos = original->GetPosition();
-		ImVec2 relativeOffset = originalPos - originalCenter;
-
-		// 设置新位置（鼠标位置+相对偏移）
-		ImVec2 newPos = mousePos + relativeOffset;
+		ImVec2 offset = originalPos - originalCenter;
+		ImVec2 newPos = mousePos + offset;
 		nodeData["Position"] = { newPos.x, newPos.y };
-		nodeData["ID"] = GetNextId();
 		nodeData["Name"] = nodeData["Name"].get<std::string>() + "_copy";
 
-		// 创建新节点（优化后的工厂方法）
 		Node* newNode = CreateNodeByType(original->GetNodeType());
-		if (!newNode)
-			continue;
-
-		// 特殊类型处理
-		if (original->GetNodeType() == NodeType::Section) {
-			auto& sectionNode = static_cast<SectionNode&>(*original);
-			auto& keyValues = nodeData["KeyValues"];
-			keyValues = json::array();
-			for (auto& kv : sectionNode.KeyValues) {
-				json kvData;
-				kv->SaveToJson(kvData);
-				kvData["ID"] = GetNextId();
-				keyValues.push_back(kvData);
-			}
-		}
-
 		newNode->LoadFromJson(nodeData, true);
 		newNodes.push_back(newNode);
+		nodeMap[original->ID.Get()] = newNode;
+
+		CollectPinMap(original, newNode, pinMap);
+	}
+
+	// 第二阶段：重建连线
+	for (Link* originalLink : linksToCopy) {
+		int oldStartPinId = originalLink->StartPinID.Get();
+		int oldEndPinId = originalLink->EndPinID.Get();
+
+		RebuildLink(nodeMap, oldStartPinId, oldEndPinId, pinMap);
 	}
 
 	// 更新编辑器状态
 	ed::ClearSelection();
-	for (Node* node : newNodes) {
+	for (Node* node : newNodes)
 		ed::SelectNode(node->ID, true);
-	}
 }
 
 Node* MainWindow::CreateNodeByType(NodeType type) {
