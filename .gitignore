@@ -12,3 +12,5 @@ RA2-Visual-INI/*
 *.json
 *.viproj
 *.log
+
+!locales.json

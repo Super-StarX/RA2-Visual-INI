@@ -110,21 +110,20 @@ void MainWindow::LayerMenu() {
 void MainWindow::NodeMenu() {
 	auto node = Node::Get(contextNodeId);
 
-	//ImGui::TextUnformatted("Node Context Menu");
-	ImGui::TextUnformatted("中文测试");
+	ImGui::TextUnformatted(LOCALE["Node Context Menu"]);
 	ImGui::Separator();
 	if (node) {
 		node->Menu();
-		if (ImGui::MenuItem("Section Editor")) {
+		if (ImGui::MenuItem(LOCALE["Section Editor"])) {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
 	}
 	else
-		ImGui::Text("Unknown node: %p", contextNodeId.AsPointer());
+		ImGui::Text("%s: %p", LOCALE["Unknown node"], contextNodeId.AsPointer());
 	ImGui::Separator();
 
-	if (ImGui::MenuItem("Delete"))
+	if (ImGui::MenuItem(LOCALE["Delete"]))
 		ed::DeleteNode(contextNodeId);
 	ImGui::EndPopup();
 }

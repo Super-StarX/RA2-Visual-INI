@@ -1,0 +1,21 @@
+{
+    "Zoom to Content": "居中缩放",
+    "Show Flow": "显示数据流",
+    "Edit Style": "编辑样式",
+    "Show Ordinals": "显示序号",
+    "Load INI": "加载INI",
+    "Save INI": "保存INI",
+    "Load Project": "加载工程",
+    "Save Project": "保存工程",
+    "Rebuild Layout": "重建布局",
+    "Sections": "节",
+    "Search sections...": "搜索节...",
+    "Selection": "已选择",
+    "Node": "节点",
+    "Link": "引线",
+    "Node Context Menu": "节点菜单",
+    "Section Editor": "节编辑器",
+    "Unknown node": "未知节点",
+    "Delete": "删除",
+    "eof": "结束"
+}

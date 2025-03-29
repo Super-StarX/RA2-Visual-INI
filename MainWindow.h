@@ -11,6 +11,7 @@
 #include "Nodes/Node.h"
 #include "LeftPanelClass.h"
 #include "TemplateManager.h"
+#include "Localization.h"
 
 class SectionNode;
 class ModuleNode;

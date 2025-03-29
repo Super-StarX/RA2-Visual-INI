@@ -120,13 +120,13 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
 		ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]), ImGui::GetTextLineHeight() * 0.25f);
 	ImGui::Spacing(); ImGui::SameLine();
-	ImGui::TextUnformatted("Sections");
+	ImGui::TextUnformatted(LOCALE["Sections"]);
 	ImGui::Indent();
 
 	// 搜索框逻辑
 	static char searchText[256] = ""; // 用于存储用户输入的搜索文本
 	ImGui::SetNextItemWidth(paneWidth - ImGui::GetStyle().FramePadding.x * 2);
-	ImGui::InputTextWithHint("##search", "Search sections...", searchText, IM_ARRAYSIZE(searchText));
+	ImGui::InputTextWithHint("##search", LOCALE["Search sections..."], searchText, IM_ARRAYSIZE(searchText));
 
 	// 筛选节点列表
 	std::vector<Node*> filteredNodes;
@@ -159,9 +159,10 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 
 			ed::NavigateToSelection();
 		}
+		/*
 		if (ImGui::IsItemHovered() && !node->State.empty())
 			ImGui::SetTooltip("State: %s", node->State.c_str());
-
+		*/
 		auto id = std::string("(") + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer())) + ")";
 		auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
 		float iconPanelX = paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1;
@@ -215,11 +216,11 @@ void LeftPanelClass::SelectionPanel(float paneWidth, int nodeCount, std::vector<
 		ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
 		ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]), ImGui::GetTextLineHeight() * 0.25f);
 	ImGui::Spacing(); ImGui::SameLine();
-	ImGui::TextUnformatted("Selection");
+	ImGui::TextUnformatted(LOCALE["Selection"]);
 
 	ImGui::Indent();
-	for (int i = 0; i < nodeCount; ++i) ImGui::Text("Node (%p)", selectedNodes[i].AsPointer());
-	for (int i = 0; i < linkCount; ++i) ImGui::Text("Link (%p)", selectedLinks[i].AsPointer());
+	for (int i = 0; i < nodeCount; ++i) ImGui::Text("%s (%p)", LOCALE["Node"], selectedNodes[i].AsPointer());
+	for (int i = 0; i < linkCount; ++i) ImGui::Text("%s (%p)", LOCALE["Link"], selectedLinks[i].AsPointer());
 	ImGui::Unindent();
 
 	if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_F)))
@@ -243,23 +244,23 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 	static bool showStyleEditor = false;
 	ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
 	ImGui::Spring(0.0f, 0.0f);
-	if (ImGui::Button("Zoom to Content")) {
-		LOG_INFO("居中布局");
+	if (ImGui::Button(LOCALE["Zoom to Content"])) {
+		LOG_INFO("居中缩放");
 		ed::NavigateToContent();
 	}
 	ImGui::Spring(0.0f);
-	if (ImGui::Button("Show Flow")) {
+	if (ImGui::Button(LOCALE["Show Flow"])) {
 		LOG_INFO("显示数据流");
 		for (auto& link : Link::Array)
 			ed::Flow(link->ID);
 	}
 	ImGui::Spring();
-	if (ImGui::Button("Edit Style")) {
+	if (ImGui::Button(LOCALE["Edit Style"])) {
 		LOG_INFO("打开样式编辑器");
 		showStyleEditor = true;
 	}
 	ImGui::EndHorizontal();
-	if (ImGui::Checkbox("Show Ordinals", &m_ShowOrdinals)) {
+	if (ImGui::Checkbox(LOCALE["Show Ordinals"], &m_ShowOrdinals)) {
 		LOG_INFO("显示序号");
 	}
 
@@ -278,20 +279,20 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 	selectedLinks.resize(linkCount);
 
 	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
-	if (ImGui::Button("Load INI"))
+	if (ImGui::Button(LOCALE["Load INI"]))
 		ShowINIFileDialog(false);
-	if (ImGui::Button("Save INI"))
+	if (ImGui::Button(LOCALE["Save INI"]))
 		ShowINIFileDialog(true);
 	ImGui::EndHorizontal();
 
-	ImGui::BeginHorizontal("File Operations", ImVec2(paneWidth, 0));
-	if (ImGui::Button("Load Project"))
+	ImGui::BeginHorizontal("Project Operations", ImVec2(paneWidth, 0));
+	if (ImGui::Button(LOCALE["Load Project"]))
 		ShowProjFileDialog(false);
-	if (ImGui::Button("Save Project"))
+	if (ImGui::Button(LOCALE["Save Project"]))
 		ShowProjFileDialog(true);
 	ImGui::EndHorizontal();
 
-	if (ImGui::Button("Rebuild Layout")) {
+	if (ImGui::Button(LOCALE["Rebuild Layout"])) {
 		LOG_INFO("自动重设布局");
 		Owner->ApplyForceDirectedLayout();
 	}

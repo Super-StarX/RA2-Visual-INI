@@ -99,6 +99,8 @@ void MainWindow::OnStart() {
 	Log::Init();
 	LOG_INFO("=================================================================");
 	LOG_INFO("正在进行初始化...");
+	LOG_INFO("正在载入语言文件[locales.json]");
+	LOCALE.Init();
 
 	SetTitle(L"Visual INI - 可视化INI编辑器");
 

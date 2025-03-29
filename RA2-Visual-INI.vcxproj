@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="AutoLayout.cpp" />
+    <ClCompile Include="Localization.cpp" />
     <ClCompile Include="Nodes\IONode.cpp" />
     <ClCompile Include="Nodes\ModuleNode.cpp" />
     <ClCompile Include="Nodes\INENode.cpp" />
@@ -193,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
+    <ClInclude Include="Localization.h" />
     <ClInclude Include="Nodes\IONode.h" />
     <ClInclude Include="Nodes\ModuleNode.h" />
     <ClInclude Include="Nodes\INENode.h" />
