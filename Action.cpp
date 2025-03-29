@@ -93,27 +93,10 @@ void MainWindow::Paste() {
 		}
 		idMap[nodeData["ID"]] = newNode;
 		// 建立Pin ID映射
-		for (Pin* pin : newNode->GetAllPins()) {
-			// 在序列化数据中找到对应的旧Pin ID
-			bool found = false;
-			int oldPinId = -1;
-
-			// 遍历序列化数据中的所有Pin字段
-			for (auto& [key, value] : nodeData.items()) {
-				if (value.is_object() && value.contains("ID") && value.contains("Name")) {
-					std::string pinName = value["Name"];
-					if (pinName == pin->Name) {
-						oldPinId = value["ID"];
-						found = true;
-						break;
-					}
-				}
-			}
-
-			// 如果找到了旧Pin ID，则建立映射
-			if (found) {
-				pinMap[oldPinId] = pin->ID.Get();
-			}
+		auto oldPins = Node::Get(nodeData["ID"].get<int>())->GetAllPins();
+		auto newPins = newNode->GetAllPins();
+		for (int i = 0; i < oldPins.size(); i++) {
+			pinMap[oldPins[i]->ID.Get()] = newPins[i]->ID.Get();
 		}
 	}
 
@@ -129,7 +112,7 @@ void MainWindow::Paste() {
 			// 两侧都被复制：新(起点)连新(终点)
 			// 仅起点被复制：新(起点)连旧(终点)
 			// 仅终点被复制：不管
-			Pin* startPin = Pin::Get(oldStartPinId);
+			Pin* startPin = Pin::Get(pinMap[oldStartPinId]);
 			Pin* endPin = Pin::Get(endCopied ? pinMap[oldEndPinId] : oldEndPinId);
 
 			startPin->LinkTo(endPin);
