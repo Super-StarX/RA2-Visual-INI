@@ -91,6 +91,10 @@ void MainWindow::LayerMenu() {
 		node = SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);
 	});
 
+	// 添加模块菜单
+	ImGui::Separator();
+	AddModuleMenuItems("Templates");
+
 	if (node) {
 		createNewNode = false;
 		LOG_INFO("创建新空白节点，节点类型为{}", static_cast<int>(node->GetNodeType()));
@@ -105,6 +109,38 @@ void MainWindow::LayerMenu() {
 	}
 
 	ImGui::EndPopup();
+}
+
+// 递归添加模块菜单项
+void MainWindow::AddModuleMenuItems(const std::string& path) {
+	try {
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+			std::string filename = entry.path().filename().string();
+
+			if (entry.is_directory()) {
+				// 递归处理子目录，创建子菜单
+				if (ImGui::BeginMenu(filename.c_str())) {
+					AddModuleMenuItems(entry.path().string());
+					ImGui::EndMenu();
+				}
+			}
+			else if (entry.path().extension() == ".viproj") {
+				// 处理.viproj文件
+				if (ImGui::MenuItem(filename.c_str())) {
+					auto moduleNode = Node::Create<ModuleNode>();
+					moduleNode->Path = entry.path().string();
+					moduleNode->LoadProject();
+
+					// 设置节点位置到右键点击位置
+					const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
+					ed::SetNodePosition(moduleNode->ID, canvasPos);
+				}
+			}
+		}
+	}
+	catch (const std::exception& e) {
+		LOG_ERROR("模块加载失败: {}", e.what());
+	}
 }
 
 void MainWindow::NodeMenu() {
