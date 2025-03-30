@@ -93,7 +93,7 @@ void MainWindow::LayerMenu() {
 
 	// 添加模块菜单
 	ImGui::Separator();
-	AddModuleMenuItems("Templates");
+	AddModuleMenuItems("Modules");
 
 	if (node) {
 		createNewNode = false;

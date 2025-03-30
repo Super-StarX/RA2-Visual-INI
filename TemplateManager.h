@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <filesystem>
 
 struct TemplateSection {
 	struct KeyValue {
@@ -21,6 +22,13 @@ struct TemplateSection {
 	std::vector<KeyValue> KeyValues;
 };
 
+// 新增模板项结构体
+struct TemplateItem {
+	std::string name;
+	std::vector<TemplateSection> sections; // 非空表示叶子节点
+	std::vector<TemplateItem> children;    // 非空表示文件夹节点
+};
+
 class TemplateManager {
 public:
 	using NodeCreator = std::function<void(
@@ -28,9 +36,14 @@ public:
 		ImVec2 position
 	)>;
 
-	void LoadTemplates(const std::string& iniPath);
+	TemplateManager() : m_Root() {}
+	void LoadTemplates(const std::string& folderPath);
 	void ShowCreationMenu(NodeCreator creator);
 
 private:
-	std::vector<TemplateSection> m_Templates;
+	TemplateItem m_Root;
+
+	void LoadFolder(const std::filesystem::path& path, TemplateItem& parent);
+	void ParseIniFile(const std::filesystem::path& filePath, TemplateItem& parent);
+	void ShowMenuRecursive(const TemplateItem& item, NodeCreator creator);
 };

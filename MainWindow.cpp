@@ -133,7 +133,7 @@ void MainWindow::OnStart() {
 	LOG_INFO("载入自定义Pin类型完毕");
 	TypeSystem::Get().LoadFromINI("INICodingCheck.ini");
 	LOG_INFO("载入INI配置完毕");
-	m_TemplateManager.LoadTemplates("templates.ini");
+	m_TemplateManager.LoadTemplates("Templates");
 	m_Editor = ed::CreateEditor(&config);
 	ed::SetCurrentEditor(m_Editor);
 	BuilderNode::CreateHeader();
