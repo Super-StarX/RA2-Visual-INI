@@ -15,7 +15,7 @@
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
 #include <imgui_internal.h>
-void RebuildLink(std::unordered_map<int, Node*>& nodeMap, int& oldStartPinId, int& oldEndPinId, std::unordered_map<int, int>& pinMap) {
+void RebuildLink(std::unordered_map<uintptr_t, Node*>& nodeMap, uintptr_t& oldStartPinId, uintptr_t& oldEndPinId, std::unordered_map<uintptr_t, uintptr_t>& pinMap) {
 	bool startCopied = nodeMap.contains(Pin::Get(oldStartPinId)->Node->ID.Get());
 	bool endCopied = nodeMap.contains(Pin::Get(oldEndPinId)->Node->ID.Get());
 
@@ -30,7 +30,7 @@ void RebuildLink(std::unordered_map<int, Node*>& nodeMap, int& oldStartPinId, in
 	}
 }
 
-void CollectPinMap(Node* original, Node* newNode, std::unordered_map<int, int>& pinMap) {
+void CollectPinMap(Node* original, Node* newNode, std::unordered_map<uintptr_t, uintptr_t>& pinMap) {
 	// 建立Pin ID映射（通过名称匹配）
 	auto oldPins = original->GetAllPins();
 	auto newPins = newNode->GetAllPins();
@@ -95,8 +95,8 @@ void MainWindow::Paste() {
 	ImVec2 oldCenter = m_Clipboard.copyCenter;
 
 	std::vector<Node*> newNodes;
-	std::unordered_map<int, Node*> idMap;
-	std::unordered_map<int, int> pinMap;    // 旧Pin ID → 新Pin ID
+	std::unordered_map<uintptr_t, Node*> idMap;
+	std::unordered_map<uintptr_t, uintptr_t> pinMap;    // 旧Pin ID → 新Pin ID
 
 	// 创建新节点并建立ID映射
 	for (auto& originalNodeData : m_Clipboard.nodes) {
@@ -119,8 +119,8 @@ void MainWindow::Paste() {
 
 	// 重建连线（智能处理新旧节点连接）
 	for (auto& linkData : m_Clipboard.links) {
-		int oldStartPinId = linkData["StartID"];
-		int oldEndPinId = linkData["EndID"];
+		uintptr_t oldStartPinId = linkData["StartID"];
+		uintptr_t oldEndPinId = linkData["EndID"];
 
 		RebuildLink(idMap, oldStartPinId, oldEndPinId, pinMap);
 	}
@@ -137,8 +137,8 @@ void MainWindow::Duplicate() {
 		return;
 
 	std::vector<Node*> newNodes;
-	std::unordered_map<int, Node*> nodeMap;    // 旧Node ID → 新Node
-	std::unordered_map<int, int> pinMap;       // 旧Pin ID → 新Pin ID
+	std::unordered_map<uintptr_t, Node*> nodeMap;    // 旧Node ID → 新Node
+	std::unordered_map<uintptr_t, uintptr_t> pinMap;       // 旧Pin ID → 新Pin ID
 	ImVec2 mousePos = ed::ScreenToCanvas(ImGui::GetMousePos());
 
 	// 计算原始几何中心
@@ -177,8 +177,8 @@ void MainWindow::Duplicate() {
 
 	// 第二阶段：重建连线
 	for (Link* originalLink : linksToCopy) {
-		int oldStartPinId = originalLink->StartPinID.Get();
-		int oldEndPinId = originalLink->EndPinID.Get();
+		uintptr_t oldStartPinId = originalLink->StartPinID.Get();
+		uintptr_t oldEndPinId = originalLink->EndPinID.Get();
 
 		RebuildLink(nodeMap, oldStartPinId, oldEndPinId, pinMap);
 	}
