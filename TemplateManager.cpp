@@ -119,11 +119,9 @@ void TemplateManager::ShowMenuRecursive(const TemplateItem& item, NodeCreator cr
 	for (const auto& child : item.children) {
 		if (!child.sections.empty()) {
 			if (ImGui::MenuItem(child.name.c_str())) {
-				ImVec2 startPos = ImGui::GetMousePos();
-				float xOffset = 0.0f;
+				ImVec2 mousePos = ImGui::GetMousePos();
 				for (const auto& section : child.sections) {
-					creator(section, ImVec2(startPos.x + xOffset, startPos.y));
-					xOffset += 200.0f;
+					creator(section, mousePos);
 				}
 			}
 		}

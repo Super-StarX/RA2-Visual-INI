@@ -88,7 +88,7 @@ void MainWindow::LayerMenu() {
 		node = Node::Create<ListNode>();
 	ImGui::Separator();
 	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
-		node = SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);
+		SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);
 	});
 
 	// 添加模块菜单
