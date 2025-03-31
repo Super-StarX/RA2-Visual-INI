@@ -42,6 +42,7 @@ public:
 
 	Node* CreateNodeByType(NodeType type);
 	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
+	void AddTemplateMenuItems();
 	void AddModuleMenuItems(const std::string& path);
 	void InitDefaultLayout();
 
