@@ -45,7 +45,7 @@ void MainWindow::ClearAll() {
 	ListNode::Map.clear();
 	SectionNode::Map.clear();
 	TagNode::GlobalNames.clear();
-	TagNode::Inputs.clear();
+	TagNode::Outputs.clear();
 	SectionNode::Map.clear();
 }
 
@@ -90,7 +90,7 @@ void MainWindow::OnFrameStart() {
 }
 
 void MainWindow::OnFrameEnd() {
-	TagNode::UpdateInputs();
+	TagNode::UpdateOutputs();
 }
 
 void MainWindow::OnStart() {

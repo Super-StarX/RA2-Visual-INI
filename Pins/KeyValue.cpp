@@ -2,9 +2,16 @@
 #include "TypeLoader.h"
 #include "Utils.h"
 
+KeyPin::KeyPin(KeyValue* value, const char* name, PinKind kind, int id) :
+	Pin(value->Node, name, kind, id), Value(value) {}
+
+std::string KeyPin::GetValue() const {
+	return Value->GetValue();
+}
+
 KeyValue::KeyValue(::Node* node, const std::string& key, const std::string& value, const std::string& comment, int id) :
 	ValuePin(node, value, id),
-	Key(key), Comment(comment), InputPin(node, "", PinKind::Input) {}
+	Key(key), Comment(comment), InputPin(this, "", PinKind::Input, id == -1 ? -1 : 0) {}
 
 void KeyValue::Tooltip() {
 	ValuePin::Tooltip();
@@ -36,6 +43,9 @@ void KeyValue::Tooltip() {
 
 void KeyValue::SaveToJson(json& j) const {
 	Pin::SaveToJson(j);
+	json inputJson;
+	InputPin.SaveToJson(inputJson);
+	j["InputPin"] = inputJson;
 	j["Key"] = Key;
 	j["value"] = Value;
 	j["IsInherited"] = IsInherited;
@@ -45,6 +55,7 @@ void KeyValue::SaveToJson(json& j) const {
 
 void KeyValue::LoadFromJson(const json& j, bool newId) {
 	Pin::LoadFromJson(j, newId);
+	InputPin.LoadFromJson(j["InputPin"], newId);
 	Key = j["Key"];
 	Value = j["value"];
 	IsInherited = j["IsInherited"];

@@ -21,11 +21,11 @@ public:
 
 	// 维护全局标签注册表
 	static std::unordered_map<std::string, int> GlobalNames;
-	static std::unordered_map<std::string, TagNode*> Inputs;
-	static bool HasInputChanged;
+	static std::unordered_map<std::string, TagNode*> Outputs;
+	static bool HasOutputChanged;
 	static std::unordered_set<std::string> HighlightedNodes;
 	static void UpdateSelectedName();
-	static void UpdateInputs();
+	static void UpdateOutputs();
 
 	std::string ResolveTagPointer(TagNode* tagNode, std::unordered_set<Node*>& visited);
 	void Update() override;
@@ -37,5 +37,5 @@ public:
 	// 引脚管理
 	void UpdatePins();
 	bool CheckOutputConflicts() const;
-	TagNode* GetInputTagNode() const;
+	TagNode* GetOutputTagNode() const;
 };

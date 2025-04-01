@@ -79,7 +79,7 @@ std::unordered_map<Node*, std::vector<Node*>> MainWindow::BuildChildrenMap() {
 					// 处理output标签节点的重定向
 					if (auto outputTag = dynamic_cast<TagNode*>(targetNode)) {
 						if (!outputTag->IsInput) {
-							if (auto inputTag = outputTag->GetInputTagNode()) {
+							if (auto inputTag = outputTag->GetOutputTagNode()) {
 								targetNode = inputTag;
 								endPin = inputTag->InputPin.get();
 							}
@@ -222,7 +222,7 @@ void MainWindow::ArrangeNodesInLayers(const std::map<int, std::vector<Node*>>& l
 		if (auto tagNode = dynamic_cast<TagNode*>(node.get())) {
 			if (tagNode->IsInput) {
 				// 输入标签固定在关联节点左侧
-				if (auto inputTag = TagNode::Inputs[tagNode->Name])
+				if (auto inputTag = TagNode::Outputs[tagNode->Name])
 					if (auto associatedNode = inputTag->InputPin->GetLinkedNode())
 						tagNode->SetPosition(associatedNode->GetPosition() - ImVec2(200, 0));
 			}

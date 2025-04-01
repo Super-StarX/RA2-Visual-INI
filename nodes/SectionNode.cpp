@@ -106,6 +106,13 @@ void SectionNode::Menu() {
 		AutoSelectType();
 }
 
+std::string SectionNode::GetValue(Pin* from) const {
+	if (!from || from == InputPin.get())
+		return VINode<KeyValue>::GetValue(from);
+
+	return from->GetValue();
+}
+
 std::vector<Pin*> SectionNode::GetAllPins() {
 	std::vector<Pin*> pins;
 	if (InputPin) pins.push_back(InputPin.get());

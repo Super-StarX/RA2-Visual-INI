@@ -21,6 +21,7 @@ public:
 	virtual void AddKeyValue() override;
 	virtual bool PinNameSyncable() const override { return true; }
 	virtual void Menu() override;
+	virtual std::string GetValue(Pin* from) const override;
 	virtual std::vector<Pin*> GetAllPins() override;
 	virtual std::vector<Pin*> GetInputPins() override;
 	virtual std::vector<Pin*> GetOutputPins() override;

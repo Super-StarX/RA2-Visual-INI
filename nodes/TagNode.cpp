@@ -25,22 +25,20 @@ OutputTag: 不可重复
 namespace ed = ax::NodeEditor;
 
 std::unordered_map<std::string, int> TagNode::GlobalNames;
-std::unordered_map<std::string, TagNode*> TagNode::Inputs;
-bool TagNode::HasInputChanged = false;
+std::unordered_map<std::string, TagNode*> TagNode::Outputs;
+bool TagNode::HasOutputChanged = false;
 std::unordered_set<std::string> TagNode::HighlightedNodes;
 TagNode::TagNode(const char* name, int id) :
-	Node(name, id), IsInput(true){
-
-	IsInput = true;
+	Node(name, id) {
 	InputPin = std::make_unique<Pin>(this, "constant", PinKind::Input);
 }
 
 TagNode::TagNode(bool input, const char* name, int id) :
-	Node(name, id), IsInput(input){
+	Node(name, id), IsInput(input) {
 
 	if (!IsInput) {
 		GlobalNames[Name]++;
-		HasInputChanged = true;
+		HasOutputChanged = true;
 	}
 
 	InputPin = input ?
@@ -53,7 +51,7 @@ TagNode::~TagNode() {
 		return;
 
 	GlobalNames[Name]--;
-	HasInputChanged = true;
+	HasOutputChanged = true;
 	if (GlobalNames[Name] == 0)
 		GlobalNames.erase(Name);
 }
@@ -65,16 +63,16 @@ void TagNode::UpdateSelectedName() {
 			HighlightedNodes.insert(tagNode->Name);
 }
 
-void TagNode::UpdateInputs() {
-	if (!HasInputChanged)
+void TagNode::UpdateOutputs() {
+	if (!HasOutputChanged)
 		return;
 
-	HasInputChanged = false;
-	Inputs.clear();
+	HasOutputChanged = false;
+	Outputs.clear();
 	for (auto& node : Node::Array)
 		if (auto tag = dynamic_cast<TagNode*>(node.get()))
-			if (tag->IsInput && GlobalNames[tag->Name] == 1)
-				Inputs[tag->Name] = tag;
+			if (!tag->IsInput)
+				Outputs[tag->Name] = tag;
 
 }
 
@@ -98,7 +96,7 @@ void TagNode::SetName(const std::string& str) {
 
 	// 新名字+1
 	GlobalNames[Name]++;
-	HasInputChanged = true;
+	HasOutputChanged = true;
 }
 
 void TagNode::Update() {
@@ -212,24 +210,17 @@ std::string TagNode::ResolveTagPointer(TagNode* tagNode, std::unordered_set<Node
 		return "";
 	visited.insert(tagNode);
 
-	if (tagNode->IsConstant)
-		return tagNode->Name;
-
-	if (!tagNode->InputPin)
+	auto outputTag = tagNode->GetOutputTagNode();
+	if (!outputTag)
 		return "";
 
-	auto inputNode = tagNode->GetInputTagNode();
-	if (!inputNode)
-		return "";
+	if (auto linked = outputTag->InputPin->GetLinkedNode()) {
+		if (auto tag = dynamic_cast<TagNode*>(linked))
+			return ResolveTagPointer(tag, visited);
+		else
+			return linked->GetValue(outputTag->InputPin.get());
+	}
 
-	if (auto section = dynamic_cast<SectionNode*>(inputNode)) {
-		return section->Name;
-	}
-	else if (auto tag = dynamic_cast<TagNode*>(inputNode)) {
-		if (tag->IsInput)
-			return tag->Name;
-		return ResolveTagPointer(tag, visited);
-	}
 	return "";
 }
 
@@ -240,6 +231,6 @@ bool TagNode::CheckOutputConflicts() const {
 	return false;
 }
 
-TagNode* TagNode::GetInputTagNode() const {
-	return Inputs.contains(Name) ? Inputs[Name] : nullptr;
+TagNode* TagNode::GetOutputTagNode() const {
+	return Outputs.contains(Name) ? Outputs[Name] : nullptr;
 }
