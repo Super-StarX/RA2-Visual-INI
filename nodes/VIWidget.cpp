@@ -6,7 +6,7 @@ bool VIInputText::Render() {
 	bool result = false;
 	ImGui::PushID(Owner);
 	Utils::SetNextInputWidth(*this, 130.f);
-	if (Editing) {
+	if (Editing || this->empty()) {
 		// 编辑模式：显示InputText
 		if (ImGui::InputText("##SectionName", Buffer, sizeof(Buffer),
 			ImGuiInputTextFlags_EnterReturnsTrue |
