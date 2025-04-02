@@ -67,25 +67,73 @@ void MainWindow::LayerMenu() {
 	//auto drawList = ImGui::GetWindowDrawList();
 	//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
 
+	ImGui::TextUnformatted(LOCALE["Create Menu"]);
+	ImGui::Separator();
 	Node* node = nullptr;
-	if (ImGui::MenuItem("Section"))
-		node = Node::Create<SectionNode>();
-	else if (ImGui::MenuItem("Group"))
-		node = Node::Create<GroupNode>();
-	else if (ImGui::MenuItem("Module"))
-		node = Node::Create<ModuleNode>();
-	else if (ImGui::MenuItem("InputTag"))
-		node = Node::Create<TagNode>(true);
-	else if (ImGui::MenuItem("OutputTag"))
-		node = Node::Create<TagNode>(false);
-	else if (ImGui::MenuItem("Input"))
-		node = Node::Create<IONode>(PinKind::Input);
-	else if (ImGui::MenuItem("Output"))
-		node = Node::Create<IONode>(PinKind::Output);
-	else if (ImGui::MenuItem("Comment"))
-		node = Node::Create<CommentNode>();
-	else if (ImGui::MenuItem("ListNode"))
-		node = Node::Create<ListNode>();
+	do {
+		if (ImGui::MenuItem(LOCALE["SectionNode"])) {
+			node = Node::Create<SectionNode>();
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["SectionNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["ListNode"])) {
+			node = Node::Create<ListNode>();
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["ListNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["InputTagNode"])) {
+			node = Node::Create<TagNode>(true);
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["InputTagNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["OutputTagNode"])) {
+			node = Node::Create<TagNode>(false);
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["OutputTagNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["ModuleNode"])) {
+			node = Node::Create<ModuleNode>();
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["ModuleNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["InputIONode"])) {
+			node = Node::Create<IONode>(PinKind::Input);
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["InputIONodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["OutputIONode"])) {
+			node = Node::Create<IONode>(PinKind::Output);
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["OutputIONodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["CommentNode"])) {
+			node = Node::Create<CommentNode>();
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["CommentNodeTooltip"]);
+
+		if (ImGui::MenuItem(LOCALE["GroupNode"])) {
+			node = Node::Create<GroupNode>();
+			break;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(LOCALE["GroupNodeTooltip"]);
+	} while (false);
 	ImGui::Separator();
 	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
 		SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);

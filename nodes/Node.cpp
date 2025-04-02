@@ -37,8 +37,8 @@ std::vector<Node*> Node::GetSelectedNodes() {
 }
 
 void Node::Menu() {
-	ImGui::Text("ID: %p", ID.AsPointer());
-	ImGui::Text("Type: %d", GetNodeType());
+	ImGui::Text("%s: %p", LOCALE["ID"], ID.AsPointer());
+	ImGui::Text("%s: %d", LOCALE["Type"], GetNodeType());
 	ImGui::Separator();
 
 	// 类型选择下拉框
@@ -62,15 +62,15 @@ void Node::Menu() {
 		ImGui::EndCombo();
 	}
 
-	if (ImGui::MenuItem(IsComment ? "Uncomment" : "Set Comment"))
+	if (ImGui::MenuItem(IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"] ))
 		IsComment = !IsComment;
-	if (ImGui::MenuItem(IsFolded ? "Unfold" : "Fold"))
+	if (ImGui::MenuItem(IsFolded ? LOCALE["Unfold"] : LOCALE["Fold"] ))
 		IsFolded = !IsFolded;
 }
 
 void Node::Tooltip() {
 	// 类型名称
-	ImGui::Text("Type:%s", TypeName.c_str());
+	ImGui::Text("%s: %s", LOCALE["Type"], TypeName.c_str());
 
 	// 类型详细信息
 	auto typeInfo = TypeSystem::Get().GetTypeInfo(TypeName);
@@ -111,8 +111,8 @@ void Node::HoverMenu(bool isHovered) {
 		hoverTime += ImGui::GetIO().DeltaTime;
 		if (hoverTime > 0.5f) {
 			ImGui::BeginTooltip();
-			ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Type: %s",
-				this->TypeName.c_str());
+			ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s: %s",
+				LOCALE["Type"], this->TypeName.c_str());
 
 			// 添加详细类型信息
 			auto typeInfo = TypeSystem::Get().GetTypeInfo(this->TypeName);
