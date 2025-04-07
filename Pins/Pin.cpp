@@ -115,7 +115,7 @@ Pin* Pin::GetLinkedPin() const {
 	if (!IsLinked())
 		return nullptr;
 
-	for (auto& [id, link] : Links)
+	for (auto& [_, link] : Links)
 		if (auto otherPin = link->StartPinID == ID ? Get(link->EndPinID) : Get(link->StartPinID))
 			return otherPin;
 

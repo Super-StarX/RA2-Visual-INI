@@ -18,9 +18,10 @@ public:
 
 	void DrawListInput(std::string& listValue, const ListType& listType);
 
-	std::string Value;
 	bool IsInherited = false;
 	bool IsComment = false;
 	bool IsFolded = false;
+protected:
+	std::string Value; // 务必使用SetValue/GetValue
 };
 

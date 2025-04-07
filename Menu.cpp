@@ -305,7 +305,7 @@ void MainWindow::ShowSectionEditor() {
 
 	if (textBuffer.empty())
 		for (auto& output : m_SectionEditorNode->KeyValues)
-			textBuffer += output->Key + "=" + output->Value + "\n";
+			textBuffer += output->Key + "=" + output->GetValue() + "\n";
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Section Editor", &m_ShowSectionEditor, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -335,7 +335,7 @@ void MainWindow::ShowSectionEditor() {
 						// Check if key already exists in KeyValues
 						auto it = m_SectionEditorNode->FindPin(key);
 						if (it != m_SectionEditorNode->KeyValues.end())
-							it->get()->Value = value; // Key exists, just update the value
+							it->get()->SetValue(value); // Key exists, just update the value
 						else
 							m_SectionEditorNode->AddKeyValue(key, value); // Key doesn't exist, add new entry
 					}
@@ -471,7 +471,7 @@ void MainWindow::ShowListEditor() {
 		// 确认操作
 		ImGui::Separator();
 		if (ImGui::Button("OK", ImVec2(120, 0))) {
-			Pin->Value = editBuffer;
+			Pin->SetValue(editBuffer);
 			KeyValue::EditPin = nullptr;
 			m_ShowListEditor = false;
 		}

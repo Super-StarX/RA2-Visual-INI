@@ -44,7 +44,7 @@ std::string ListNode::GetValue(Pin* from) const {
 	for (const auto& valuePin : KeyValues) {
 		if (!values.empty())
 			values += ",";
-		values += valuePin->Value;
+		values += valuePin->GetValue();
 	}
 	return values;
 }
@@ -70,7 +70,7 @@ void ListNode::UnFoldedKeyValues(ValuePin& kv, int mode) {
 
 	const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
 	if (isDisabled) {
-		ImGui::TextDisabled("; %s", kv.Value.c_str());
+		ImGui::TextDisabled("; %s", kv.GetValue().c_str());
 	}
 	else {
 		// 获取当前键的类型信息（假设已实现类型查找逻辑）
@@ -79,7 +79,9 @@ void ListNode::UnFoldedKeyValues(ValuePin& kv, int mode) {
 		// 根据类型绘制不同控件
 		ImGui::PushItemWidth(120);
 		auto ms = maxSize;
-		maxSize = kv.DrawValueWidget(kv.Value, typeInfo);
+		auto value = kv.GetValue();
+		maxSize = kv.DrawValueWidget(value, typeInfo);
+		kv.SetValue(value);
 		// 这里的逻辑是，利用maxsize暂存value的长度，因此把原maxSize的值存到ms里
 		// 所以比较的长度是key的长度（w1）和value的长度（maxSize）之和与原maxSize（ms）
 		maxSize = std::max(maxSize, ms);
