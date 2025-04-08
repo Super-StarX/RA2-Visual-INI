@@ -105,6 +105,7 @@ void LeftPanelClass::DrawIcon(ImDrawList* drawList, ImTextureID* icon) {
 	else
 		drawList->AddImage(icon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
 }
+std::array<bool, static_cast<size_t>(NodeType::IO) + 1> m_TypeFilters;
 
 void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes) {
 	auto& io = ImGui::GetIO();
@@ -125,15 +126,39 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 
 	// 搜索框逻辑
 	static char searchText[256] = ""; // 用于存储用户输入的搜索文本
-	ImGui::SetNextItemWidth(paneWidth - ImGui::GetStyle().FramePadding.x * 2);
+	ImGui::SetNextItemWidth(- ImGui::GetStyle().FramePadding.x * 2 - ImGui::GetFontSize() * 2); // 为筛选按钮预留空间
 	ImGui::InputTextWithHint("##search", LOCALE["Search sections..."], searchText, IM_ARRAYSIZE(searchText));
+
+	// 筛选按钮
+	ImGui::SameLine();
+	if (ImGui::Button("...")) {
+		ImGui::OpenPopup("type_filter_popup");
+	}
+
+	// 类型筛选弹出菜单
+	if (ImGui::BeginPopup("type_filter_popup")) {
+		const char* NodeTypeNames[] = {
+			"Blueprint", "Simple", "Tag", "Tree", "Group", "Houdini",
+			"Section", "Comment", "List", "Module", "IO"
+		};
+		for (int i = 0; i <= static_cast<int>(NodeType::IO); ++i) {
+			ImGui::Checkbox(NodeTypeNames[i], &m_TypeFilters[i]);
+		}
+		ImGui::EndPopup();
+	}
 
 	// 筛选节点列表
 	std::vector<Node*> filteredNodes;
-	for (auto& node : Node::Array)
-		if (strstr(node->Name.c_str(), searchText) != nullptr || strlen(searchText) == 0)
-			filteredNodes.push_back(node.get()); // 如果节点名称包含搜索文本，或者搜索文本为空，则添加到筛选列表
-	
+	for (auto& node : Node::Array) {
+		bool nameMatches = (strstr(node->Name.c_str(), searchText) != nullptr || strlen(searchText) == 0);
+		NodeType nodeType = node->GetNodeType();
+		bool typeMatches = m_TypeFilters[static_cast<size_t>(nodeType)];
+		bool anyTypeSelected = std::any_of(m_TypeFilters.begin(), m_TypeFilters.end(), [](bool b) { return b; });
+
+		if ((!anyTypeSelected || typeMatches) && nameMatches) {
+			filteredNodes.push_back(node.get());
+		}
+	}
 	// 绘制筛选后的节点列表
 	for (auto& node : filteredNodes) {
 		ImGui::PushID(node->ID.AsPointer());
