@@ -105,8 +105,10 @@ void LeftPanelClass::DrawIcon(ImDrawList* drawList, ImTextureID* icon) {
 	else
 		drawList->AddImage(icon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 160));
 }
-std::array<bool, static_cast<size_t>(NodeType::IO) + 1> m_TypeFilters;
 
+std::array<bool, static_cast<size_t>(NodeType::IO) + 1> m_TypeFilters;
+Node* m_EditingNode = nullptr;    // 当前正在编辑的节点
+char m_NodeNameBuffer[256] = "";  // 编辑时的缓冲区
 void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& selectedNodes) {
 	auto& io = ImGui::GetIO();
 
@@ -164,13 +166,20 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
 
-		if (const auto progress = Owner->GetTouchProgress(node->ID)) {
-			ImGui::GetWindowDrawList()->AddLine(
-				start + ImVec2(-8, 0),
-				start + ImVec2(-8, ImGui::GetTextLineHeight()),
-				IM_COL32(255, 0, 0, 255 - (int)(255 * progress)), 4.0f);
+		// 如果当前节点处于编辑模式
+		if (m_EditingNode == node) {
+			// 创建独立的编辑框，占据一整行
+			ImGui::SetNextItemWidth(paneWidth - ImGui::GetStyle().FramePadding.x * 4);
+			if (ImGui::InputText("##edit_node_name", m_NodeNameBuffer, IM_ARRAYSIZE(m_NodeNameBuffer),
+				ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
+				node->Name = m_NodeNameBuffer;
+				m_EditingNode = nullptr;
+			}
+			ImGui::PopID();
+			continue;  // 跳过后续绘制逻辑，避免重复绘制按钮和图标
 		}
 
+		// 正常显示可选择的节点名称
 		bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node->ID) != selectedNodes.end();
 		if (ImGui::Selectable((node->Name + "##" + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer()))).c_str(), &isSelected)) {
 			if (io.KeyCtrl) {
@@ -179,15 +188,20 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 				else
 					ed::DeselectNode(node->ID);
 			}
-			else
+			else {
 				ed::SelectNode(node->ID, false);
-
+			}
 			ed::NavigateToSelection();
 		}
-		/*
-		if (ImGui::IsItemHovered() && !node->State.empty())
-			ImGui::SetTooltip("State: %s", node->State.c_str());
-		*/
+
+		// 右键点击进入编辑模式
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+			m_EditingNode = node;
+			strcpy_s(m_NodeNameBuffer, node->Name.c_str());  // 初始化缓冲区
+			ImGui::SetKeyboardFocusHere(-1);  // 自动聚焦到输入框
+		}
+
+		// 原有的图标和ID绘制逻辑保持不变
 		auto id = std::string("(") + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer())) + ")";
 		auto textSize = ImGui::CalcTextSize(id.c_str(), nullptr);
 		float iconPanelX = paneWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x * 1;
