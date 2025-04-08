@@ -294,7 +294,7 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 
 	if (ImGui::Button(LOCALE["Rebuild Layout"])) {
 		LOG_INFO("自动重设布局");
-		Owner->ApplyForceDirectedLayout();
+		Owner->EnableApplyForceDirectedLayout();
 	}
 
 	NodesPanel(paneWidth, selectedNodes);

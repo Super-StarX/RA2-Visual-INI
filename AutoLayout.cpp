@@ -7,7 +7,15 @@
 #include <cmath>
 #include <limits>
 
+void MainWindow::EnableApplyForceDirectedLayout() {
+	m_ShouldApplyForceDirectedLayout = true;
+}
+
 void MainWindow::ApplyForceDirectedLayout() {
+	if (!m_ShouldApplyForceDirectedLayout)
+		return;
+	m_ShouldApplyForceDirectedLayout = false;
+
 	// 1. 动态创建标签节点
 	CreateTagNodesForMultiInputs();
 

@@ -206,6 +206,8 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	m_LeftPanel.ShowOrdinals();
 
+	ApplyForceDirectedLayout();
+
 	//ImGui::ShowTestWindow();
 	//ImGui::ShowMetricsWindow();
 	OnFrameEnd();

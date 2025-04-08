@@ -348,7 +348,7 @@ void MainWindow::ImportINI(const std::string& path) {
 		}
 	}
 	LOG_INFO("载入完毕");
-	ApplyForceDirectedLayout();
+	EnableApplyForceDirectedLayout();
 	ed::NavigateToContent();
 }
 

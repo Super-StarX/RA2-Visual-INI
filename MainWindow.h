@@ -24,7 +24,7 @@ class MainWindow : public Application {
 public:
 	using Application::Application;
 	static MainWindow* Instance;
-	
+
 	static Pin* newLinkPin;
 
 	static float leftPaneWidth;
@@ -59,6 +59,7 @@ public:
 	void ShowListEditor();
 
 	// 布局算法相关函数声明
+	void EnableApplyForceDirectedLayout();
 	void ApplyForceDirectedLayout();
 	void CreateTagNodesForMultiInputs();
 	std::unordered_map<Node*, std::vector<Node*>> BuildChildrenMap();
@@ -69,7 +70,7 @@ public:
 	void Copy();
 	void Paste();
 	void Duplicate();
-	
+
 	void LoadProject(const std::string& path);
 	void SaveProject(const std::string& path);
 	void ImportINI(const std::string& path);
@@ -89,4 +90,5 @@ public:
 	bool								m_ShowPinTypeEditor{ false };
 	bool                                m_ShowSectionEditor{ false };
 	bool                                m_ShowListEditor{ false };
+	bool								m_ShouldApplyForceDirectedLayout{ false };
 };
