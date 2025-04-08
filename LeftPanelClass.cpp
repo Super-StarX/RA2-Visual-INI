@@ -173,7 +173,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		}
 	}
 
-	// 绘制筛选后的节点列表（原有代码保持不变）
+	// 绘制筛选后的节点列表
 	for (auto& node : filteredNodes) {
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
@@ -187,6 +187,13 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 				node->Name = m_NodeNameBuffer;
 				m_EditingNode = nullptr;
 			}
+
+			// 如果点击了文本框之外的地方，则退出编辑模式
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsItemHovered()) {
+				node->Name = m_NodeNameBuffer;  // 保存修改
+				m_EditingNode = nullptr;        // 退出编辑模式
+			}
+
 			ImGui::PopID();
 			continue;  // 跳过后续绘制逻辑，避免重复绘制按钮和图标
 		}
@@ -194,6 +201,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		// 正常显示可选择的节点名称
 		bool isSelected = std::find(selectedNodes.begin(), selectedNodes.end(), node->ID) != selectedNodes.end();
 		if (ImGui::Selectable((node->Name + "##" + std::to_string(reinterpret_cast<uintptr_t>(node->ID.AsPointer()))).c_str(), &isSelected)) {
+			// 单击触发选择逻辑
 			if (io.KeyCtrl) {
 				if (isSelected)
 					ed::SelectNode(node->ID, true);
@@ -206,8 +214,8 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 			ed::NavigateToSelection();
 		}
 
-		// 右键点击进入编辑模式
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+		// 双击进入编辑模式
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 			m_EditingNode = node;
 			strcpy_s(m_NodeNameBuffer, node->Name.c_str());  // 初始化缓冲区
 			ImGui::SetKeyboardFocusHere(-1);  // 自动聚焦到输入框
@@ -258,6 +266,13 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		*/
 		ImGui::PopID();
 	}
+	// 如果点击了空白区域（非任何节点），退出编辑模式
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && m_EditingNode != nullptr && !ImGui::IsAnyItemHovered()) {
+		Node* editingNode = m_EditingNode;
+		editingNode->Name = m_NodeNameBuffer;  // 保存修改
+		m_EditingNode = nullptr;               // 退出编辑模式
+	}
+
 	ImGui::Unindent();
 }
 
