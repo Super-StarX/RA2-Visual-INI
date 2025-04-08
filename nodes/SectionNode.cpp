@@ -102,6 +102,8 @@ void SectionNode::AddKeyValue() {
 
 void SectionNode::Menu() {
 	VINode::Menu();
+	if (ImGui::MenuItem("Editing Name"))
+		Name.BeginEditing();
 	if (ImGui::MenuItem("Auto Select Type"))
 		AutoSelectType();
 }

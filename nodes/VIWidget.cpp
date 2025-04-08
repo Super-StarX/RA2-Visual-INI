@@ -2,6 +2,13 @@
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 
+void VIInputText::BeginEditing() {
+	Editing = true;
+	strcpy_s(Buffer, this->c_str());
+	Temp = *this;
+	ImGui::SetKeyboardFocusHere();
+}
+
 bool VIInputText::Render() {
 	bool result = false;
 	ImGui::PushID(Owner);
@@ -28,10 +35,7 @@ bool VIInputText::Render() {
 		ImGui::Text("%s", this->c_str());
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			// 双击：进入编辑模式
-			Editing = true;
-			strcpy_s(Buffer, this->c_str());
-			Temp = *this;
-			ImGui::SetKeyboardFocusHere();
+			BeginEditing();
 		}
 	}
 	// 处理ESC取消编辑
