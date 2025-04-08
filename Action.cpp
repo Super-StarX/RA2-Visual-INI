@@ -15,6 +15,9 @@
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
 #include <imgui_internal.h>
+#include <windows.h>
+#include <fstream>
+
 void RebuildLink(std::unordered_map<uintptr_t, Node*>& nodeMap, uintptr_t& oldStartPinId, uintptr_t& oldEndPinId, std::unordered_map<uintptr_t, uintptr_t>& pinMap) {
 	bool startCopied = nodeMap.contains(Pin::Get(oldStartPinId)->Node->ID.Get());
 	bool endCopied = nodeMap.contains(Pin::Get(oldEndPinId)->Node->ID.Get());
@@ -41,12 +44,41 @@ void CollectPinMap(Node* original, Node* newNode, std::unordered_map<uintptr_t, 
 	}
 }
 
+std::string GetSystemClipboardText() {
+	if (!OpenClipboard(nullptr))
+		return "";
+
+	// 获取剪贴板数据（使用 Unicode 格式）
+	HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+	if (hData == nullptr) {
+		CloseClipboard();
+		return "";
+	}
+
+	// 锁定句柄获取文本指针
+	wchar_t* pwszText = static_cast<wchar_t*>(GlobalLock(hData));
+	if (pwszText == nullptr) {
+		CloseClipboard();
+		return "";
+	}
+
+	// 将 wchar_t* 转换为 UTF-8 std::string
+	int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, pwszText, -1, nullptr, 0, nullptr, nullptr);
+	std::string text(sizeNeeded, 0);
+	WideCharToMultiByte(CP_UTF8, 0, pwszText, -1, &text[0], sizeNeeded, nullptr, nullptr);
+
+	GlobalUnlock(hData);
+	CloseClipboard();
+	return text;
+}
+
 void MainWindow::Copy() {
 	auto selectedNodes = Node::GetSelectedNodes();
 	if (selectedNodes.empty())
 		return;
 
 	m_Clipboard = {}; // 清空剪贴板
+	m_Clipboard.clipboardSequence = GetClipboardSequenceNumber();
 
 	// 计算几何中心
 	ImVec2 center(0, 0);
@@ -88,6 +120,19 @@ void MainWindow::Copy() {
 }
 
 void MainWindow::Paste() {
+	if (m_Clipboard.clipboardSequence != GetClipboardSequenceNumber()) {
+		std::string sysClipboardContent = GetSystemClipboardText();
+		if (!sysClipboardContent.empty()) {
+			std::istringstream iss(sysClipboardContent);
+			auto item = TemplateManager::ParseIniString(iss);
+			// 转换屏幕坐标到画布坐标
+			const auto canvasPos = ImGui::GetMousePos();
+			for (const auto& setion : item.sections)
+				SpawnNodeFromTemplate(setion, canvasPos);
+		}
+		return;
+	}
+
 	if (!m_Clipboard.hasData)
 		return;
 

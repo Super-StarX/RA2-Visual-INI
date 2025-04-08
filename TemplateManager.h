@@ -39,6 +39,7 @@ public:
 	TemplateManager() : m_Root() {}
 	void LoadTemplates(const std::string& folderPath);
 	void ShowCreationMenu(NodeCreator creator);
+	static TemplateItem ParseIniString(std::istringstream& file);
 
 private:
 	TemplateItem m_Root;

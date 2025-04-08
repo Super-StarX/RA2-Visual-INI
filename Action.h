@@ -14,4 +14,5 @@ struct ClipboardData {
 	std::vector<json> links;
 	ImVec2 copyCenter;
 	bool hasData = false;
+	int clipboardSequence;
 };

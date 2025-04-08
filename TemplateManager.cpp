@@ -39,6 +39,64 @@ void TemplateManager::LoadFolder(const fs::path& path, TemplateItem& parent) {
 	}
 }
 
+TemplateItem TemplateManager::ParseIniString(std::istringstream& file) {
+	TemplateItem fileItem;
+	std::string line;
+	TemplateSection* currentSection = nullptr;
+
+	while (std::getline(file, line)) {
+		line.erase(0, line.find_first_not_of(" \t"));
+		line.erase(line.find_last_not_of(" \t\r\n") + 1);
+
+		if (line.empty()) continue;
+
+		if (line[0] == '[') {
+			auto endPos = line.find(']');
+			if (endPos != std::string::npos) {
+				TemplateSection newSection;
+				newSection.Name = line.substr(1, endPos - 1);
+				fileItem.sections.push_back(newSection);
+				currentSection = &fileItem.sections.back();
+			}
+		}
+		else if (currentSection) {
+			auto eqPos = line.find('=');
+			if (eqPos != std::string::npos) {
+				if (auto lgPos = line.find(">"); lgPos != std::string::npos) {
+					auto key = line.substr(lgPos + 1, eqPos - lgPos - 1);
+					key = Utils::Trim(key);
+					auto value = line.substr(eqPos + 1);
+					if (key == "Color") {
+						std::istringstream iss(value);
+						int r, g, b;
+						iss >> r >> g >> b;
+						currentSection->Color = ImColor(r, g, b);
+					}
+					else if (key == "Type")
+						currentSection->Type = value;
+					else if (key == "Folded")
+						currentSection->IsFolded = value == "true";
+					else if (key == "Comment")
+						currentSection->IsComment = value == "true";
+				}
+				else {
+					TemplateSection::KeyValue kv;
+					kv.IsComment = line.find(";") == 0;
+					kv.IsInherited = line.find("@") == 0;
+					kv.IsFolded = line.find("#") == 0;
+					line.erase(0, line.find_first_not_of(";@#"));
+					eqPos = line.find('=');
+					kv.Key = line.substr(0, eqPos);
+					kv.Value = line.substr(eqPos + 1);
+					currentSection->KeyValues.push_back(kv);
+				}
+			}
+		}
+	}
+
+	return fileItem;
+}
+
 void TemplateManager::ParseIniFile(const fs::path& filePath, TemplateItem& parent) {
 	try {
 		std::ifstream file(filePath);
@@ -46,61 +104,11 @@ void TemplateManager::ParseIniFile(const fs::path& filePath, TemplateItem& paren
 			LOG_ERROR("无法打开文件: {}", filePath.string());
 			return;
 		}
-
-		TemplateItem fileItem;
+		std::string content((std::istreambuf_iterator<char>(file)),
+						 std::istreambuf_iterator<char>());
+		std::istringstream iss(content);
+		auto fileItem = ParseIniString(iss);
 		fileItem.name = filePath.stem().string(); // 使用文件名作为显示名称
-		std::string line;
-		TemplateSection* currentSection = nullptr;
-
-		while (std::getline(file, line)) {
-			line.erase(0, line.find_first_not_of(" \t"));
-			line.erase(line.find_last_not_of(" \t\r\n") + 1);
-
-			if (line.empty()) continue;
-
-			if (line[0] == '[') {
-				auto endPos = line.find(']');
-				if (endPos != std::string::npos) {
-					TemplateSection newSection;
-					newSection.Name = line.substr(1, endPos - 1);
-					fileItem.sections.push_back(newSection);
-					currentSection = &fileItem.sections.back();
-				}
-			}
-			else if (currentSection) {
-				auto eqPos = line.find('=');
-				if (eqPos != std::string::npos) {
-					if (auto lgPos = line.find(">"); lgPos != std::string::npos) {
-						auto key = line.substr(lgPos + 1, eqPos - lgPos - 1);
-						key = Utils::Trim(key);
-						auto value = line.substr(eqPos + 1);
-						if (key == "Color") {
-							std::istringstream iss(value);
-							int r, g, b;
-							iss >> r >> g >> b;
-							currentSection->Color = ImColor(r, g, b);
-						}
-						else if (key == "Type")
-							currentSection->Type = value;
-						else if (key == "Folded")
-							currentSection->IsFolded = value == "true";
-						else if (key == "Comment")
-							currentSection->IsComment = value == "true";
-					}
-					else {
-						TemplateSection::KeyValue kv;
-						kv.IsComment = line.find(";") == 0;
-						kv.IsInherited = line.find("@") == 0;
-						kv.IsFolded = line.find("#") == 0;
-						line.erase(0, line.find_first_not_of(";@#"));
-						eqPos = line.find('=');
-						kv.Key = line.substr(0, eqPos);
-						kv.Value = line.substr(eqPos + 1);
-						currentSection->KeyValues.push_back(kv);
-					}
-				}
-			}
-		}
 
 		if (!fileItem.sections.empty()) {
 			parent.children.push_back(fileItem);
