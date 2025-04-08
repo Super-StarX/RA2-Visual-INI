@@ -12,6 +12,7 @@ public:
 private:
 	const void* Owner{ nullptr };
 	bool Editing{ false };
+	bool NeedFocus{ false };
 	char Buffer[256] = ""; // 临时缓冲区
 	std::string Temp;     // 保存编辑前的原始值
 };

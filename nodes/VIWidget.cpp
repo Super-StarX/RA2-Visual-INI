@@ -4,9 +4,10 @@
 
 void VIInputText::BeginEditing() {
 	Editing = true;
+	NeedFocus = true;
 	strcpy_s(Buffer, this->c_str());
 	Temp = *this;
-	ImGui::SetKeyboardFocusHere();
+	//ImGui::SetKeyboardFocusHere();
 }
 
 bool VIInputText::Render() {
@@ -24,10 +25,16 @@ bool VIInputText::Render() {
 			// 更新关联Pin的值（保持原有逻辑）
 			result = true;
 		}
+
 		// 失去焦点时保存
-		if (!ImGui::IsItemActive() && !ImGui::IsItemFocused()) {
+		if (!NeedFocus && !ImGui::IsItemActive() && !ImGui::IsItemFocused()) {
 			*this = Buffer;
 			Editing = false;
+		}
+
+		if (NeedFocus) {
+			ImGui::SetKeyboardFocusHere(-1);
+			NeedFocus = false;
 		}
 	}
 	else {
