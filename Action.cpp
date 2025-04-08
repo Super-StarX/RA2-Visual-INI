@@ -2,18 +2,6 @@
 #include "Action.h"
 #include "MainWindow.h"
 #include "Pins/KeyValue.h"
-#include "Nodes/Node.h"
-#include "Nodes/BlueprintNode.h"
-#include "Nodes/CommentNode.h"
-#include "Nodes/GroupNode.h"
-#include "Nodes/HoudiniNode.h"
-#include "Nodes/ListNode.h"
-#include "Nodes/ModuleNode.h"
-#include "Nodes/SectionNode.h"
-#include "Nodes/SimpleNode.h"
-#include "Nodes/TagNode.h"
-#include "Nodes/TreeNode.h"
-#include "Nodes/IONode.h"
 #include <imgui_internal.h>
 #include <windows.h>
 #include <fstream>
@@ -232,17 +220,4 @@ void MainWindow::Duplicate() {
 	ed::ClearSelection();
 	for (Node* node : newNodes)
 		ed::SelectNode(node->ID, true);
-}
-
-Node* MainWindow::CreateNodeByType(NodeType type) {
-	switch (type) {
-	case NodeType::Tag:      return Node::Create<TagNode>(true);
-	case NodeType::Group:    return Node::Create<GroupNode>();
-	case NodeType::Section:  return Node::Create<SectionNode>();
-	case NodeType::Comment:  return Node::Create<CommentNode>();
-	case NodeType::List:     return Node::Create<ListNode>();
-	case NodeType::Module:   return Node::Create<ModuleNode>();
-	case NodeType::IO:      return Node::Create<IONode>(PinKind::Input);
-	default:                return nullptr;
-	}
 }

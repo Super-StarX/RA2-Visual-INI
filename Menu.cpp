@@ -62,99 +62,29 @@ void MainWindow::Menu() {
 }
 
 void MainWindow::LayerMenu() {
-	//ImGui::SetCursorScreenPos(ImGui::GetMousePosOnOpeningCurrentPopup());
-
-	//auto drawList = ImGui::GetWindowDrawList();
-	//drawList->AddCircleFilled(ImGui::GetMousePosOnOpeningCurrentPopup(), 10.0f, 0xFFFF00FF);
-
+	// 添加节点菜单
 	ImGui::TextUnformatted(LOCALE["Create Menu"]);
 	ImGui::Separator();
-	Node* node = nullptr;
-	do {
-		if (ImGui::MenuItem(LOCALE["SectionNode"])) {
-			node = Node::Create<SectionNode>();
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["SectionNodeTooltip"]);
+	if (auto node = CreateNodeByName()) {
+		createNewNode = false;
+		const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
+		ed::SetNodePosition(node->ID, canvasPos);
+		if (auto startPin = newNodeLinkPin)
+			if (auto pin = node->GetFirstCompatiblePin(startPin))
+				if (startPin->CanCreateLink(pin))
+					startPin->LinkTo(pin)->TypeIdentifier = startPin->GetLinkType();
+		LOG_INFO("创建新空白节点，节点类型为{}", static_cast<int>(node->GetNodeType()));
+	}
 
-		if (ImGui::MenuItem(LOCALE["ListNode"])) {
-			node = Node::Create<ListNode>();
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["ListNodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["InputTagNode"])) {
-			node = Node::Create<TagNode>(true);
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["InputTagNodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["OutputTagNode"])) {
-			node = Node::Create<TagNode>(false);
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["OutputTagNodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["ModuleNode"])) {
-			node = Node::Create<ModuleNode>();
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["ModuleNodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["InputIONode"])) {
-			node = Node::Create<IONode>(PinKind::Input);
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["InputIONodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["OutputIONode"])) {
-			node = Node::Create<IONode>(PinKind::Output);
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["OutputIONodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["CommentNode"])) {
-			node = Node::Create<CommentNode>();
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["CommentNodeTooltip"]);
-
-		if (ImGui::MenuItem(LOCALE["GroupNode"])) {
-			node = Node::Create<GroupNode>();
-			break;
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip(LOCALE["GroupNodeTooltip"]);
-	} while (false);
+	// 添加模板菜单
 	ImGui::Separator();
-	m_TemplateManager.ShowCreationMenu([this, &node](auto&&... args) {
+	m_TemplateManager.ShowCreationMenu([this](auto&&... args) {
 		SpawnNodeFromTemplate(std::forward<decltype(args)>(args)...);
 	});
 
 	// 添加模块菜单
 	ImGui::Separator();
 	AddModuleMenuItems("Modules");
-
-	if (node) {
-		createNewNode = false;
-		LOG_INFO("创建新空白节点，节点类型为{}", static_cast<int>(node->GetNodeType()));
-
-		const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
-		ed::SetNodePosition(node->ID, canvasPos);
-
-		if (auto startPin = newNodeLinkPin)
-			if(auto pin = node->GetFirstCompatiblePin(startPin))
-				if (startPin->CanCreateLink(pin))
-					startPin->LinkTo(pin)->TypeIdentifier = startPin->GetLinkType();
-	}
 
 	ImGui::EndPopup();
 }

@@ -40,8 +40,9 @@ public:
 	void TouchNode(ed::NodeId id);
 	void UpdateTouch();
 
-	Node* CreateNodeByType(NodeType type);
 	Node* SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 position);
+	Node* CreateNodeByType(NodeType type);
+	Node* CreateNodeByName();
 	void AddTemplateMenuItems();
 	void AddModuleMenuItems(const std::string& path);
 	void InitDefaultLayout();
