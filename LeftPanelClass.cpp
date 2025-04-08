@@ -128,7 +128,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 
 	// 搜索框逻辑
 	static char searchText[256] = ""; // 用于存储用户输入的搜索文本
-	ImGui::SetNextItemWidth(- ImGui::GetStyle().FramePadding.x * 2 - ImGui::GetFontSize() * 2); // 为筛选按钮预留空间
+	ImGui::SetNextItemWidth(-ImGui::GetStyle().FramePadding.x * 2 - ImGui::GetFontSize() * 2); // 为筛选按钮预留空间
 	ImGui::InputTextWithHint("##search", LOCALE["Search sections..."], searchText, IM_ARRAYSIZE(searchText));
 
 	// 筛选按钮
@@ -137,14 +137,25 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		ImGui::OpenPopup("type_filter_popup");
 	}
 
+	// 动态检测当前场景中存在哪些节点类型
+	std::array<bool, static_cast<size_t>(NodeType::IO) + 1> existingTypes{};
+	for (auto& node : Node::Array) {
+		NodeType nodeType = node->GetNodeType();
+		existingTypes[static_cast<size_t>(nodeType)] = true;
+	}
+
 	// 类型筛选弹出菜单
 	if (ImGui::BeginPopup("type_filter_popup")) {
 		const char* NodeTypeNames[] = {
 			"Blueprint", "Simple", "Tag", "Tree", "Group", "Houdini",
 			"Section", "Comment", "List", "Module", "IO"
 		};
+
+		// 只显示当前场景中存在的节点类型
 		for (int i = 0; i <= static_cast<int>(NodeType::IO); ++i) {
-			ImGui::Checkbox(NodeTypeNames[i], &m_TypeFilters[i]);
+			if (existingTypes[i]) { // 如果该类型在场景中存在
+				ImGui::Checkbox(NodeTypeNames[i], &m_TypeFilters[i]);
+			}
 		}
 		ImGui::EndPopup();
 	}
@@ -161,7 +172,8 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 			filteredNodes.push_back(node.get());
 		}
 	}
-	// 绘制筛选后的节点列表
+
+	// 绘制筛选后的节点列表（原有代码保持不变）
 	for (auto& node : filteredNodes) {
 		ImGui::PushID(node->ID.AsPointer());
 		auto start = ImGui::GetCursorScreenPos();
