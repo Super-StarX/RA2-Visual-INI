@@ -220,9 +220,9 @@ void ModuleNode::UpdatePins() {
 
 	for (const auto& ioNode : InternalProject["IO"]) {
 		if (ioNode["Kind"] == PinKind::Output)
-			inputNames.push_back(ioNode["Section"]);  // 工程的input node的pinkind是output, 对于模块Node来说, 就需要一个input的pin
+			inputNames.push_back(ioNode["Name"]);  // 工程的input node的pinkind是output, 对于模块Node来说, 就需要一个input的pin
 		else
-			outputNames.push_back(ioNode["Section"]);
+			outputNames.push_back(ioNode["Name"]);
 	}
 
 	UpdatePinSet(Inputs, inputNames, true);

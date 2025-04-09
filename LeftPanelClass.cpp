@@ -229,41 +229,6 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		auto textPos = ImVec2(iconPanelX - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y);
 		ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), id.c_str(), nullptr);
 
-		/*
-		auto drawList = ImGui::GetWindowDrawList();
-		ImGui::SetCursorScreenPos(iconPanelPos);
-		ImGui::SetItemAllowOverlap();
-		if (node->SavedState.empty()) {
-			if (ImGui::InvisibleButton("save", ImVec2((float)saveIconWidth, (float)saveIconHeight)))
-				node->SavedState = node->State;
-
-			DrawIcon(drawList, &m_SaveIcon);
-		}
-		else {
-			ImGui::Dummy(ImVec2((float)saveIconWidth, (float)saveIconHeight));
-			drawList->AddImage(m_SaveIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 32));
-		}
-
-		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::SetItemAllowOverlap();
-		if (!node->SavedState.empty()) {
-			if (ImGui::InvisibleButton("restore", ImVec2((float)restoreIconWidth, (float)restoreIconHeight))) {
-				node->State = node->SavedState;
-				ed::RestoreNodeState(node->ID);
-				node->SavedState.clear();
-			}
-
-			DrawIcon(drawList, &m_RestoreIcon);
-		}
-		else {
-			ImGui::Dummy(ImVec2((float)restoreIconWidth, (float)restoreIconHeight));
-			drawList->AddImage(m_RestoreIcon, ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 32));
-		}
-
-		ImGui::SameLine(0, 0);
-		ImGui::SetItemAllowOverlap();
-		ImGui::Dummy(ImVec2(0, (float)restoreIconHeight));
-		*/
 		ImGui::PopID();
 	}
 	// 如果点击了空白区域（非任何节点），退出编辑模式

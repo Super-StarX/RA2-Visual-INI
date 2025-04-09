@@ -106,8 +106,7 @@ void MainWindow::AddModuleMenuItems(const std::string& path) {
 				// 处理.viproj文件
 				if (ImGui::MenuItem(filename.c_str())) {
 					auto moduleNode = Node::Create<ModuleNode>();
-					moduleNode->Path = entry.path().string();
-					moduleNode->LoadProject();
+					moduleNode->LoadProject(entry.path().string());
 
 					// 设置节点位置到右键点击位置
 					const ImVec2 canvasPos = ed::ScreenToCanvas(newNodePosition);
