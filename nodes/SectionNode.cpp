@@ -155,6 +155,18 @@ KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& va
 	return kv.get();
 }
 
+void SectionNode::DrawInputText(const char* label, std::string* str, bool disable) {
+	if (disable) {
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 0.5f));   // 淡化文字颜色
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f); // 降低透明度
+		ImGui::InputText(label, str, ImGuiInputTextFlags_ReadOnly);
+		ImGui::PopStyleColor(1);
+		ImGui::PopStyleVar();
+	}
+	else
+		ImGui::InputText(label, str);
+}
+
 void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
 	auto builder = BuilderNode::GetBuilder();
 
@@ -174,14 +186,20 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ImGui::PushID(&kv);
 
+		bool disableKey = kv.IsComment || IsComment;
+		bool disableValue = kv.IsInherited || kv.IsComment || IsComment;
+
 		const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
-		if (isDisabled) {
-			ImGui::TextDisabled("; %s = %s", kv.Key.c_str(), kv.GetValue().c_str());
+		auto w1 = Utils::SetNextInputWidth(kv.Key, 60.f);
+
+		DrawInputText("##Key", &kv.Key, disableKey);
+		if (disableValue) {
+			auto value = kv.GetValue();
+			auto w2 = Utils::SetNextInputWidth(value, 60.f);
+			DrawInputText("##Value", &value, true);
+			maxSize = std::max(w2 + w1, maxSize);
 		}
 		else {
-			auto w1 = Utils::SetNextInputWidth(kv.Key, 60.f);
-			ImGui::InputText("##Key", &kv.Key, kv.IsInherited ? ImGuiInputTextFlags_ReadOnly : 0);
-
 			// 获取当前键的类型信息（假设已实现类型查找逻辑）
 			auto typeInfo = TypeSystem::Get().GetKeyType(this->TypeName, kv.Key);
 
@@ -196,6 +214,8 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
 			maxSize = std::max(maxSize + w1, ms);
 			ImGui::PopItemWidth();
 		}
+
+
 
 		ImGui::Spring(0);
 		kv.DrawPinIcon(kv.IsLinked(), (int)(alpha * 255));

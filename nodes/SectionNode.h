@@ -25,6 +25,7 @@ public:
 	virtual std::vector<Pin*> GetAllPins() override;
 	virtual std::vector<Pin*> GetInputPins() override;
 	virtual std::vector<Pin*> GetOutputPins() override;
+	void DrawInputText(const char* label, std::string* str, bool disable);
 	KeyValue* AddKeyValue(const std::string& key, const std::string& value, const std::string& comment = "", int pinid = 0, bool isInherited = false, bool isComment = false, bool isFolded = false);
 
 	vector_kv::iterator FindPin(const Pin& key);
