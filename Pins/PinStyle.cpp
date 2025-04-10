@@ -19,10 +19,10 @@ void PinStyleManager::Menu() {
 	ImGui::Combo("Icon", &newIconType, "Flow\0Circle\0Square\0Grid\0RoundSquare\0Diamond\0");
 
 	// 新增Link类型选择下拉框
-	auto& linkTypes = LinkTypeManager::Get().GetAllTypes();
+	auto& linkTypes = LinkStyleManager::Get().GetAllTypes();
 	if (ImGui::Combo("Link Type", &selectedLinkTypeIndex,
 		[](void* data, int idx, const char** out_text) {
-			auto& types = *static_cast<const std::vector<LinkTypeInfo>*>(data);
+			auto& types = *static_cast<const std::vector<LinkStyleInfo>*>(data);
 			if (idx >= 0 && idx < static_cast<int>(types.size())) {
 				*out_text = types[idx].DisplayName.c_str();
 				return true;

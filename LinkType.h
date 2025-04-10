@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <imgui.h>
 
-struct LinkTypeInfo {
+struct LinkStyleInfo {
 	std::string Identifier;  // 唯一标识符
 	std::string DisplayName; // 显示名称
 	ImColor       Color;       // 基础颜色
@@ -21,24 +21,24 @@ struct LinkTypeInfo {
 	}
 };
 
-class LinkTypeManager {
+class LinkStyleManager {
 public:
-	static LinkTypeManager& Get() {
-		static LinkTypeManager instance;
+	static LinkStyleManager& Get() {
+		static LinkStyleManager instance;
 		return instance;
 	}
 
-	LinkTypeManager();
-	const LinkTypeInfo* FindType(const std::string& identifier) const;
-	const std::vector<LinkTypeInfo>& GetAllTypes() const { return m_Types; }
+	LinkStyleManager();
+	const LinkStyleInfo* FindType(const std::string& identifier) const;
+	const std::vector<LinkStyleInfo>& GetAllTypes() const { return m_Types; }
 
-	void AddCustomType(const LinkTypeInfo& type);
+	void AddCustomType(const LinkStyleInfo& type);
 	void RemoveCustomType(const std::string& identifier);
 
 	bool LoadFromFile(const std::string& path);
 	bool SaveToFile(const std::string& path);
 
 private:
-	std::vector<LinkTypeInfo> m_Types;
+	std::vector<LinkStyleInfo> m_Types;
 	std::unordered_map<std::string, size_t> m_TypeIndex;
 };

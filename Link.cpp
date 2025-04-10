@@ -29,7 +29,7 @@ Link* Link::Get(ed::LinkId id) {
 }
 
 void Link::Draw() const {
-	auto* typeInfo = LinkTypeManager::Get().FindType(TypeIdentifier);
+	auto* typeInfo = LinkStyleManager::Get().FindType(TypeIdentifier);
 	if (!typeInfo) return;
 
 	ed::Link(ID, StartPinID, EndPinID, typeInfo->Color, typeInfo->Thickness);
@@ -37,7 +37,7 @@ void Link::Draw() const {
 
 void Link::Menu() {
 	// 显示当前类型
-	if (auto* currentType = LinkTypeManager::Get().FindType(TypeIdentifier)) {
+	if (auto* currentType = LinkStyleManager::Get().FindType(TypeIdentifier)) {
 		ImGui::Text("Current Type: %s", currentType->DisplayName.c_str());
 		ImGui::ColorButton("##color", currentType->Color,
 			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
@@ -50,7 +50,7 @@ void Link::Menu() {
 
 	// 类型选择菜单
 	if (ImGui::BeginMenu("Change Type")) {
-		for (const auto& type : LinkTypeManager::Get().GetAllTypes()) {
+		for (const auto& type : LinkStyleManager::Get().GetAllTypes()) {
 			if (ImGui::MenuItem(type.DisplayName.c_str()))
 				TypeIdentifier = type.Identifier;
 

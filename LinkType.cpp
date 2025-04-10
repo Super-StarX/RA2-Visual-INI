@@ -3,8 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-LinkTypeManager::LinkTypeManager() {
-	auto AddType = [this](const LinkTypeInfo& type) {
+
+LinkStyleManager::LinkStyleManager() {
+	auto AddType = [this](const LinkStyleInfo& type) {
 		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 			return;
 
@@ -23,14 +24,14 @@ LinkTypeManager::LinkTypeManager() {
 			2.0f, 0 });
 }
 
-const LinkTypeInfo* LinkTypeManager::FindType(const std::string& identifier) const {
+const LinkStyleInfo* LinkStyleManager::FindType(const std::string& identifier) const {
 	auto it = m_TypeIndex.find(identifier);
 	if (it != m_TypeIndex.end() && it->second < m_Types.size())
 		return &m_Types[it->second];
 	return nullptr;
 }
 
-void LinkTypeManager::AddCustomType(const LinkTypeInfo& type) {
+void LinkStyleManager::AddCustomType(const LinkStyleInfo& type) {
 	if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 		return;
 
@@ -38,7 +39,7 @@ void LinkTypeManager::AddCustomType(const LinkTypeInfo& type) {
 	m_TypeIndex[type.Identifier] = m_Types.size() - 1;
 }
 
-void LinkTypeManager::RemoveCustomType(const std::string& identifier) {
+void LinkStyleManager::RemoveCustomType(const std::string& identifier) {
 	auto it = m_TypeIndex.find(identifier);
 	if (it == m_TypeIndex.end() || !m_Types[it->second].IsUserDefined)
 		return;
@@ -49,7 +50,7 @@ void LinkTypeManager::RemoveCustomType(const std::string& identifier) {
 		m_TypeIndex[m_Types[i].Identifier] = i;
 }
 
-bool LinkTypeManager::LoadFromFile(const std::string& path) {
+bool LinkStyleManager::LoadFromFile(const std::string& path) {
 	try {
 		// 打开文件并读取内容
 		std::ifstream file(path);
@@ -68,7 +69,7 @@ bool LinkTypeManager::LoadFromFile(const std::string& path) {
 		json j = json::parse(jsonContent);
 		for (auto& t : j["LinkTypes"]) {
 			auto& color = t["Color"];
-			LinkTypeInfo info{
+			LinkStyleInfo info{
 				t["Identifier"].get<std::string>(),
 				t["DisplayName"].get<std::string>(),
 				ImColor(
@@ -88,7 +89,7 @@ bool LinkTypeManager::LoadFromFile(const std::string& path) {
 	}
 }
 
-bool LinkTypeManager::SaveToFile(const std::string& path) {
+bool LinkStyleManager::SaveToFile(const std::string& path) {
 	using json = nlohmann::json;
 	json j = json::parse(path);
 	for (const auto& type : m_Types) {
