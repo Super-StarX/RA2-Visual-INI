@@ -1,8 +1,8 @@
-﻿// LinkType.cpp
-#include "LinkType.h"
+﻿// LinkStyle.cpp
+#include "LinkStyle.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
-
+#include <misc/cpp/imgui_stdlib.h>
 
 LinkStyleManager::LinkStyleManager() {
 	auto AddType = [this](const LinkStyleInfo& type) {
@@ -22,6 +22,86 @@ LinkStyleManager::LinkStyleManager() {
 	AddType({ "blue", "Blue",
 			IM_COL32(0, 0, 180, 255), IM_COL32(0, 0, 255, 255),
 			2.0f, 0 });
+}
+
+void LinkStyleManager::Menu() {
+
+	static int selected = -1;
+	const auto& types = LinkStyleManager::Get().GetAllTypes();
+
+	ImGui::Text("Styles:");
+	ImGui::BeginChild("##StyleList", ImVec2(200, 300), true);
+	for (int i = 0; i < types.size(); ++i) {
+		const auto& type = types[i];
+		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i)) {
+			selected = i;
+		}
+	}
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+
+	// 编辑区域
+	ImGui::BeginGroup();
+	if (selected >= 0 && selected < types.size()) {
+		LinkStyleInfo& type = const_cast<LinkStyleInfo&>(types[selected]); // 注意：这里直接修改内存，确保只对用户定义项启用修改
+
+		ImGui::Text("Edit Style:");
+		ImGui::Text("Identifier: %s", type.Identifier.c_str());
+		ImGui::Text("Name:");
+		ImGui::InputText("##DisplayName", &type.DisplayName);
+
+		ImVec4 col = type.Color;
+		if (ImGui::ColorEdit4("Base Color", (float*)&col))
+			type.Color = ImColor(col);
+
+		ImVec4 highlight = ImGui::ColorConvertU32ToFloat4(type.HighlightColor);
+		if (ImGui::ColorEdit4("Highlight Color", (float*)&highlight))
+			type.HighlightColor = ImGui::ColorConvertFloat4ToU32(highlight);
+
+		ImGui::SliderFloat("Thickness", &type.Thickness, 0.5f, 10.0f);
+
+		if (type.IsUserDefined) {
+			if (ImGui::Button("Delete")) {
+				LinkStyleManager::Get().RemoveCustomType(type.Identifier);
+				selected = -1;
+			}
+		}
+	}
+	ImGui::EndGroup();
+
+	ImGui::Separator();
+
+	// 添加新样式
+	static char newId[64] = "";
+	static char newName[64] = "";
+	static ImVec4 newColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static ImVec4 newHighlight = ImVec4(0.8f, 0.8f, 1.0f, 1.0f);
+	static float newThickness = 1.0f;
+
+	ImGui::Text("Add New Style:");
+	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
+	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
+	ImGui::ColorEdit4("Base Color##new", (float*)&newColor);
+	ImGui::ColorEdit4("Highlight Color##new", (float*)&newHighlight);
+	ImGui::SliderFloat("Thickness##new", &newThickness, 0.5f, 10.0f);
+
+	if (ImGui::Button("Add")) {
+		if (strlen(newId) > 0 && strlen(newName) > 0 && !LinkStyleManager::Get().FindType(newId)) {
+			LinkStyleInfo newType;
+			newType.Identifier = newId;
+			newType.DisplayName = newName;
+			newType.Color = ImColor(newColor);
+			newType.HighlightColor = ImGui::ColorConvertFloat4ToU32(newHighlight);
+			newType.Thickness = newThickness;
+			newType.IsUserDefined = true;
+
+			LinkStyleManager::Get().AddCustomType(newType);
+			memset(newId, 0, sizeof(newId));
+			memset(newName, 0, sizeof(newName));
+		}
+	}
+
 }
 
 const LinkStyleInfo* LinkStyleManager::FindType(const std::string& identifier) const {

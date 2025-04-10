@@ -57,6 +57,7 @@ public:
 	void LinkMenu();
 	void NodeEditor();
 	void ShowPinStyleEditor();
+	void ShowLinkStyleEditor();
 	void ShowSectionEditor();
 	void ShowListEditor();
 	void ShowTypeEnumPopup();
@@ -90,7 +91,6 @@ public:
 	TemplateManager m_TemplateManager;
 	const float							m_TouchTime = 1.0f;
 	std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
-	bool								m_ShowPinStyleEditor{ false };
 	bool                                m_ShowSectionEditor{ false };
 	bool                                m_ShowListEditor{ false };
 	bool								m_ShouldApplyForceDirectedLayout{ false };

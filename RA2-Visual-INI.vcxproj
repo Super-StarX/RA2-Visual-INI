@@ -159,7 +159,7 @@
     <ClCompile Include="Nodes\INENode.cpp" />
     <ClCompile Include="Nodes\ListNode.cpp" />
     <ClCompile Include="Nodes\CommentNode.cpp" />
-    <ClCompile Include="LinkType.cpp" />
+    <ClCompile Include="LinkStyle.cpp" />
     <ClCompile Include="LoadSave.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Nodes\BuilderNode.cpp" />
@@ -200,7 +200,7 @@
     <ClInclude Include="Nodes\INENode.h" />
     <ClInclude Include="Nodes\ListNode.h" />
     <ClInclude Include="Nodes\CommentNode.h" />
-    <ClInclude Include="LinkType.h" />
+    <ClInclude Include="LinkStyle.h" />
     <ClInclude Include="Nodes\BuilderNode.h" />
     <ClInclude Include="LeftPanelClass.h" />
     <ClInclude Include="Link.h" />

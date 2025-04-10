@@ -1,5 +1,6 @@
 ﻿#include "MainWindow.h"
 #include "Utils.h"
+#include "LinkStyle.h"
 #include "Nodes/BlueprintNode.h"
 #include "Nodes/CommentNode.h"
 #include "Nodes/GroupNode.h"
@@ -23,6 +24,8 @@ static ed::LinkId contextLinkId;
 static ed::PinId  contextPinId;
 static Pin* newNodeLinkPin = nullptr;
 static ImVec2 newNodePosition;
+static bool m_ShowPinStyleEditor{ false };
+static bool m_ShowLinkStyleEditor{ false };
 static SectionNode* m_SectionEditorNode{ nullptr };
 void MainWindow::Menu() {
 	ed::Suspend();
@@ -423,14 +426,28 @@ void MainWindow::LinkMenu() {
 
 	ImGui::TextUnformatted("Link Context Menu");
 	ImGui::Separator();
-	if (link)
+	if (link) {
 		link->Menu();
+		if (ImGui::MenuItem("Manage Custom Styles..."))
+			m_ShowLinkStyleEditor = true;
+	}
 	else
 		ImGui::Text("Unknown link: %p", contextLinkId.AsPointer());
 	ImGui::Separator();
 	if (ImGui::MenuItem("Delete"))
 		ed::DeleteLink(contextLinkId);
 	ImGui::EndPopup();
+}
+
+// 类型编辑器窗口
+void MainWindow::ShowLinkStyleEditor() {
+	if (!m_ShowLinkStyleEditor) return;
+
+	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Link Sytle Manager", &m_ShowLinkStyleEditor)) {
+		LinkStyleManager::Menu();
+	}
+	ImGui::End();
 }
 
 void MainWindow::ToolTip() {

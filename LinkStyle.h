@@ -1,4 +1,4 @@
-﻿// LinkType.h
+﻿// LinkStyle.h
 #pragma once
 #include <string>
 #include <vector>
@@ -29,6 +29,8 @@ public:
 	}
 
 	LinkStyleManager();
+
+	static void Menu();
 	const LinkStyleInfo* FindType(const std::string& identifier) const;
 	const std::vector<LinkStyleInfo>& GetAllTypes() const { return m_Types; }
 

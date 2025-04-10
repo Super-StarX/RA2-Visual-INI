@@ -1,5 +1,5 @@
 ﻿#include "Link.h"
-#include "LinkType.h"
+#include "LinkStyle.h"
 #include "MainWindow.h"
 
 std::vector<std::unique_ptr<Link>> Link::Array;

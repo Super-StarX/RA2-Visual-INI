@@ -1,80 +1,107 @@
 ﻿#include "PinStyle.h"
-#include "LinkType.h"
+#include "LinkStyle.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
+#include <misc/cpp/imgui_stdlib.h>
 
 void PinStyleManager::Menu() {
-	static char newIdentifier[128] = "";
-	static char newDisplayName[128] = "";
-	static ImColor newColor = ImColor(255, 255, 255);
-	static int newIconType = 0;
-	static int selectedLinkTypeIndex = 0;
-	static std::string linkType = "";
 
-	// 添加新类型
-	ImGui::InputText("Identifier", newIdentifier, IM_ARRAYSIZE(newIdentifier));
-	ImGui::InputText("Display Name", newDisplayName, IM_ARRAYSIZE(newDisplayName));
-	ImGui::ColorEdit4("Color", &newColor.Value.x);
-	ImGui::Combo("Icon", &newIconType, "Flow\0Circle\0Square\0Grid\0RoundSquare\0Diamond\0");
+	static int selected = -1;
+	const auto& types = PinStyleManager::Get().GetAllTypes();
 
-	// 新增Link类型选择下拉框
-	auto& linkTypes = LinkStyleManager::Get().GetAllTypes();
-	if (ImGui::Combo("Link Type", &selectedLinkTypeIndex,
-		[](void* data, int idx, const char** out_text) {
-			auto& types = *static_cast<const std::vector<LinkStyleInfo>*>(data);
-			if (idx >= 0 && idx < static_cast<int>(types.size())) {
-				*out_text = types[idx].DisplayName.c_str();
-				return true;
-			}
-			return false;
-		},
-		(void*)&linkTypes,
-		static_cast<int>(linkTypes.size()))) {
-		// 这里可以添加选择变化后的处理逻辑
-		if (selectedLinkTypeIndex >= 0 && selectedLinkTypeIndex < static_cast<int>(linkTypes.size())) {
-			linkType = linkTypes[selectedLinkTypeIndex].Identifier;
+	ImGui::Text("Pin Styles:");
+	ImGui::BeginChild("##PinStyleList", ImVec2(200, 300), true);
+	for (int i = 0; i < types.size(); ++i) {
+		const auto& type = types[i];
+		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i)) {
+			selected = i;
 		}
 	}
+	ImGui::EndChild();
 
-	if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
-		PinStyleInfo newType;
-		newType.Identifier = newIdentifier;
-		newType.DisplayName = newDisplayName[0] ? newDisplayName : newIdentifier;
-		newType.Color = newColor;
-		newType.IconType = newIconType;
-		newType.IsUserDefined = true;
-		newType.LinkType = linkType;
+	ImGui::SameLine();
 
-		PinStyleManager::Get().AddCustomType(newType);
+	// 编辑区域
+	ImGui::BeginGroup();
+	if (selected >= 0 && selected < types.size()) {
+		PinStyleInfo& type = const_cast<PinStyleInfo&>(types[selected]);
 
-		// 清空输入
-		memset(newIdentifier, 0, sizeof(newIdentifier));
-		memset(newDisplayName, 0, sizeof(newDisplayName));
-		newColor = ImColor(255, 255, 255);
+		ImGui::Text("Edit Pin Style:");
+		ImGui::Text("Identifier: %s", type.Identifier.c_str());
+		ImGui::InputText("Name", &type.DisplayName);
+
+		ImVec4 col = type.Color;
+		if (ImGui::ColorEdit4("Color", (float*)&col))
+			type.Color = ImColor(col);
+
+		ImGui::Combo("Icon Type", &type.IconType, "Circle\0Square\0Triangle\0Diamond\0");
+
+		if (ImGui::BeginCombo("Link Type", type.LinkType.c_str())) {
+			for (const auto& linkType : LinkStyleManager::Get().GetAllTypes()) {
+				bool isSelected = (type.LinkType == linkType.Identifier);
+				if (ImGui::Selectable(linkType.DisplayName.c_str(), isSelected)) {
+					type.LinkType = linkType.Identifier;
+				}
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		if (type.IsUserDefined) {
+			if (ImGui::Button("Delete")) {
+				PinStyleManager::Get().RemoveCustomType(type.Identifier);
+				selected = -1;
+			}
+		}
 	}
+	ImGui::EndGroup();
 
 	ImGui::Separator();
 
-	// 现有类型列表
-	ImGui::Text("Existing Types:");
-	ImGui::BeginChild("##type_list", ImVec2(0, 200), true);
-	for (const auto& type : PinStyleManager::Get().GetAllTypes()) {
-		ImGui::ColorButton("##color", type.Color,
-			ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
-		ImGui::SameLine();
+	// 添加新样式
+	static char newId[64] = "";
+	static char newName[64] = "";
+	static ImVec4 newColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static int newIconType = 0;
+	static std::string newLinkType = "default";
 
-		if (type.IsUserDefined) {
-			if (ImGui::Button(("X##del_" + type.Identifier).c_str())) {
-				PinStyleManager::Get().RemoveCustomType(type.Identifier);
+	ImGui::Text("Add New Pin Style:");
+	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
+	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
+	ImGui::ColorEdit4("Color##new", (float*)&newColor);
+	ImGui::Combo("Icon Type##new", &newIconType, "Circle\0Square\0Triangle\0Diamond\0");
+
+	if (ImGui::BeginCombo("Link Type##new", newLinkType.c_str())) {
+		for (const auto& linkType : LinkStyleManager::Get().GetAllTypes()) {
+			bool isSelected = (newLinkType == linkType.Identifier);
+			if (ImGui::Selectable(linkType.DisplayName.c_str(), isSelected)) {
+				newLinkType = linkType.Identifier;
 			}
-			ImGui::SameLine();
+			if (isSelected)
+				ImGui::SetItemDefaultFocus();
 		}
-
-		ImGui::Text("%s (%s)", type.DisplayName.c_str(),
-			type.Identifier.c_str());
+		ImGui::EndCombo();
 	}
-	ImGui::EndChild();
+
+	if (ImGui::Button("Add")) {
+		if (strlen(newId) > 0 && strlen(newName) > 0 && !PinStyleManager::Get().FindType(newId)) {
+			PinStyleInfo newType;
+			newType.Identifier = newId;
+			newType.DisplayName = newName;
+			newType.Color = ImColor(newColor);
+			newType.IconType = newIconType;
+			newType.LinkType = newLinkType;
+			newType.IsUserDefined = true;
+
+			PinStyleManager::Get().AddCustomType(newType);
+			memset(newId, 0, sizeof(newId));
+			memset(newName, 0, sizeof(newName));
+			newLinkType = "default";
+		}
+	}
+
 }
 
 const PinStyleInfo* PinStyleManager::FindType(const std::string& identifier) const {
