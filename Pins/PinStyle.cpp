@@ -5,19 +5,65 @@
 #include <sstream>
 #include <misc/cpp/imgui_stdlib.h>
 
-void PinStyleManager::Menu() {
+PinStyleManager::PinStyleManager() {
+	auto AddType = [this](const PinStyleInfo& type) {
+		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
+			return;
 
+		m_Types.push_back(type);
+		m_TypeIndex[type.Identifier] = m_Types.size() - 1;
+	};
+
+	AddType({ "flow",    "Flow",    ImColor(255, 255, 255), 0 });
+	AddType({ "bool",    "Boolean", ImColor(220, 48, 48),   1 });
+	AddType({ "int",     "Integer", ImColor(68, 201, 156),  1 });
+	AddType({ "float",   "Float",   ImColor(147, 226, 74),  1 });
+	AddType({ "string",  "String",  ImColor(124, 21, 153),  1 });
+	AddType({ "object",  "Object",  ImColor(51, 150, 215),  1 });
+	AddType({ "function","Function",ImColor(218, 0, 183),   1 });
+	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   2 });
+	//AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
+}
+
+void PinStyleManager::Menu() {
 	static int selected = -1;
 	const auto& types = PinStyleManager::Get().GetAllTypes();
 
 	ImGui::Text("Pin Styles:");
-	ImGui::BeginChild("##PinStyleList", ImVec2(200, 300), true);
+	ImGui::BeginChild("##PinStyleList", ImVec2(150, 300), true);
 	for (int i = 0; i < types.size(); ++i) {
 		const auto& type = types[i];
-		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i)) {
+		ImGui::PushID(i);
+
+		// 给每一行留出删除按钮空间（比如 20 像素）
+		float fullWidth = ImGui::GetContentRegionAvail().x;
+		float buttonWidth = 20.0f;
+		float labelWidth = fullWidth - buttonWidth - 5.0f; // 5 px 间距
+
+		// 限制 Selectable 宽度
+		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i, 0, ImVec2(labelWidth, 0))) {
 			selected = i;
 		}
+
+		// 删除按钮
+		if (type.IsUserDefined) {
+			ImGui::SameLine(labelWidth + 15.0f); // 靠右对齐
+			if (ImGui::SmallButton("×")) {
+				PinStyleManager::Get().RemoveCustomType(type.Identifier);
+
+				if (selected == i)
+					selected = -1;
+				else if (selected > i)
+					selected--;
+
+				ImGui::PopID();
+				break;
+			}
+		}
+
+		ImGui::PopID();
 	}
+
 	ImGui::EndChild();
 
 	ImGui::SameLine();
@@ -27,6 +73,7 @@ void PinStyleManager::Menu() {
 	if (selected >= 0 && selected < types.size()) {
 		PinStyleInfo& type = const_cast<PinStyleInfo&>(types[selected]);
 
+		ImGui::PushItemWidth(300.0f);
 		ImGui::Text("Edit Pin Style:");
 		ImGui::Text("Identifier: %s", type.Identifier.c_str());
 		ImGui::InputText("Name", &type.DisplayName);
@@ -37,7 +84,7 @@ void PinStyleManager::Menu() {
 
 		ImGui::Combo("Icon Type", &type.IconType, "Circle\0Square\0Triangle\0Diamond\0");
 
-		if (ImGui::BeginCombo("Link Type", type.LinkType.c_str())) {
+		if (ImGui::BeginCombo("Link Style", type.LinkType.c_str())) {
 			for (const auto& linkType : LinkStyleManager::Get().GetAllTypes()) {
 				bool isSelected = (type.LinkType == linkType.Identifier);
 				if (ImGui::Selectable(linkType.DisplayName.c_str(), isSelected)) {
@@ -55,6 +102,7 @@ void PinStyleManager::Menu() {
 				selected = -1;
 			}
 		}
+		ImGui::PopItemWidth();
 	}
 	ImGui::EndGroup();
 
@@ -67,6 +115,7 @@ void PinStyleManager::Menu() {
 	static int newIconType = 0;
 	static std::string newLinkType = "default";
 
+	ImGui::PushItemWidth(455.0f);
 	ImGui::Text("Add New Pin Style:");
 	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
 	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
@@ -84,6 +133,7 @@ void PinStyleManager::Menu() {
 		}
 		ImGui::EndCombo();
 	}
+	ImGui::PopItemWidth();
 
 	if (ImGui::Button("Add")) {
 		if (strlen(newId) > 0 && strlen(newName) > 0 && !PinStyleManager::Get().FindType(newId)) {
@@ -211,26 +261,6 @@ bool PinStyleManager::SaveToFile(const std::string& path) {
 
 	file << std::setw(4) << j << std::endl;
 	return true;
-}
-
-PinStyleManager::PinStyleManager() {
-	auto AddType = [this](const PinStyleInfo& type) {
-		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
-			return;
-
-		m_Types.push_back(type);
-		m_TypeIndex[type.Identifier] = m_Types.size() - 1;
-	};
-
-	AddType({ "flow",    "Flow",    ImColor(255, 255, 255), 0 });
-	AddType({ "bool",    "Boolean", ImColor(220, 48, 48),   1 });
-	AddType({ "int",     "Integer", ImColor(68, 201, 156),  1 });
-	AddType({ "float",   "Float",   ImColor(147, 226, 74),  1 });
-	AddType({ "string",  "String",  ImColor(124, 21, 153),  1 });
-	AddType({ "object",  "Object",  ImColor(51, 150, 215),  1 });
-	AddType({ "function","Function",ImColor(218, 0, 183),   1 });
-	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   2 });
-	//AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
 }
 
 void PinStyleManager::AddCustomType(const PinStyleInfo& type) {

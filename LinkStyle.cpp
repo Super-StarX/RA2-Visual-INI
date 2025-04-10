@@ -21,21 +21,46 @@ LinkStyleManager::LinkStyleManager() {
 			1.0f, 1 });
 	AddType({ "blue", "Blue",
 			IM_COL32(0, 0, 180, 255), IM_COL32(0, 0, 255, 255),
-			2.0f, 0 });
+			2.0f, 1 });
 }
 
 void LinkStyleManager::Menu() {
-
 	static int selected = -1;
 	const auto& types = LinkStyleManager::Get().GetAllTypes();
 
-	ImGui::Text("Styles:");
-	ImGui::BeginChild("##StyleList", ImVec2(200, 300), true);
+	ImGui::Text("Link Styles:");
+	ImGui::BeginChild("##LinkStyleList", ImVec2(150, 300), true);
 	for (int i = 0; i < types.size(); ++i) {
 		const auto& type = types[i];
-		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i)) {
+		ImGui::PushID(i);
+
+		// 给每一行留出删除按钮空间（比如 20 像素）
+		float fullWidth = ImGui::GetContentRegionAvail().x;
+		float buttonWidth = 20.0f;
+		float labelWidth = fullWidth - buttonWidth - 5.0f; // 5 px 间距
+
+		// 限制 Selectable 宽度
+		if (ImGui::Selectable(type.DisplayName.c_str(), selected == i, 0, ImVec2(labelWidth, 0))) {
 			selected = i;
 		}
+
+		// 删除按钮
+		if (type.IsUserDefined) {
+			ImGui::SameLine(labelWidth + 15.0f); // 靠右对齐
+			if (ImGui::SmallButton("×")) {
+				LinkStyleManager::Get().RemoveCustomType(type.Identifier);
+
+				if (selected == i)
+					selected = -1;
+				else if (selected > i)
+					selected--;
+
+				ImGui::PopID();
+				break;
+			}
+		}
+
+		ImGui::PopID();
 	}
 	ImGui::EndChild();
 
@@ -46,7 +71,8 @@ void LinkStyleManager::Menu() {
 	if (selected >= 0 && selected < types.size()) {
 		LinkStyleInfo& type = const_cast<LinkStyleInfo&>(types[selected]); // 注意：这里直接修改内存，确保只对用户定义项启用修改
 
-		ImGui::Text("Edit Style:");
+		ImGui::PushItemWidth(300.0f);
+		ImGui::Text("Edit Link Style:");
 		ImGui::Text("Identifier: %s", type.Identifier.c_str());
 		ImGui::Text("Name:");
 		ImGui::InputText("##DisplayName", &type.DisplayName);
@@ -60,6 +86,7 @@ void LinkStyleManager::Menu() {
 			type.HighlightColor = ImGui::ColorConvertFloat4ToU32(highlight);
 
 		ImGui::SliderFloat("Thickness", &type.Thickness, 0.5f, 10.0f);
+		ImGui::PopItemWidth();
 
 		if (type.IsUserDefined) {
 			if (ImGui::Button("Delete")) {
@@ -79,12 +106,14 @@ void LinkStyleManager::Menu() {
 	static ImVec4 newHighlight = ImVec4(0.8f, 0.8f, 1.0f, 1.0f);
 	static float newThickness = 1.0f;
 
+	ImGui::PushItemWidth(455.0f);
 	ImGui::Text("Add New Style:");
 	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
 	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
 	ImGui::ColorEdit4("Base Color##new", (float*)&newColor);
 	ImGui::ColorEdit4("Highlight Color##new", (float*)&newHighlight);
 	ImGui::SliderFloat("Thickness##new", &newThickness, 0.5f, 10.0f);
+	ImGui::PopItemWidth();
 
 	if (ImGui::Button("Add")) {
 		if (strlen(newId) > 0 && strlen(newName) > 0 && !LinkStyleManager::Get().FindType(newId)) {
