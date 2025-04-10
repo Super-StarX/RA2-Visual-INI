@@ -167,12 +167,12 @@ void SectionNode::DrawInputText(const char* label, std::string* str, bool disabl
 		ImGui::InputText(label, str);
 }
 
-void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
+void SectionNode::UnFoldedKeyValues(KeyValue* kv, int mode) {
 	auto builder = BuilderNode::GetBuilder();
 
 	if (mode == 0) {
-		builder->Input(kv.InputPin.ID);
-		auto& inputPin = kv.InputPin;
+		builder->Input(kv->InputPin.ID);
+		auto& inputPin = kv->InputPin;
 		auto alpha = inputPin.GetAlpha();
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		inputPin.DrawPinIcon(inputPin.IsLinked(), (int)(alpha * 255));
@@ -181,34 +181,34 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
 		builder->EndInput();
 	}
 	else if (mode == 1) {
-		builder->Output(kv.ID);
-		auto alpha = kv.GetAlpha();
+		builder->Output(kv->ID);
+		auto alpha = kv->GetAlpha();
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 		ImGui::PushID(&kv);
 
-		bool disableKey = kv.IsComment || IsComment;
-		bool disableValue = kv.IsInherited || kv.IsComment || IsComment;
+		bool disableKey = kv->IsComment || IsComment;
+		bool disableValue = kv->IsInherited || kv->IsComment || IsComment;
 
-		const bool isDisabled = kv.IsInherited || kv.IsComment || IsComment;
-		auto w1 = Utils::SetNextInputWidth(kv.Key, 60.f);
+		const bool isDisabled = kv->IsInherited || kv->IsComment || IsComment;
+		auto w1 = Utils::SetNextInputWidth(kv->Key, 60.f);
 
-		DrawInputText("##Key", &kv.Key, disableKey);
+		DrawInputText("##Key", &kv->Key, disableKey);
 		if (disableValue) {
-			auto value = kv.GetValue();
+			auto value = kv->GetValue();
 			auto w2 = Utils::SetNextInputWidth(value, 60.f);
 			DrawInputText("##Value", &value, true);
 			maxSize = std::max(w2 + w1, maxSize);
 		}
 		else {
 			// 获取当前键的类型信息（假设已实现类型查找逻辑）
-			auto typeInfo = TypeSystem::Get().GetKeyType(this->TypeName, kv.Key);
+			auto typeInfo = TypeSystem::Get().GetKeyType(this->TypeName, kv->Key);
 
 			// 根据类型绘制不同控件
 			ImGui::PushItemWidth(120);
 			auto ms = maxSize;
-			auto value = kv.GetValue();
-			maxSize = kv.DrawValueWidget(value, typeInfo);
-			kv.SetValue(value);
+			auto value = kv->GetValue();
+			maxSize = kv->DrawValueWidget(value, typeInfo);
+			kv->SetValue(value);
 			// 这里的逻辑是，利用maxsize暂存value的长度，因此把原maxSize的值存到ms里
 			// 所以比较的长度是key的长度（w1）和value的长度（maxSize）之和与原maxSize（ms）
 			maxSize = std::max(maxSize + w1, ms);
@@ -218,7 +218,7 @@ void SectionNode::UnFoldedKeyValues(KeyValue& kv, int mode) {
 
 
 		ImGui::Spring(0);
-		kv.DrawPinIcon(kv.IsLinked(), (int)(alpha * 255));
+		kv->DrawPinIcon(kv->IsLinked(), (int)(alpha * 255));
 
 		ImGui::PopID();
 		ImGui::PopStyleVar();

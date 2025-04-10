@@ -13,7 +13,7 @@ public:
 	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual Pin* GetFirstCompatiblePin(Pin* pin) override;
 	virtual void AddKeyValue() = 0;
-	virtual void UnFoldedKeyValues(T& kv, int mode = 0) = 0;
+	virtual void UnFoldedKeyValues(T* kv, int mode = 0) = 0;
 	virtual void FoldedKeyValues(size_t& i);
 
 	vector KeyValues;

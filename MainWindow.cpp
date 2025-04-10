@@ -191,6 +191,7 @@ void MainWindow::OnFrame(float deltaTime) {
 	ShowPinTypeEditor();
 	ShowSectionEditor();
 	ShowListEditor();
+	ShowTypeEnumPopup();
 
 	ed::Begin("Node editor");
 	for (auto& node : Node::Array)

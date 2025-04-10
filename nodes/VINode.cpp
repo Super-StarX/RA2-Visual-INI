@@ -58,9 +58,9 @@ void VINode<T>::Update() {
 
 	if (!IsFolded) {
 		while (i < this->KeyValues.size()) {
-			auto& kv = this->KeyValues[i];
+			auto kv = this->KeyValues[i].get();
 			if (!kv->IsFolded) {
-				UnFoldedKeyValues(*kv, 0); // 展开状态下的渲染
+				UnFoldedKeyValues(kv, 0); // 展开状态下的渲染
 				i++;
 			}
 			else {
@@ -71,9 +71,9 @@ void VINode<T>::Update() {
 		}
 		i = 0;
 		while (i < this->KeyValues.size()) {
-			auto& kv = this->KeyValues[i];
+			auto kv = this->KeyValues[i].get();
 			if (!kv->IsFolded) {
-				UnFoldedKeyValues(*kv, 1); // 展开状态下的渲染
+				UnFoldedKeyValues(kv, 1); // 展开状态下的渲染
 				i++;
 			}
 			else

@@ -478,3 +478,34 @@ void MainWindow::ToolTip() {
 		lastHoveredPin = nullptr;
 	}
 }
+
+void MainWindow::ShowTypeEnumPopup() {
+	if (!m_ShowTypeEnumPopup)
+		return;
+
+	if(!ImGui::IsPopupOpen("Type Enum Popup"))
+		ImGui::OpenPopup("Type Enum Popup");
+
+	if (ImGui::BeginPopup("Type Enum Popup")) {
+		auto& typeSystem = TypeSystem::Get();
+		auto& type = m_TypeEnumPopupType;
+
+		for (auto& item : std::get<StringLimit>(type.Data).ValidValues) {
+			if (ImGui::MenuItem(item.c_str())) {
+				m_TypeEnumPopupPin->SetValue(item);
+				m_TypeEnumPopupPin->UpdateOutputLink("");
+				m_ShowTypeEnumPopup = false;
+				m_TypeEnumPopupType = {};
+				m_TypeEnumPopupPin = nullptr;
+				break;
+			}
+		}
+
+		if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) && ImGui::IsMouseClicked(0)) {
+			m_ShowTypeEnumPopup = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+}

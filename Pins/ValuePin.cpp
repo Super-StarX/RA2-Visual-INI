@@ -43,10 +43,18 @@ float ValuePin::DrawValueWidget(std::string& value, const TypeInfo& type) {
 	case TypeCategory::StringLimit: {
 		if (!std::get<StringLimit>(type.Data).ValidValues.empty()) {
 			int current = Utils::GetComboIndex(value, std::get<StringLimit>(type.Data).ValidValues);
-			if (ImGui::Combo("##str", &current,
-				Utils::GetComboItems(std::get<StringLimit>(type.Data).ValidValues))) {
-				value = std::get<StringLimit>(type.Data).ValidValues[current];
+			ImGui::BeginHorizontal("#combo_str");
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+			auto w = Utils::SetNextInputWidth(value, 80.f);
+			width = std::max(width, w);
+			ImGui::InputText("##str", &value);
+			if (ImGui::Button("...")) {
+				MainWindow::Instance->m_ShowTypeEnumPopup = true;
+				MainWindow::Instance->m_TypeEnumPopupType = type;
+				MainWindow::Instance->m_TypeEnumPopupPin = this;
 			}
+			ImGui::PopStyleVar();
+			ImGui::EndHorizontal();
 		}
 		else {
 			auto w = Utils::SetNextInputWidth(value, 100.f);

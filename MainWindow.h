@@ -12,6 +12,7 @@
 #include "LeftPanelClass.h"
 #include "TemplateManager.h"
 #include "Localization.h"
+#include "TypeLoader.h"
 
 class SectionNode;
 class ModuleNode;
@@ -19,6 +20,7 @@ class TagNode;
 class GroupNode;
 class CommentNode;
 class ListNode;
+class ValuePin;
 
 class MainWindow : public Application {
 public:
@@ -57,6 +59,7 @@ public:
 	void ShowPinTypeEditor();
 	void ShowSectionEditor();
 	void ShowListEditor();
+	void ShowTypeEnumPopup();
 
 	// 布局算法相关函数声明
 	void EnableApplyForceDirectedLayout();
@@ -91,4 +94,7 @@ public:
 	bool                                m_ShowSectionEditor{ false };
 	bool                                m_ShowListEditor{ false };
 	bool								m_ShouldApplyForceDirectedLayout{ false };
+	bool                                m_ShowTypeEnumPopup{ false };
+	TypeInfo							m_TypeEnumPopupType{ };
+	ValuePin*							m_TypeEnumPopupPin{ nullptr };
 };
