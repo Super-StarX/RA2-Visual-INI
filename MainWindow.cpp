@@ -6,7 +6,7 @@
 #include "Nodes/ListNode.h"
 #include "Nodes/BuilderNode.h"
 #include "Pins/KeyValue.h"
-#include "Pins/PinType.h"
+#include "Pins/PinStyle.h"
 #include "Nodes/TagNode.h"
 #include "Log.h"
 
@@ -129,7 +129,7 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
-	PinTypeManager::Get().LoadFromFile("custom_types.json");
+	PinStyleManager::Get().LoadFromFile("custom_types.json");
 	LOG_INFO("载入自定义Pin类型完毕");
 	TypeSystem::Get().LoadFromINI("INICodingCheck.ini");
 	LOG_INFO("载入INI配置完毕");
@@ -149,7 +149,7 @@ void MainWindow::OnStart() {
 
 void MainWindow::OnStop() {
 	LOG_INFO("程序关闭，正在保存自定义数据信息...");
-	PinTypeManager::Get().SaveToFile("custom_types.json");
+	PinStyleManager::Get().SaveToFile("custom_types.json");
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
@@ -188,7 +188,7 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	ImGui::SameLine(0.0f, 12.0f);
 
-	ShowPinTypeEditor();
+	ShowPinStyleEditor();
 	ShowSectionEditor();
 	ShowListEditor();
 	ShowTypeEnumPopup();

@@ -1,10 +1,10 @@
-﻿#include "PinType.h"
+﻿#include "PinStyle.h"
 #include "LinkType.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
 
-void PinTypeManager::Menu() {
+void PinStyleManager::Menu() {
 	static char newIdentifier[128] = "";
 	static char newDisplayName[128] = "";
 	static ImColor newColor = ImColor(255, 255, 255);
@@ -38,7 +38,7 @@ void PinTypeManager::Menu() {
 	}
 
 	if (ImGui::Button("Add New Type") && newIdentifier[0] != '\0') {
-		PinTypeInfo newType;
+		PinStyleInfo newType;
 		newType.Identifier = newIdentifier;
 		newType.DisplayName = newDisplayName[0] ? newDisplayName : newIdentifier;
 		newType.Color = newColor;
@@ -46,7 +46,7 @@ void PinTypeManager::Menu() {
 		newType.IsUserDefined = true;
 		newType.LinkType = linkType;
 
-		PinTypeManager::Get().AddCustomType(newType);
+		PinStyleManager::Get().AddCustomType(newType);
 
 		// 清空输入
 		memset(newIdentifier, 0, sizeof(newIdentifier));
@@ -59,14 +59,14 @@ void PinTypeManager::Menu() {
 	// 现有类型列表
 	ImGui::Text("Existing Types:");
 	ImGui::BeginChild("##type_list", ImVec2(0, 200), true);
-	for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
+	for (const auto& type : PinStyleManager::Get().GetAllTypes()) {
 		ImGui::ColorButton("##color", type.Color,
 			ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
 		ImGui::SameLine();
 
 		if (type.IsUserDefined) {
 			if (ImGui::Button(("X##del_" + type.Identifier).c_str())) {
-				PinTypeManager::Get().RemoveCustomType(type.Identifier);
+				PinStyleManager::Get().RemoveCustomType(type.Identifier);
 			}
 			ImGui::SameLine();
 		}
@@ -77,14 +77,14 @@ void PinTypeManager::Menu() {
 	ImGui::EndChild();
 }
 
-const PinTypeInfo* PinTypeManager::FindType(const std::string& identifier) const {
+const PinStyleInfo* PinStyleManager::FindType(const std::string& identifier) const {
 	auto it = m_TypeIndex.find(identifier);
 	if (it != m_TypeIndex.end() && it->second < m_Types.size())
 		return &m_Types[it->second];
 	return nullptr;
 }
 
-void PinTypeManager::RemoveCustomType(const std::string& identifier) {
+void PinStyleManager::RemoveCustomType(const std::string& identifier) {
 	auto it = m_TypeIndex.find(identifier);
 	if (it == m_TypeIndex.end())
 		return;
@@ -103,7 +103,7 @@ void PinTypeManager::RemoveCustomType(const std::string& identifier) {
 	}
 }
 
-bool PinTypeManager::LoadFromFile(const std::string& path) {
+bool PinStyleManager::LoadFromFile(const std::string& path) {
 	try {
 		// 打开文件并读取内容
 		std::ifstream file(path);
@@ -122,7 +122,7 @@ bool PinTypeManager::LoadFromFile(const std::string& path) {
 		json j = json::parse(jsonContent);
 		for (const auto& type : j["Types"]) {
 
-			PinTypeInfo info;
+			PinStyleInfo info;
 			info.Identifier = type["Identifier"].get<std::string>();
 			info.DisplayName = type["DisplayName"].get<std::string>();
 
@@ -154,7 +154,7 @@ bool PinTypeManager::LoadFromFile(const std::string& path) {
 	}
 }
 
-bool PinTypeManager::SaveToFile(const std::string& path) {
+bool PinStyleManager::SaveToFile(const std::string& path) {
 	using json = nlohmann::json;
 	json j;
 	for (const auto& type : m_Types) {
@@ -186,8 +186,8 @@ bool PinTypeManager::SaveToFile(const std::string& path) {
 	return true;
 }
 
-PinTypeManager::PinTypeManager() {
-	auto AddType = [this](const PinTypeInfo& type) {
+PinStyleManager::PinStyleManager() {
+	auto AddType = [this](const PinStyleInfo& type) {
 		if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 			return;
 
@@ -206,7 +206,7 @@ PinTypeManager::PinTypeManager() {
 	//AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
 }
 
-void PinTypeManager::AddCustomType(const PinTypeInfo& type) {
+void PinStyleManager::AddCustomType(const PinStyleInfo& type) {
 	if (m_TypeIndex.find(type.Identifier) != m_TypeIndex.end())
 		return;
 

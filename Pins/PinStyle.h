@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 
-struct PinTypeInfo {
+struct PinStyleInfo {
 	std::string Identifier;  // 唯一标识符
 	std::string DisplayName; // 显示名称
 	ImColor     Color;       // 显示颜色
@@ -19,25 +19,25 @@ struct PinTypeInfo {
 	}
 };
 
-class PinTypeManager {
+class PinStyleManager {
 public:
-	static PinTypeManager& Get() {
-		static PinTypeManager instance;
+	static PinStyleManager& Get() {
+		static PinStyleManager instance;
 		return instance;
 	}
 	static void Menu();
 
-	PinTypeManager();
+	PinStyleManager();
 	bool LoadFromFile(const std::string& path);
 	bool SaveToFile(const std::string& path);
 
-	const PinTypeInfo* FindType(const std::string& identifier) const;
-	const std::vector<PinTypeInfo>& GetAllTypes() const { return m_Types; }
+	const PinStyleInfo* FindType(const std::string& identifier) const;
+	const std::vector<PinStyleInfo>& GetAllTypes() const { return m_Types; }
 
-	void AddCustomType(const PinTypeInfo& type);
+	void AddCustomType(const PinStyleInfo& type);
 	void RemoveCustomType(const std::string& identifier);
 
 private:
-	std::vector<PinTypeInfo> m_Types;
+	std::vector<PinStyleInfo> m_Types;
 	std::unordered_map<std::string, size_t> m_TypeIndex;
 };

@@ -11,7 +11,7 @@
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
-#include "Pins/PinType.h"
+#include "Pins/PinStyle.h"
 #include "Pins/KeyValue.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include "Log.h"
@@ -314,8 +314,8 @@ void MainWindow::PinMenu() {
 	if (pin) {
 		pin->Menu();
 		// 自定义类型管理
-		if (ImGui::MenuItem("Manage Custom Types..."))
-			m_ShowPinTypeEditor = true;
+		if (ImGui::MenuItem("Manage Custom Styles..."))
+			m_ShowPinStyleEditor = true;
 	}
 	else {
 		ImGui::Text("Unknown pin: %p", contextPinId.AsPointer());
@@ -325,12 +325,12 @@ void MainWindow::PinMenu() {
 }
 
 // 类型编辑器窗口
-void MainWindow::ShowPinTypeEditor() {
-	if (!m_ShowPinTypeEditor) return;
+void MainWindow::ShowPinStyleEditor() {
+	if (!m_ShowPinStyleEditor) return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Pin Type Manager", &m_ShowPinTypeEditor)) {
-		PinTypeManager::Menu();
+	if (ImGui::Begin("Pin Sytle Manager", &m_ShowPinStyleEditor)) {
+		PinStyleManager::Menu();
 	}
 	ImGui::End();
 }

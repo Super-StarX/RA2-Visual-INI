@@ -177,7 +177,7 @@
     <ClCompile Include="Pins\KeyValue.cpp" />
     <ClCompile Include="Pins\Pin.cpp" />
     <ClCompile Include="Nodes\SimpleNode.cpp" />
-    <ClCompile Include="Pins\PinType.cpp" />
+    <ClCompile Include="Pins\PinStyle.cpp" />
     <ClCompile Include="PlaceholderReplacer.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="Nodes\TagNode.cpp" />
@@ -217,7 +217,7 @@
     <ClInclude Include="Pins\KeyValue.h" />
     <ClInclude Include="Pins\Pin.h" />
     <ClInclude Include="Nodes\SimpleNode.h" />
-    <ClInclude Include="Pins\PinType.h" />
+    <ClInclude Include="Pins\PinStyle.h" />
     <ClInclude Include="Nodes\TagNode.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="PlaceholderReplacer.h" />

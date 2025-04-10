@@ -1,5 +1,5 @@
 ﻿#include "Pin.h"
-#include "PinType.h"
+#include "PinStyle.h"
 #include "Utils.h"
 #include "KeyValue.h"
 #include "Nodes/SectionNode.h"
@@ -142,14 +142,14 @@ SectionNode* Pin::GetLinkedSection() const {
 }
 
 ImColor Pin::GetIconColor() const {
-	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
+	auto* typeInfo = PinStyleManager::Get().FindType(TypeIdentifier);
 	if (!typeInfo) return ImColor(255, 255, 255);
 
 	return typeInfo->Color;
 }
 
 std::string Pin::GetLinkType() const {
-	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
+	auto* typeInfo = PinStyleManager::Get().FindType(TypeIdentifier);
 	if (!typeInfo) return std::string();
 
 	return typeInfo->LinkType;
@@ -157,7 +157,7 @@ std::string Pin::GetLinkType() const {
 
 void Pin::Menu() {
 	// 显示当前类型
-	if (auto* currentType = PinTypeManager::Get().FindType(TypeIdentifier)) {
+	if (auto* currentType = PinStyleManager::Get().FindType(TypeIdentifier)) {
 		ImGui::Text("Current Type: %s", currentType->DisplayName.c_str());
 		ImGui::ColorButton("##color", currentType->Color,
 			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
@@ -170,7 +170,7 @@ void Pin::Menu() {
 
 	// 类型选择菜单
 	if (ImGui::BeginMenu("Change Type")) {
-		for (const auto& type : PinTypeManager::Get().GetAllTypes()) {
+		for (const auto& type : PinStyleManager::Get().GetAllTypes()) {
 			if (ImGui::MenuItem(type.DisplayName.c_str()))
 				TypeIdentifier = type.Identifier;
 
@@ -211,7 +211,7 @@ float Pin::GetAlpha() {
 }
 
 void Pin::DrawPinIcon(bool connected, int alpha, bool isReverse) const {
-	auto* typeInfo = PinTypeManager::Get().FindType(TypeIdentifier);
+	auto* typeInfo = PinStyleManager::Get().FindType(TypeIdentifier);
 
 	using namespace ax::Widgets;
 	ImColor color = typeInfo->Color;
