@@ -105,8 +105,21 @@ void PinTypeManager::RemoveCustomType(const std::string& identifier) {
 
 bool PinTypeManager::LoadFromFile(const std::string& path) {
 	try {
+		// 打开文件并读取内容
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			// 文件无法打开时返回 false
+			return false;
+		}
+
+		// 将文件内容读取到字符串中
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string jsonContent = buffer.str();
+
+		// 解析 JSON 数据
 		using json = nlohmann::json;
-		json j = json::parse(path);
+		json j = json::parse(jsonContent);
 		for (const auto& type : j["Types"]) {
 
 			PinTypeInfo info;

@@ -1,4 +1,4 @@
-﻿#include "SectionNode.h"
+#include "SectionNode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
@@ -189,10 +189,8 @@ void SectionNode::UnFoldedKeyValues(KeyValue* kv, int mode) {
 		bool disableKey = kv->IsComment || IsComment;
 		bool disableValue = kv->IsInherited || kv->IsComment || IsComment;
 
-		const bool isDisabled = kv->IsInherited || kv->IsComment || IsComment;
-		auto w1 = Utils::SetNextInputWidth(kv->Key, 60.f);
-
-		DrawInputText("##Key", &kv->Key, disableKey);
+		auto w1 = Utils::SetNextInputWidth(kv.Key, 60.f);
+		DrawInputText("##Key", &kv.Key, disableKey);
 		if (disableValue) {
 			auto value = kv->GetValue();
 			auto w2 = Utils::SetNextInputWidth(value, 60.f);
