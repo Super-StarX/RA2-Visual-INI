@@ -292,14 +292,17 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 		LOG_INFO("打开样式编辑器");
 		showStyleEditor = true;
 	}
-	if (ImGui::Button(LOCALE["Manager Type"])) {
+	ImGui::EndHorizontal();
+	ImGui::BeginHorizontal("Type Manager", ImVec2(paneWidth, 0));
+	if (ImGui::Checkbox(LOCALE["Show Ordinals"], &m_ShowOrdinals)) {
+		LOG_INFO("显示序号");
+	}
+	ImGui::Spring();
+	if (ImGui::Button(LOCALE["Type Manager"])) {
 		LOG_INFO("打开类型编辑器");
 		showTypeEditor = true;
 	}
 	ImGui::EndHorizontal();
-	if (ImGui::Checkbox(LOCALE["Show Ordinals"], &m_ShowOrdinals)) {
-		LOG_INFO("显示序号");
-	}
 
 	if (showStyleEditor)
 		ShowStyleEditor(&showStyleEditor);
