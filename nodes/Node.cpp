@@ -58,13 +58,13 @@ void Node::Menu() {
 	if (ImGui::BeginMenu(LOCALE["Node Style"])) {
 		auto& styleMgr = NodeStyleManager::Get();
 		for (const auto& style : styleMgr.GetAllTypes()) {
-			ImVec4 color = style.Color;
-			ImGui::PushStyleColor(ImGuiCol_Text, color);
-			bool selected = (Style == style.Identifier);
-			if (ImGui::MenuItem(style.DisplayName.c_str(), nullptr, selected)) {
+			if (ImGui::MenuItem(style.DisplayName.c_str()))
 				Style = style.Identifier;
-			}
-			ImGui::PopStyleColor();
+
+			// 在菜单项显示颜色标记
+			ImGui::SameLine();
+			ImGui::ColorButton(("##color_" + style.Identifier).c_str(),
+				style.Color, ImGuiColorEditFlags_NoTooltip, ImVec2(15, 15));
 		}
 		ImGui::EndMenu();
 	}
