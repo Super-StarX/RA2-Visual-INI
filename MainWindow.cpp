@@ -188,6 +188,7 @@ void MainWindow::OnFrame(float deltaTime) {
 
 	ImGui::SameLine(0.0f, 12.0f);
 
+	ShowNodeStyleEditor();
 	ShowPinStyleEditor();
 	ShowLinkStyleEditor();
 	ShowSectionEditor();

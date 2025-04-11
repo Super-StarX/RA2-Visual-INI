@@ -16,7 +16,7 @@ struct TemplateSection {
 
 	std::string Name{};
 	std::string Type{};
-	ImColor Color{};
+	std::string Style{};
 	bool IsFolded{ false };
 	bool IsComment{ false };
 	std::vector<KeyValue> KeyValues;

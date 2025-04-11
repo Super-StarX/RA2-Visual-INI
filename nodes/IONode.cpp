@@ -6,7 +6,7 @@
 
 IONode::IONode(PinKind mode, const char* name, int id, ModuleNode* parent)
 	: Node(name, id), Mode(mode), Parent(parent) {
-	Color = (mode == PinKind::Input) ? ImColor(0, 255, 0) : ImColor(255, 0, 0);
+	Style = (mode == PinKind::Input) ? "green" : "red";
 
 	if (mode == PinKind::Input) {
 		IOPin = std::make_unique<Pin>(this, name, PinKind::Input);

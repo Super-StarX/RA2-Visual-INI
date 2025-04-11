@@ -2,6 +2,7 @@
 #include "Link.h"
 #include "MainWindow.h"
 #include "TypeLoader.h"
+#include "NodeStyle.h"
 #include "Utils.h"
 
 std::vector<std::unique_ptr<Node>> Node::Array;
@@ -41,32 +42,42 @@ void Node::Menu() {
 	ImGui::Text("%s: %d", LOCALE["Type"], GetNodeType());
 	ImGui::Separator();
 
-	// 类型选择下拉框
-	ImGui::Separator();
-	if (ImGui::BeginCombo("##NodeType", TypeName.c_str())) {
-		auto& ts = TypeSystem::Get();
+	auto& ts = TypeSystem::Get();
 
-		// 显示所有已注册类型
-		for (auto& [name, _] : ts.Sections)
-			if (ImGui::Selectable(name.c_str()))
+	// 类型选择为子菜单结构
+	if (ImGui::BeginMenu(LOCALE["Change Type"])) {
+		for (const auto& [name, _] : ts.Sections) {
+			if (ImGui::MenuItem(name.c_str())) {
 				TypeName = name;
-		for (auto& [name, _] : ts.NumberLimits)
-			if (ImGui::Selectable(name.c_str()))
-				TypeName = name;
-		for (auto& [name, _] : ts.StringLimits)
-			if (ImGui::Selectable(name.c_str()))
-				TypeName = name;
-		for (auto& [name, _] : ts.Lists)
-			if (ImGui::Selectable(name.c_str()))
-				TypeName = name;
-		ImGui::EndCombo();
+			}
+		}
+		ImGui::EndMenu();
 	}
 
-	if (ImGui::MenuItem(IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"] ))
+	// 样式选择菜单
+	if (ImGui::BeginMenu(LOCALE["Node Style"])) {
+		auto& styleMgr = NodeStyleManager::Get();
+		for (const auto& style : styleMgr.GetAllTypes()) {
+			ImVec4 color = style.Color;
+			ImGui::PushStyleColor(ImGuiCol_Text, color);
+			bool selected = (Style == style.Identifier);
+			if (ImGui::MenuItem(style.DisplayName.c_str(), nullptr, selected)) {
+				Style = style.Identifier;
+			}
+			ImGui::PopStyleColor();
+		}
+		ImGui::EndMenu();
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::MenuItem(IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"]))
 		IsComment = !IsComment;
-	if (ImGui::MenuItem(IsFolded ? LOCALE["Unfold"] : LOCALE["Fold"] ))
+
+	if (ImGui::MenuItem(IsFolded ? LOCALE["Unfold"] : LOCALE["Fold"]))
 		IsFolded = !IsFolded;
 }
+
 
 void Node::Tooltip() {
 	// 类型名称
@@ -207,7 +218,7 @@ void Node::SaveToJson(json& j) const {
 	j["ID"] = ID.Get();
 	j["Name"] = Name;
 	j["Position"] = { pos.x, pos.y };
-	j["Color"] = { Color.Value.x,Color.Value.y,Color.Value.z };
+	j["Style"] = Style;
 	j["Type"] = static_cast<int>(GetNodeType());
 	j["TypeName"] = TypeName;
 	j["IsFolded"] = IsFolded;
@@ -221,13 +232,7 @@ void Node::LoadFromJson(const json& j, bool newId) {
 		j["Position"][0].get<float>(),
 		j["Position"][1].get<float>()
 	});
-	Color = {
-		j["Color"][0].get<float>(),
-		j["Color"][1].get<float>(),
-		j["Color"][2].get<float>(),
-		1.0f
-	};
-	//Type = static_cast<NodeType>(j["Type"]);
+	Style = j["Style"];
 	TypeName = j["TypeName"];
 	IsFolded = j["IsFolded"];
 	IsComment = j["IsComment"];

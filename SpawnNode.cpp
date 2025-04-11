@@ -21,7 +21,7 @@ Node* MainWindow::SpawnNodeFromTemplate(const TemplateSection& templa, ImVec2 po
 	auto* newNode = Node::Create<SectionNode>(templa.Name.c_str());
 	ed::SetNodePosition(newNode->ID, canvasPos);
 	newNode->TypeName = templa.Type;
-	newNode->Color = templa.Color;
+	newNode->Style = templa.Style;
 	newNode->IsFolded = templa.IsFolded;
 	newNode->IsComment = templa.IsComment;
 

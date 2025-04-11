@@ -12,6 +12,7 @@
 #include "Nodes/TagNode.h"
 #include "Nodes/TreeNode.h"
 #include "Nodes/IONode.h"
+#include "Nodes/NodeStyle.h"
 #include "Pins/PinStyle.h"
 #include "Pins/KeyValue.h"
 #include <misc/cpp/imgui_stdlib.h>
@@ -24,6 +25,7 @@ static ed::LinkId contextLinkId;
 static ed::PinId  contextPinId;
 static Pin* newNodeLinkPin = nullptr;
 static ImVec2 newNodePosition;
+static bool m_ShowNodeStyleEditor{ false };
 static bool m_ShowPinStyleEditor{ false };
 static bool m_ShowLinkStyleEditor{ false };
 static SectionNode* m_SectionEditorNode{ nullptr };
@@ -134,6 +136,8 @@ void MainWindow::NodeMenu() {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
+		if (ImGui::MenuItem("Manage Custom Styles..."))
+			m_ShowNodeStyleEditor = true;
 	}
 	else
 		ImGui::Text("%s: %p", LOCALE["Unknown node"], contextNodeId.AsPointer());
@@ -142,6 +146,16 @@ void MainWindow::NodeMenu() {
 	if (ImGui::MenuItem(LOCALE["Delete"]))
 		ed::DeleteNode(contextNodeId);
 	ImGui::EndPopup();
+}
+
+void MainWindow::ShowNodeStyleEditor() {
+	if (!m_ShowNodeStyleEditor) return;
+
+	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Node Sytle Manager", &m_ShowNodeStyleEditor)) {
+		NodeStyleManager::Menu();
+	}
+	ImGui::End();
 }
 
 void MainWindow::NodeEditor() {

@@ -193,7 +193,7 @@ void TypeSystem::Draw() {
 		// ImGui::Text("Category: %d", (int)info.Category);
 
 		if (info.Category == TypeCategory::NumberLimit) {
-			auto limit = std::get<NumberLimit>(info.Data);
+			auto& limit = std::get<NumberLimit>(info.Data);
 			ImGui::InputInt("Min", &limit.Min);
 			ImGui::InputInt("Max", &limit.Max);
 			if (ImGui::Button("Apply")) {
@@ -201,7 +201,7 @@ void TypeSystem::Draw() {
 			}
 		}
 		else if (info.Category == TypeCategory::StringLimit) {
-			auto lim = std::get<StringLimit>(info.Data);
+			auto& lim = std::get<StringLimit>(info.Data);
 			std::string bufStart = lim.StartWith;
 			std::string bufEnd = lim.EndWith;
 			std::string validBuf = Utils::JoinStrings(lim.ValidValues, ",");
@@ -218,7 +218,7 @@ void TypeSystem::Draw() {
 			}
 		}
 		else if (info.Category == TypeCategory::List) {
-			auto list = std::get<ListType>(info.Data);
+			auto& list = std::get<ListType>(info.Data);
 			char bufType[128] = {};
 			strcpy_s(bufType, list.ElementType.c_str());
 			ImGui::InputText("ElementType", bufType, sizeof(bufType));
@@ -231,7 +231,7 @@ void TypeSystem::Draw() {
 			}
 		}
 		else if (info.Category == TypeCategory::Section) {
-			Section& section = ts.Sections[selectedName];
+			auto& section = ts.Sections[selectedName];
 
 			ImGui::Text("Key-Value Pairs:");
 

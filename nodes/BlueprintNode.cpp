@@ -1,6 +1,7 @@
 ﻿#include "BlueprintNode.h"
 #include "BuilderNode.h"
 #include "MainWindow.h"
+#include "NodeStyle.h"
 
 void BlueprintNode::Update() {
 	auto builder = BuilderNode::GetBuilder();
@@ -11,7 +12,10 @@ void BlueprintNode::Update() {
 			hasOutputDelegates = true;
 
 	builder->Begin(this->ID);
-	builder->Header(this->Color);
+
+	auto* typeInfo = NodeStyleManager::Get().FindType(Style);
+	if (!typeInfo) return; 
+	builder->Header(typeInfo->Color);
 	ImGui::Spring(0);
 	ImGui::TextUnformatted(this->Name.c_str());
 	ImGui::Spring(1);

@@ -145,7 +145,7 @@ std::string PlaceholderReplacer::generateRandom(int length) {
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz";
 
-	std::uniform_int_distribution<> dist(0, chars.size() - 1);
+	std::uniform_int_distribution<> dist(0, static_cast<int>(chars.size()) - 1);
 	std::string result;
 	for (int i = 0; i < length; ++i) {
 		result += chars[dist(rng)];

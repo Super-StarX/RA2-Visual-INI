@@ -2,6 +2,7 @@
 #include "BuilderNode.h"
 #include "MainWindow.h"
 #include "Utils.h"
+#include "NodeStyle.h"
 #include "Pins/KeyValue.h"
 #include <misc/cpp/imgui_stdlib.h>
 #include <algorithm>
@@ -18,7 +19,9 @@ void VINode<T>::Update() {
 	auto builder = BuilderNode::GetBuilder();
 
 	builder->Begin(ID);
-	builder->Header(Color);
+	auto* typeInfo = NodeStyleManager::Get().FindType(Style);
+	if (!typeInfo) return;
+	builder->Header(typeInfo->Color);
 	ImGui::Spring(0);
 
 	{

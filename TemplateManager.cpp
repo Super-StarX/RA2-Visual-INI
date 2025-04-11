@@ -66,12 +66,8 @@ TemplateItem TemplateManager::ParseIniString(std::istringstream& file) {
 					auto key = line.substr(lgPos + 1, eqPos - lgPos - 1);
 					key = Utils::Trim(key);
 					auto value = line.substr(eqPos + 1);
-					if (key == "Color") {
-						std::istringstream iss(value);
-						int r, g, b;
-						iss >> r >> g >> b;
-						currentSection->Color = ImColor(r, g, b);
-					}
+					if (key == "Style")
+						currentSection->Style = value;
 					else if (key == "Type")
 						currentSection->Type = value;
 					else if (key == "Folded")

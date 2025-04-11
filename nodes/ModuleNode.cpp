@@ -8,6 +8,7 @@
 #include "GroupNode.h"
 #include "TagNode.h"
 #include "IONode.h"
+#include "NodeStyle.h"
 
 #include <fstream>
 #include <iostream>
@@ -26,7 +27,9 @@ void ModuleNode::Update() {
 	auto builder = BuilderNode::GetBuilder();
 
 	builder->Begin(this->ID);
-	builder->Header(this->Color);
+	auto* typeInfo = NodeStyleManager::Get().FindType(Style);
+	if (!typeInfo) return;
+	builder->Header(typeInfo->Color);
 	ImGui::Spring(0);
 	ImGui::PushID(this);
 	Utils::SetNextInputWidth(Name, 130.f);

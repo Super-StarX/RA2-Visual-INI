@@ -56,6 +56,7 @@ public:
 	void PinMenu();
 	void LinkMenu();
 	void NodeEditor();
+	void ShowNodeStyleEditor();
 	void ShowPinStyleEditor();
 	void ShowLinkStyleEditor();
 	void ShowSectionEditor();

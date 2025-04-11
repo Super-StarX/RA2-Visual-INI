@@ -81,12 +81,12 @@ public:
 
 	ed::NodeId ID;
 	VIInputText Name;
-	ImColor Color{ 0, 64, 128 };
 	int level{};
 	bool IsFolded{false};
 	bool IsComment{false};
 	float HoverTimer = 0.0f;
 	std::string TypeName{};
+	std::string Style{ "default" };
 	std::string State;
 	std::string SavedState;
 };
