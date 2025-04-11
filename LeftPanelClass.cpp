@@ -5,6 +5,7 @@
 #include "utilities/builders.h"
 #include "utilities/widgets.h"
 #include "Log.h"
+#include "TypeLoader.h"
 #include <ImGui.h>
 #include <imgui_internal.h>
 
@@ -273,6 +274,7 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 	paneWidth = ImGui::GetContentRegionAvail().x;
 
 	static bool showStyleEditor = false;
+	static bool showTypeEditor = false;
 	ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
 	ImGui::Spring(0.0f, 0.0f);
 	if (ImGui::Button(LOCALE["Zoom to Content"])) {
@@ -290,6 +292,10 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 		LOG_INFO("打开样式编辑器");
 		showStyleEditor = true;
 	}
+	if (ImGui::Button(LOCALE["Manager Type"])) {
+		LOG_INFO("打开类型编辑器");
+		showTypeEditor = true;
+	}
 	ImGui::EndHorizontal();
 	if (ImGui::Checkbox(LOCALE["Show Ordinals"], &m_ShowOrdinals)) {
 		LOG_INFO("显示序号");
@@ -297,6 +303,9 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 
 	if (showStyleEditor)
 		ShowStyleEditor(&showStyleEditor);
+	
+	if (showTypeEditor)
+		TypeSystem::Draw();
 
 	std::vector<ed::NodeId> selectedNodes;
 	std::vector<ed::LinkId> selectedLinks;
