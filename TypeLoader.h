@@ -63,7 +63,7 @@ public:
 		InLists
 	};
 	static TypeSystem& Get();
-	static void Draw();
+	static void Draw(bool* show);
 	TypeInfo GetTypeInfo(const std::string& typeName) const;
 	TypeInfo GetKeyType(const std::string& sectionType, const std::string& key) const;
 	void LoadFromINI(const std::string& path);

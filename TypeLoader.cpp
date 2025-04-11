@@ -1,5 +1,6 @@
 ﻿#include "TypeLoader.h"
 #include "Utils.h"
+#include "Localization.h"
 #include <IniFile.h>
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -115,13 +116,13 @@ void TypeSystem::LoadFromINI(const std::string& path) {
 	});
 }
 
-void TypeSystem::Draw() {
+void TypeSystem::Draw(bool* show) {
 	static int selectedCategory = -1; // 0: NumberLimit, 1: StringLimit, 2: List, 3: Section
 	static std::string selectedName;
 	static bool showAddPopup = false;
 
 	auto& ts = TypeSystem::Get();
-	ImGui::Begin("Type Manager");
+	ImGui::Begin(LOCALE["Type Manager"], show);
 
 	ImGui::BeginGroup();
 	ImGui::BeginChild("##TypeList", ImVec2(250, 500), true);

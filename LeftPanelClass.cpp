@@ -1,4 +1,4 @@
-﻿#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "LeftPanelClass.h"
 #include "MainWindow.h"
 #include "Nodes/SectionNode.h"
@@ -308,7 +308,7 @@ void LeftPanelClass::OnFrame(float paneWidth) {
 		ShowStyleEditor(&showStyleEditor);
 	
 	if (showTypeEditor)
-		TypeSystem::Draw();
+		TypeSystem::Draw(&showTypeEditor);
 
 	std::vector<ed::NodeId> selectedNodes;
 	std::vector<ed::LinkId> selectedLinks;
