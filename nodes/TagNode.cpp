@@ -31,6 +31,7 @@ std::unordered_set<std::string> TagNode::HighlightedNodes;
 TagNode::TagNode(const char* name, int id) :
 	Node(name, id) {
 	InputPin = std::make_unique<Pin>(this, "constant", PinKind::Input);
+	IsConstant = true;
 }
 
 TagNode::TagNode(bool input, const char* name, int id) :
@@ -148,7 +149,7 @@ void TagNode::Update() {
 		if (hasInputConflict) {
 			ed::PopStyleColor();
 			// 绘制标题（带冲突提示）
-			ImGui::Text("(Conflict!)");
+			ImGui::Text("(%s!)", LOCALE["Conflict"]);
 		}
 		else if (HighlightedNodes.contains(Name))
 			ed::PopStyleColor();

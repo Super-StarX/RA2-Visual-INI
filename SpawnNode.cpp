@@ -85,6 +85,11 @@ Node* MainWindow::CreateNodeByName() {
 	if (ImGui::IsItemHovered())
 		ImGui::SetTooltip(LOCALE["OutputTagNodeTooltip"]);
 
+	if (ImGui::MenuItem(LOCALE["ConstTagNode"]))
+		return Node::Create<TagNode>();
+	if (ImGui::IsItemHovered())
+		ImGui::SetTooltip(LOCALE["ConstTagNodeTooltip"]);
+
 	if (ImGui::MenuItem(LOCALE["ModuleNode"]))
 		return Node::Create<ModuleNode>();
 	if (ImGui::IsItemHovered())
