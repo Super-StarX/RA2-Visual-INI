@@ -1,4 +1,5 @@
 ﻿#pragma once
+#define NOMINMAX
 #include <application.h>
 #include <imgui_node_editor.h>
 

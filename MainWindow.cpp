@@ -10,6 +10,8 @@
 #include "Nodes/TagNode.h"
 #include "Log.h"
 
+#include "version.h"
+#include "Windows.h"
 #include <imgui_internal.h>
 
 static ed::EditorContext* m_Editor = nullptr;

@@ -3,11 +3,16 @@
 # include <string>
 # include <memory>
 
+#include <Windows.h>
+
 struct Platform;
 struct Renderer;
 
 struct Application
 {
+	static void SetIcon(HICON icon);
+    static HICON GetIcon();
+
     Application(const char* name);
     Application(const char* name, int argc, char** argv);
     ~Application();
