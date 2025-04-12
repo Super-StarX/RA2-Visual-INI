@@ -1,4 +1,4 @@
-#define IMGUI_DEFINE_MATH_OPERATORS
+﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "LeftPanelClass.h"
 #include "MainWindow.h"
 #include "Nodes/SectionNode.h"
@@ -175,6 +175,8 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		auto start = ImGui::GetCursorScreenPos();
 
 		// 如果当前节点处于编辑模式
+		static bool shouldFocusOnEdit = false;
+
 		if (m_EditingNode == node) {
 			// 创建独立的编辑框，占据一整行
 			ImGui::SetNextItemWidth(paneWidth - ImGui::GetStyle().FramePadding.x * 4);
@@ -185,9 +187,14 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 			}
 
 			// 如果点击了文本框之外的地方，则退出编辑模式
-			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsItemHovered()) {
+			if (!shouldFocusOnEdit && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsItemHovered()) {
 				node->Name = m_NodeNameBuffer;  // 保存修改
 				m_EditingNode = nullptr;        // 退出编辑模式
+			}
+
+			if (shouldFocusOnEdit) {
+				ImGui::SetKeyboardFocusHere(-1);
+				shouldFocusOnEdit = false;
 			}
 
 			ImGui::PopID();
@@ -214,7 +221,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 			m_EditingNode = node;
 			strcpy_s(m_NodeNameBuffer, node->Name.c_str());  // 初始化缓冲区
-			ImGui::SetKeyboardFocusHere(-1);  // 自动聚焦到输入框
+			shouldFocusOnEdit = true;  // 自动聚焦到输入框
 		}
 
 		// 原有的图标和ID绘制逻辑保持不变
