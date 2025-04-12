@@ -1,5 +1,6 @@
 ﻿// LinkStyle.cpp
 #include "LinkStyle.h"
+#include "Localization.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <misc/cpp/imgui_stdlib.h>
@@ -13,13 +14,13 @@ LinkStyleManager::LinkStyleManager() {
 		m_TypeIndex[type.Identifier] = m_Types.size() - 1;
 	};
 
-	AddType({ "default", "Default",
+	AddType({ "default", LOCALE["Style Default"],
 			IM_COL32(255, 255, 255, 255), IM_COL32(200, 200, 255, 255),
 			1.0f, 0 });
-	AddType({ "red", "Red",
+	AddType({ "red", LOCALE["Style Red"],
 			IM_COL32(180, 0, 0, 255), IM_COL32(220, 0, 0, 255),
 			1.0f, 1 });
-	AddType({ "blue", "Blue",
+	AddType({ "blue", LOCALE["Style Blue"],
 			IM_COL32(0, 0, 180, 255), IM_COL32(0, 0, 255, 255),
 			2.0f, 1 });
 }

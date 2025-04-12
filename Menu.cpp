@@ -136,7 +136,7 @@ void MainWindow::NodeMenu() {
 			m_ShowSectionEditor = true;
 			m_SectionEditorNode = reinterpret_cast<SectionNode*>(node);
 		}
-		if (ImGui::MenuItem("Manage Custom Styles..."))
+		if (ImGui::MenuItem(LOCALE["Manage Custom Styles"]))
 			m_ShowNodeStyleEditor = true;
 	}
 	else
@@ -152,7 +152,7 @@ void MainWindow::ShowNodeStyleEditor() {
 	if (!m_ShowNodeStyleEditor) return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Node Sytle Manager", &m_ShowNodeStyleEditor)) {
+	if (ImGui::Begin(LOCALE["Node Sytle Manager"], &m_ShowNodeStyleEditor)) {
 		NodeStyleManager::Menu();
 	}
 	ImGui::End();
@@ -325,17 +325,17 @@ void MainWindow::ShowSectionEditor() {
 void MainWindow::PinMenu() {
 	auto pin = Pin::Get(contextPinId);
 
-	ImGui::TextUnformatted("Pin Context Menu");
+	ImGui::TextUnformatted(LOCALE["Pin Context Menu"]);
 	ImGui::Separator();
 
 	if (pin) {
 		pin->Menu();
 		// 自定义类型管理
-		if (ImGui::MenuItem("Manage Custom Styles..."))
+		if (ImGui::MenuItem(LOCALE["Manage Custom Styles"]))
 			m_ShowPinStyleEditor = true;
 	}
 	else {
-		ImGui::Text("Unknown pin: %p", contextPinId.AsPointer());
+		ImGui::Text("%s: %p", LOCALE["Unknown pin"], contextPinId.AsPointer());
 	}
 
 	ImGui::EndPopup();
@@ -438,17 +438,17 @@ void MainWindow::ShowListEditor() {
 void MainWindow::LinkMenu() {
 	auto link = Link::Get(contextLinkId);
 
-	ImGui::TextUnformatted("Link Context Menu");
+	ImGui::TextUnformatted(LOCALE["Link Context Menu"]);
 	ImGui::Separator();
 	if (link) {
 		link->Menu();
-		if (ImGui::MenuItem("Manage Custom Styles..."))
+		if (ImGui::MenuItem(LOCALE["Manage Custom Styles"]))
 			m_ShowLinkStyleEditor = true;
 	}
 	else
-		ImGui::Text("Unknown link: %p", contextLinkId.AsPointer());
+		ImGui::Text("%s: %p",LOCALE["Unknown link"], contextLinkId.AsPointer());
 	ImGui::Separator();
-	if (ImGui::MenuItem("Delete"))
+	if (ImGui::MenuItem(LOCALE["Delete"]))
 		ed::DeleteLink(contextLinkId);
 	ImGui::EndPopup();
 }

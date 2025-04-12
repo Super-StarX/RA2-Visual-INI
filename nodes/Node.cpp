@@ -24,6 +24,39 @@ Node* Node::Get(ed::NodeId id) {
 	return nullptr;
 }
 
+std::string Node::GetNodeTypeName(NodeType type) {
+	switch (type) {
+	case NodeType::Blueprint:
+		return LOCALE["BlueprintNode"];
+	case NodeType::Simple:
+		return LOCALE["SimpleNode"];
+	case NodeType::Tag:
+		return LOCALE["TagNode"];
+	case NodeType::Tree:
+		return LOCALE["TreeNode"];
+	case NodeType::Group:
+		return LOCALE["GroupNode"];
+	case NodeType::Houdini:
+		return LOCALE["HoudiniNode"];
+	case NodeType::Section:
+		return LOCALE["SectionNode"];
+	case NodeType::Comment:
+		return LOCALE["CommentNode"];
+	case NodeType::List:
+		return LOCALE["ListNode"];
+	case NodeType::Module:
+		return LOCALE["ModuleNode"];
+	case NodeType::IO:
+		return LOCALE["IONode"];
+	default:
+		return "";
+	}
+}
+
+std::string Node::GetNodeTypeName(int type) {
+	return GetNodeTypeName(static_cast<NodeType>(type));
+}
+
 std::vector<Node*> Node::GetSelectedNodes() {
 	std::vector<Node*> ret;
 	std::vector<ed::NodeId> selectedNodes;
@@ -39,7 +72,7 @@ std::vector<Node*> Node::GetSelectedNodes() {
 
 void Node::Menu() {
 	ImGui::Text("%s: %p", LOCALE["ID"], ID.AsPointer());
-	ImGui::Text("%s: %d", LOCALE["Type"], GetNodeType());
+	ImGui::Text("%s: %s", LOCALE["Type"], GetNodeTypeName(GetNodeType()));
 	ImGui::Separator();
 
 	auto& ts = TypeSystem::Get();

@@ -29,7 +29,7 @@ Pin* Pin::Get(ed::PinId id) {
 }
 
 void Pin::Tooltip() {
-	ImGui::Text("Pin %d", ID);
+	ImGui::Text("%s: %d", LOCALE["ID"], ID);
 	ImGui::Text("Type: %s", TypeIdentifier.c_str());
 	ImGui::Text("Node: %s", Node ? Node->Name.c_str() : "None");
 	ImGui::Text("Links: %d", Links.size());
@@ -158,18 +158,19 @@ std::string Pin::GetLinkType() const {
 void Pin::Menu() {
 	// 显示当前类型
 	if (auto* currentType = PinStyleManager::Get().FindType(TypeIdentifier)) {
-		ImGui::Text("Current Type: %s", currentType->DisplayName.c_str());
-		ImGui::ColorButton("##color", currentType->Color,
-			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
+		ImGui::Text("%s: ",LOCALE["Current Style"]);
 		ImGui::SameLine();
 		ImGui::TextColored(currentType->Color, "%s",
 			currentType->DisplayName.c_str());
+		ImGui::SameLine();
+		ImGui::ColorButton("##color", currentType->Color,
+			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
 	}
 
 	ImGui::Separator();
 
 	// 类型选择菜单
-	if (ImGui::BeginMenu("Change Type")) {
+	if (ImGui::BeginMenu(LOCALE["Change Style"])) {
 		for (const auto& type : PinStyleManager::Get().GetAllTypes()) {
 			if (ImGui::MenuItem(type.DisplayName.c_str()))
 				TypeIdentifier = type.Identifier;
@@ -186,19 +187,19 @@ void Pin::Menu() {
 		auto kv = reinterpret_cast<KeyValue*>(this);
 
 		auto it = sectionNode->FindPin(*this);
-		if (ImGui::MenuItem("Add Key Value"))
+		if (ImGui::MenuItem(LOCALE["Add Key Value"]))
 			sectionNode->KeyValues.insert(it, std::make_unique<KeyValue>(sectionNode)); // 需要在中途加入，因此不能使用Add函数
 
-		if (ImGui::MenuItem("Delete"))
+		if (ImGui::MenuItem(LOCALE["Delete"]))
 			sectionNode->KeyValues.erase(it);
 
-		if (ImGui::MenuItem("Fold"))
+		if (ImGui::MenuItem(LOCALE["Fold"]))
 			kv->IsFolded = true;
 
-		if (ImGui::MenuItem(kv->IsComment ? "Uncomment" : "Set Comment"))
+		if (ImGui::MenuItem(kv->IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"]))
 			kv->IsComment = !kv->IsComment;
 
-		if (ImGui::MenuItem(kv->IsInherited ? "Cancel Inherited" : "Set Inherited"))
+		if (ImGui::MenuItem(kv->IsInherited ? LOCALE["Cancel Inherited"] : LOCALE["Set Inherited"]))
 			kv->IsInherited = !kv->IsInherited;
 	}
 }

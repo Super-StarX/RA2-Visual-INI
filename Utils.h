@@ -27,4 +27,6 @@ public:
 	static float SetNextInputWidth(const std::string& value, float minSize = 0.f, float maxSize = 400.f);
 	static bool IsCommentSection(const std::string& str);
 	static bool OpenFileDialog(const char* fliter, char* path, int maxPath, bool isSaving);
+	static void InputText(const char* label, std::string* str, bool disable);
+	static void InputTextWithLeftLabel(const char* label, const char* text, float textWidth, std::string* string, bool disable = false);
 };

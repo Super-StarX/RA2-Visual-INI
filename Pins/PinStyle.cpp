@@ -1,5 +1,6 @@
 ﻿#include "PinStyle.h"
 #include "LinkStyle.h"
+#include "Localization.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
@@ -14,22 +15,21 @@ PinStyleManager::PinStyleManager() {
 		m_TypeIndex[type.Identifier] = m_Types.size() - 1;
 	};
 
-	AddType({ "flow",    "Flow",    ImColor(255, 255, 255), 0 });
-	AddType({ "bool",    "Boolean", ImColor(220, 48, 48),   1 });
-	AddType({ "int",     "Integer", ImColor(68, 201, 156),  1 });
-	AddType({ "float",   "Float",   ImColor(147, 226, 74),  1 });
-	AddType({ "string",  "String",  ImColor(124, 21, 153),  1 });
-	AddType({ "object",  "Object",  ImColor(51, 150, 215),  1 });
-	AddType({ "function","Function",ImColor(218, 0, 183),   1 });
-	AddType({ "delegate","Delegate",ImColor(255, 48, 48),   2 });
-	//AddType({ "tag",     "Tag",     ImColor(220, 48, 48),   0 });
+	AddType({ "flow",    LOCALE["Style Flow"],    ImColor(255, 255, 255), 0 });
+	AddType({ "bool",    LOCALE["Style Boolean"], ImColor(220, 48, 48),   1 });
+	AddType({ "int",     LOCALE["Style Integer"], ImColor(68, 201, 156),  1 });
+	AddType({ "float",   LOCALE["Style Float"],   ImColor(147, 226, 74),  1 });
+	AddType({ "string",  LOCALE["Style String"],  ImColor(124, 21, 153),  1 });
+	AddType({ "object",  LOCALE["Style Object"],  ImColor(51, 150, 215),  1 });
+	AddType({ "function",LOCALE["Style Function"],ImColor(218, 0, 183),   1 });
+	AddType({ "delegate",LOCALE["Style Delegate"],ImColor(255, 48, 48),   2 });
 }
 
 void PinStyleManager::Menu() {
 	static int selected = -1;
 	const auto& types = PinStyleManager::Get().GetAllTypes();
 
-	ImGui::Text("Pin Styles:");
+	ImGui::Text(LOCALE["Pin Style"]);
 	ImGui::BeginChild("##PinStyleList", ImVec2(150, 300), true);
 	for (int i = 0; i < types.size(); ++i) {
 		const auto& type = types[i];

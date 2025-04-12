@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <regex>
 #include <windows.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 void Utils::DrawTextOnCursor(const char* label, ImColor color) {
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
@@ -115,4 +116,24 @@ bool Utils::OpenFileDialog(const char* fliter, char* path, int maxPath, bool isS
 		}
 	}
 	return false;
+}
+
+void Utils::InputText(const char* label, std::string* str, bool disable) {
+	if (disable) {
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 0.5f));   // 淡化文字颜色
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f); // 降低透明度
+		ImGui::InputText(label, str, ImGuiInputTextFlags_ReadOnly);
+		ImGui::PopStyleColor(1);
+		ImGui::PopStyleVar();
+	}
+	else
+		ImGui::InputText(label, str);
+}
+
+void Utils::InputTextWithLeftLabel(const char* label, const char* text, float textWidth, std::string* string, bool disable) {
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted(text);
+	ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	Utils::InputText(label, string, disable);
 }

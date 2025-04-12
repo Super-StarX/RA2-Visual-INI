@@ -1,20 +1,21 @@
 ﻿#include "NodeStyle.h"
-#include "NodeStyle.h"
+#include "Utils.h"
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include "Localization.h"
 
 NodeStyleManager::NodeStyleManager() {
-	AddCustomType({ "default", "Default", ImColor(0, 64, 128), false });
-	AddCustomType({ "red", "Red", ImColor(255, 0, 0), false });
-	AddCustomType({ "green", "Green", ImColor(0, 255, 0), false });
-	AddCustomType({ "blue", "Blue", ImColor(0, 0, 255), false });
-	AddCustomType({ "dark", "Dark Blue", ImColor(30, 30, 80), true });
+	AddCustomType({ "default", LOCALE["Style Default"], ImColor(0, 64, 128), false });
+	AddCustomType({ "red",LOCALE["Style Red"], ImColor(255, 0, 0), false });
+	AddCustomType({ "green",LOCALE["Style Green"], ImColor(0, 255, 0), false });
+	AddCustomType({ "blue",LOCALE["Style Blue"], ImColor(0, 0, 255), false });
+	AddCustomType({ "dark",LOCALE["Style Dark Blue"], ImColor(30, 30, 80), true });
 }
 void NodeStyleManager::Menu() {
 	static int selected = -1;
 	const auto& types = NodeStyleManager::Get().GetAllTypes();
 
-	ImGui::Text("Node Styles:");
+	ImGui::Text(LOCALE["Node Styles"]);
 	ImGui::BeginChild("##NodeStyleList", ImVec2(150, 300), true);
 	for (int i = 0; i < types.size(); ++i) {
 		const auto& type = types[i];
@@ -49,21 +50,22 @@ void NodeStyleManager::Menu() {
 	ImGui::SameLine();
 	ImGui::BeginGroup();
 
+	static auto textWidth = std::max(ImGui::CalcTextSize(LOCALE["Identifier"]).x, std::max(ImGui::CalcTextSize(LOCALE["Display Name"]).x, ImGui::CalcTextSize(LOCALE["Title Color"]).x));
 	if (selected >= 0 && selected < types.size()) {
-		NodeStyleInfo& type = const_cast<NodeStyleInfo&>(types[selected]);
-
-		ImGui::Text("Edit Node Style:");
-		ImGui::Text("Identifier: %s", type.Identifier.c_str());
-
-		ImGui::Text("Display Name:");
-		ImGui::InputText("##DisplayName", &type.DisplayName);
+		auto& type = const_cast<NodeStyleInfo&>(types[selected]);
+		Utils::InputTextWithLeftLabel("##Identifier", LOCALE["Identifier"], textWidth, &type.Identifier, true);
+		Utils::InputTextWithLeftLabel("##DisplayName", LOCALE["Display Name"], textWidth, &type.Identifier);
 
 		ImVec4 color = type.Color;
-		if (ImGui::ColorEdit4("Node Color", (float*)&color))
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted(LOCALE["Title Color"]);
+		ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::ColorEdit4("##NodeColor", (float*)&color))
 			type.Color = ImColor(color);
 
 		if (type.IsUserDefined) {
-			if (ImGui::Button("Delete")) {
+			if (ImGui::Button(LOCALE["Delete"])) {
 				NodeStyleManager::Get().RemoveCustomType(type.Identifier);
 				selected = -1;
 			}
@@ -73,18 +75,25 @@ void NodeStyleManager::Menu() {
 	ImGui::EndGroup();
 	ImGui::Separator();
 
+	ImGui::BeginGroup();
 	// Add New Node Style
-	static char newId[64] = "";
-	static char newName[64] = "";
+	static std::string newId{};
+	static std::string newName{};
 	static ImVec4 newColor = ImVec4(0.3f, 0.3f, 0.6f, 1.0f);
 
-	ImGui::Text("Add New Style:");
-	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
-	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
-	ImGui::ColorEdit4("Node Color##new", (float*)&newColor);
+	ImGui::Text(LOCALE["Add New Style"]);
 
-	if (ImGui::Button("Add")) {
-		if (strlen(newId) > 0 && strlen(newName) > 0 && !NodeStyleManager::Get().FindType(newId)) {
+	Utils::InputTextWithLeftLabel("##IdentifierNew", LOCALE["Identifier"], textWidth, &newId);
+	Utils::InputTextWithLeftLabel("##DisplayNameNew", LOCALE["Display Name"], textWidth, &newName);
+
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted(LOCALE["Title Color"]);
+	ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	ImGui::ColorEdit4("##NodeColorNew", (float*)&newColor);
+
+	if (ImGui::Button(LOCALE["Add"])) {
+		if (newId.size() > 0 && newName.size() > 0 && !NodeStyleManager::Get().FindType(newId)) {
 			NodeStyleInfo style;
 			style.Identifier = newId;
 			style.DisplayName = newName;
@@ -93,10 +102,12 @@ void NodeStyleManager::Menu() {
 
 			NodeStyleManager::Get().AddCustomType(style);
 
-			memset(newId, 0, sizeof(newId));
-			memset(newName, 0, sizeof(newName));
+			newId.clear();
+			newName.clear();
 		}
 	}
+
+	ImGui::EndGroup();
 }
 
 void NodeStyleManager::AddCustomType(const NodeStyleInfo& type) {

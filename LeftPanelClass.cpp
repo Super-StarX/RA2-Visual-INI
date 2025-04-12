@@ -139,7 +139,7 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 	}
 
 	// 动态检测当前场景中存在哪些节点类型
-	std::array<bool, static_cast<size_t>(NodeType::IO) + 1> existingTypes{};
+	std::array<bool, static_cast<size_t>(NodeType::End)> existingTypes{};
 	for (auto& node : Node::Array) {
 		NodeType nodeType = node->GetNodeType();
 		existingTypes[static_cast<size_t>(nodeType)] = true;
@@ -147,15 +147,10 @@ void LeftPanelClass::NodesPanel(float paneWidth, std::vector<ed::NodeId>& select
 
 	// 类型筛选弹出菜单
 	if (ImGui::BeginPopup("type_filter_popup")) {
-		const char* NodeTypeNames[] = {
-			"Blueprint", "Simple", "Tag", "Tree", "Group", "Houdini",
-			"Section", "Comment", "List", "Module", "IO"
-		};
-
 		// 只显示当前场景中存在的节点类型
-		for (int i = 0; i <= static_cast<int>(NodeType::IO); ++i) {
+		for (int i = 0; i < static_cast<int>(NodeType::End); ++i) {
 			if (existingTypes[i]) { // 如果该类型在场景中存在
-				ImGui::Checkbox(NodeTypeNames[i], &m_TypeFilters[i]);
+				ImGui::Checkbox(Node::GetNodeTypeName(i).c_str(), &m_TypeFilters[i]);
 			}
 		}
 		ImGui::EndPopup();

@@ -102,9 +102,9 @@ void SectionNode::AddKeyValue() {
 
 void SectionNode::Menu() {
 	VINode::Menu();
-	if (ImGui::MenuItem("Editing Name"))
+	if (ImGui::MenuItem(LOCALE["Rename"]))
 		Name.BeginEditing();
-	if (ImGui::MenuItem("Auto Select Type"))
+	if (ImGui::MenuItem(LOCALE["Auto Select Type"]))
 		AutoSelectType();
 }
 
@@ -155,18 +155,6 @@ KeyValue* SectionNode::AddKeyValue(const std::string& key, const std::string& va
 	return kv.get();
 }
 
-void SectionNode::DrawInputText(const char* label, std::string* str, bool disable) {
-	if (disable) {
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 0.5f));   // 淡化文字颜色
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f); // 降低透明度
-		ImGui::InputText(label, str, ImGuiInputTextFlags_ReadOnly);
-		ImGui::PopStyleColor(1);
-		ImGui::PopStyleVar();
-	}
-	else
-		ImGui::InputText(label, str);
-}
-
 void SectionNode::UnFoldedKeyValues(KeyValue* kv, int mode) {
 	auto builder = BuilderNode::GetBuilder();
 
@@ -190,11 +178,11 @@ void SectionNode::UnFoldedKeyValues(KeyValue* kv, int mode) {
 		bool disableValue = kv->IsInherited || kv->IsComment || IsComment;
 
 		auto w1 = Utils::SetNextInputWidth(kv->Key, 60.f);
-		DrawInputText("##Key", &kv->Key, disableKey);
+		Utils::InputText("##Key", &kv->Key, disableKey);
 		if (disableValue) {
 			auto value = kv->GetValue();
 			auto w2 = Utils::SetNextInputWidth(value, 60.f);
-			DrawInputText("##Value", &value, true);
+			Utils::InputText("##Value", &value, true);
 			maxSize = std::max(w2 + w1, maxSize);
 		}
 		else {

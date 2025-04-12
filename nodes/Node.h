@@ -21,6 +21,8 @@ enum class NodeType {
 	List,
 	Module,
 	IO,
+
+	End,
 };
 /*
 Node->INENode->HeaderNode->BlueprintNode
@@ -43,6 +45,8 @@ public:
 
 	static Node* Get(ed::NodeId id);
 	static std::vector<Node*> GetSelectedNodes();
+	static std::string GetNodeTypeName(NodeType type);
+	static std::string GetNodeTypeName(int type);
 
 	template<typename T, typename... Args>
 	static T* Create(Args&&... args) {

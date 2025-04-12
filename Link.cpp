@@ -38,18 +38,20 @@ void Link::Draw() const {
 void Link::Menu() {
 	// 显示当前类型
 	if (auto* currentType = LinkStyleManager::Get().FindType(TypeIdentifier)) {
-		ImGui::Text("Current Type: %s", currentType->DisplayName.c_str());
-		ImGui::ColorButton("##color", currentType->Color,
-			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
+		ImGui::Text("%s: ", LOCALE["Current Style"]);
 		ImGui::SameLine();
 		ImGui::TextColored(currentType->Color, "%s",
 			currentType->DisplayName.c_str());
+		ImGui::SameLine();
+		ImGui::ColorButton("##color", currentType->Color,
+			ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
+
 	}
 
 	ImGui::Separator();
 
 	// 类型选择菜单
-	if (ImGui::BeginMenu("Change Type")) {
+	if (ImGui::BeginMenu(LOCALE["Change Style"])) {
 		for (const auto& type : LinkStyleManager::Get().GetAllTypes()) {
 			if (ImGui::MenuItem(type.DisplayName.c_str()))
 				TypeIdentifier = type.Identifier;
