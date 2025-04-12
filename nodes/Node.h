@@ -19,9 +19,9 @@ enum class NodeType {
 	Section,
 	Comment,
 	List,
-	Registry,
 	Module,
 	IO,
+	Registry,
 
 	End,
 };
@@ -61,7 +61,6 @@ public:
 	virtual NodeType GetNodeType() const = 0;
 	virtual void Menu() override;
 	virtual void Tooltip() override;
-	virtual void HoverMenu(bool isHovered);
 	virtual void SaveToJson(json& j) const override;
 	virtual void LoadFromJson(const json& j, bool newId = false) override;
 	virtual void Update() = 0;

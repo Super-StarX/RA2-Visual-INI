@@ -58,29 +58,29 @@ void ModuleNode::Menu() {
 	INENode::Menu();
 	ImGui::Separator();
 
-	if (ImGui::MenuItem("Load Project"))
+	if (ImGui::MenuItem(LOCALE["Load Project"]))
 		LoadProject();
 }
 
 void ModuleNode::Tooltip() {
 	INENode::Tooltip();
 	ImGui::Separator();
-	std::string input;
+	std::string input = LOCALE["ModuleNode Inputs"];
 	for (const auto& valuePin : Inputs) {
 		if (!input.empty())
 			input += ",";
 		input += valuePin.Name;
 	}
-	input = "Inputs: " + input;
+	input += ": " + input;
 	ImGui::Text(input.c_str());
 
-	std::string output;
+	std::string output = LOCALE["ModuleNode Outputs"];
 	for (const auto& valuePin : Outputs) {
 		if (!output.empty())
 			output += ",";
 		output += valuePin.Name;
 	}
-	output = "Outputs: " + output;
+	output += ": " + output;
 	ImGui::Text(output.c_str());
 }
 

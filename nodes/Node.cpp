@@ -44,12 +44,12 @@ std::string Node::GetNodeTypeName(NodeType type) {
 		return LOCALE["CommentNode"];
 	case NodeType::List:
 		return LOCALE["ListNode"];
-	case NodeType::Registry:
-		return LOCALE["RegistryNode"];
 	case NodeType::Module:
 		return LOCALE["ModuleNode"];
 	case NodeType::IO:
 		return LOCALE["IONode"];
+	case NodeType::Registry:
+		return LOCALE["RegistryNode"]; // TODO: 添加到locales.json中，先不加防止剧透
 	default:
 		return "";
 	}
@@ -74,7 +74,7 @@ std::vector<Node*> Node::GetSelectedNodes() {
 
 void Node::Menu() {
 	ImGui::Text("%s: %p", LOCALE["ID"], ID.AsPointer());
-	ImGui::Text("%s: %s", LOCALE["Type"], GetNodeTypeName(GetNodeType()));
+	ImGui::Text("%s: %s", LOCALE["Type"], GetNodeTypeName(GetNodeType()).c_str());
 	ImGui::Separator();
 
 	auto& ts = TypeSystem::Get();
@@ -123,17 +123,17 @@ void Node::Tooltip() {
 	switch (typeInfo.Category) {
 	case TypeCategory::NumberLimit:
 		ImGui::Separator();
-		ImGui::Text("Value Range:");
-		ImGui::BulletText("%d to %d",
+		ImGui::Text("%s: ", LOCALE["Node Value Range"]);
+		ImGui::BulletText("[%d, %d]",
 			std::get<NumberLimit>(typeInfo.Data).Min,
 			std::get<NumberLimit>(typeInfo.Data).Max);
 		break;
 
 	case TypeCategory::List:
 		ImGui::Separator();
-		ImGui::Text("List Properties:");
-		ImGui::BulletText("Element: %s", std::get<ListType>(typeInfo.Data).ElementType.c_str());
-		ImGui::BulletText("Length: %d-%d",
+		ImGui::Text("%s: ", LOCALE["Node List Properties"]);
+		ImGui::BulletText("%s: %s", LOCALE["Node List Element"], std::get<ListType>(typeInfo.Data).ElementType.c_str());
+		ImGui::BulletText("%s: [%d, %d]", LOCALE["Node List Length"],
 			std::get<ListType>(typeInfo.Data).MinLength,
 			std::get<ListType>(typeInfo.Data).MaxLength);
 		break;
@@ -141,52 +141,12 @@ void Node::Tooltip() {
 	case TypeCategory::StringLimit:
 		if (!std::get<StringLimit>(typeInfo.Data).ValidValues.empty()) {
 			ImGui::Separator();
-			ImGui::Text("Valid Options:");
+			ImGui::Text("%s: ", LOCALE["Node Valid Options"]);
 			for (auto& val : std::get<StringLimit>(typeInfo.Data).ValidValues) {
 				ImGui::BulletText("%s", val.c_str());
 			}
 		}
 		break;
-	}
-}
-
-void Node::HoverMenu(bool isHovered) {
-	// 显示类型提示
-	static float hoverTime = 0.0f;
-	if (isHovered) {
-		hoverTime += ImGui::GetIO().DeltaTime;
-		if (hoverTime > 0.5f) {
-			ImGui::BeginTooltip();
-			ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s: %s",
-				LOCALE["Type"], this->TypeName.c_str());
-
-			// 添加详细类型信息
-			auto typeInfo = TypeSystem::Get().GetTypeInfo(this->TypeName);
-			switch (typeInfo.Category) {
-			case TypeCategory::NumberLimit:
-				ImGui::Text("Range: %d - %d",
-					std::get<NumberLimit>(typeInfo.Data).Min,
-					std::get<NumberLimit>(typeInfo.Data).Max);
-				break;
-			case TypeCategory::List:
-				ImGui::Text("List of: %s (%d-%d)",
-					std::get<ListType>(typeInfo.Data).ElementType.c_str(),
-					std::get<ListType>(typeInfo.Data).MinLength,
-					std::get<ListType>(typeInfo.Data).MaxLength);
-				break;
-			case TypeCategory::StringLimit:
-				if (!std::get<StringLimit>(typeInfo.Data).ValidValues.empty()) {
-					ImGui::Text("Options: %s",
-						Utils::JoinStrings(std::get<StringLimit>(typeInfo.Data).ValidValues, ", ").c_str());
-				}
-				break;
-			}
-
-			ImGui::EndTooltip();
-		}
-	}
-	else {
-		hoverTime = 0.0f;
 	}
 }
 

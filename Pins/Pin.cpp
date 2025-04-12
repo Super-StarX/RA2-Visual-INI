@@ -30,9 +30,8 @@ Pin* Pin::Get(ed::PinId id) {
 
 void Pin::Tooltip() {
 	ImGui::Text("%s: %d", LOCALE["ID"], ID);
-	ImGui::Text("Type: %s", TypeIdentifier.c_str());
-	ImGui::Text("Node: %s", Node ? Node->Name.c_str() : "None");
-	ImGui::Text("Links: %d", Links.size());
+	ImGui::Text("%s: %s", LOCALE["Pin Style"], PinStyleManager::Get().FindType(TypeIdentifier)->DisplayName);
+	ImGui::Text("%s: %d", LOCALE["Pin Links"], Links.size());
 }
 
 void Pin::SetValue(const std::string& str) {
