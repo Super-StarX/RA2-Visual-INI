@@ -32,16 +32,24 @@ void IONode::Update() {
 	auto builder = BuilderNode::GetBuilder();
 
 	builder->Begin(this->ID);
+	auto alpha = IOPin->GetAlpha();
+	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+	if (Mode == PinKind::Input) {
+		ed::BeginPin(IOPin->ID, ed::PinKind::Input);
+		IOPin->DrawPinIcon(IOPin->IsLinked(), (int)(alpha * 255));
+		ed::EndPin();
+		ImGui::SameLine();
+	}
 	Utils::SetNextInputWidth(Name, 120.f);
 	if(ImGui::InputText("##Name", &Name))
 		IOPin->SetValue(Name);
 
-	ImGui::SameLine();
-	auto alpha = IOPin->GetAlpha();
-	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
-	ed::BeginPin(IOPin->ID, ed::PinKind::Output);
-	IOPin->DrawPinIcon(IOPin->IsLinked(), (int)(alpha * 255));
-	ed::EndPin();
+	if (Mode == PinKind::Output) {
+		ImGui::SameLine();
+		ed::BeginPin(IOPin->ID, ed::PinKind::Output);
+		IOPin->DrawPinIcon(IOPin->IsLinked(), (int)(alpha * 255));
+		ed::EndPin();
+	}
 	ImGui::PopStyleVar();
 	builder->End();
 }
