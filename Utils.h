@@ -29,4 +29,12 @@ public:
 	static bool OpenFileDialog(const char* fliter, char* path, int maxPath, bool isSaving);
 	static void InputText(const char* label, std::string* str, bool disable);
 	static void InputTextWithLeftLabel(const char* label, const char* text, float textWidth, std::string* string, bool disable = false);
+	static void InsertLeftLabelToNextItem(const char* text, float textWidth);
+
+	template <typename First, typename... Rest>
+	static auto max(First first, Rest... rest) {
+		auto max_val = first;
+		((max_val = (rest > max_val) ? rest : max_val), ...);
+		return max_val;
+	}
 };

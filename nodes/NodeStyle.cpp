@@ -52,17 +52,19 @@ void NodeStyleManager::Menu() {
 	ImGui::SameLine();
 	ImGui::BeginGroup();
 
-	static auto textWidth = std::max(ImGui::CalcTextSize(LOCALE["Identifier"]).x, std::max(ImGui::CalcTextSize(LOCALE["Display Name"]).x, ImGui::CalcTextSize(LOCALE["Title Color"]).x));
+	static auto textWidth = Utils::max(
+		ImGui::CalcTextSize(LOCALE["Identifier"]).x, 
+		ImGui::CalcTextSize(LOCALE["Display Name"]).x,
+		ImGui::CalcTextSize(LOCALE["Title Color"]).x
+	);
+
 	if (selected >= 0 && selected < types.size()) {
 		auto& type = const_cast<NodeStyleInfo&>(types[selected]);
 		Utils::InputTextWithLeftLabel("##Identifier", LOCALE["Identifier"], textWidth, &type.Identifier, true);
 		Utils::InputTextWithLeftLabel("##DisplayName", LOCALE["Display Name"], textWidth, &type.Identifier);
 
 		ImVec4 color = type.Color;
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(LOCALE["Title Color"]);
-		ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
-		ImGui::SetNextItemWidth(-FLT_MIN);
+		Utils::InsertLeftLabelToNextItem(LOCALE["Title Color"], textWidth);
 		if (ImGui::ColorEdit4("##NodeColor", (float*)&color))
 			type.Color = ImColor(color);
 
@@ -77,8 +79,8 @@ void NodeStyleManager::Menu() {
 	ImGui::EndGroup();
 	ImGui::Separator();
 
+	// 添加新样式
 	ImGui::BeginGroup();
-	// Add New Node Style
 	static std::string newId{};
 	static std::string newName{};
 	static ImVec4 newColor = ImVec4(0.3f, 0.3f, 0.6f, 1.0f);
@@ -88,21 +90,12 @@ void NodeStyleManager::Menu() {
 	Utils::InputTextWithLeftLabel("##IdentifierNew", LOCALE["Identifier"], textWidth, &newId);
 	Utils::InputTextWithLeftLabel("##DisplayNameNew", LOCALE["Display Name"], textWidth, &newName);
 
-	ImGui::AlignTextToFramePadding();
-	ImGui::TextUnformatted(LOCALE["Title Color"]);
-	ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
-	ImGui::SetNextItemWidth(-FLT_MIN);
+	Utils::InsertLeftLabelToNextItem(LOCALE["Title Color"], textWidth);
 	ImGui::ColorEdit4("##NodeColorNew", (float*)&newColor);
 
 	if (ImGui::Button(LOCALE["Add"])) {
-		if (newId.size() > 0 && newName.size() > 0 && !NodeStyleManager::Get().FindType(newId)) {
-			NodeStyleInfo style;
-			style.Identifier = newId;
-			style.DisplayName = newName;
-			style.Color = ImColor(newColor);
-			style.IsUserDefined = true;
-
-			NodeStyleManager::Get().AddCustomType(style);
+		if (!newId.empty() && !newName.empty() && !NodeStyleManager::Get().FindType(newId)) {
+			NodeStyleManager::Get().AddCustomType({ newId,newName,ImColor(newColor),true });
 
 			newId.clear();
 			newName.clear();

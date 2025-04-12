@@ -31,6 +31,8 @@ public:
 	LinkStyleManager();
 
 	static void Menu();
+	static const char* GetDefaultIdentifier();
+	static const char* GetDefaultDisplayName();
 	const LinkStyleInfo* FindType(const std::string& identifier) const;
 	const std::vector<LinkStyleInfo>& GetAllTypes() const { return m_Types; }
 

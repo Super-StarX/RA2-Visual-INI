@@ -1,9 +1,17 @@
 ﻿// LinkStyle.cpp
 #include "LinkStyle.h"
 #include "Localization.h"
+#include "Utils.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <misc/cpp/imgui_stdlib.h>
+
+const char* LinkStyleManager::GetDefaultIdentifier() {
+	return "default";
+}
+const char* LinkStyleManager::GetDefaultDisplayName() {
+	return LOCALE["Style Default"];
+}
 
 LinkStyleManager::LinkStyleManager() {
 	auto AddType = [this](const LinkStyleInfo& type) {
@@ -14,7 +22,7 @@ LinkStyleManager::LinkStyleManager() {
 		m_TypeIndex[type.Identifier] = m_Types.size() - 1;
 	};
 
-	AddType({ "default", LOCALE["Style Default"],
+	AddType({ GetDefaultIdentifier(), GetDefaultDisplayName(),
 			IM_COL32(255, 255, 255, 255), IM_COL32(200, 200, 255, 255),
 			1.0f, 0 });
 	AddType({ "red", LOCALE["Style Red"],
@@ -29,7 +37,7 @@ void LinkStyleManager::Menu() {
 	static int selected = -1;
 	const auto& types = LinkStyleManager::Get().GetAllTypes();
 
-	ImGui::Text("Link Styles:");
+	ImGui::Text(LOCALE["Link Style"]);
 	ImGui::BeginChild("##LinkStyleList", ImVec2(150, 300), true);
 	for (int i = 0; i < types.size(); ++i) {
 		const auto& type = types[i];
@@ -67,30 +75,37 @@ void LinkStyleManager::Menu() {
 
 	ImGui::SameLine();
 
+	static auto textWidth = Utils::max(
+		ImGui::CalcTextSize(LOCALE["Identifier"]).x,
+		ImGui::CalcTextSize(LOCALE["Display Name"]).x,
+		ImGui::CalcTextSize(LOCALE["Link Base Color"]).x,
+		ImGui::CalcTextSize(LOCALE["Link Highlight Color"]).x,
+		ImGui::CalcTextSize(LOCALE["Link Thickness"]).x
+	);
+
 	// 编辑区域
 	ImGui::BeginGroup();
 	if (selected >= 0 && selected < types.size()) {
-		LinkStyleInfo& type = const_cast<LinkStyleInfo&>(types[selected]); // 注意：这里直接修改内存，确保只对用户定义项启用修改
+		auto& type = const_cast<LinkStyleInfo&>(types[selected]); // 注意：这里直接修改内存，确保只对用户定义项启用修改
 
-		ImGui::PushItemWidth(300.0f);
-		ImGui::Text("Edit Link Style:");
-		ImGui::Text("Identifier: %s", type.Identifier.c_str());
-		ImGui::Text("Name:");
-		ImGui::InputText("##DisplayName", &type.DisplayName);
+		Utils::InputTextWithLeftLabel("##Identifier", LOCALE["Identifier"], textWidth, &type.Identifier, true);
+		Utils::InputTextWithLeftLabel("##DisplayName", LOCALE["Display Name"], textWidth, &type.DisplayName);
 
 		ImVec4 col = type.Color;
-		if (ImGui::ColorEdit4("Base Color", (float*)&col))
+		Utils::InsertLeftLabelToNextItem(LOCALE["Link Base Color"], textWidth);
+		if (ImGui::ColorEdit4("##BaseColor", (float*)&col))
 			type.Color = ImColor(col);
 
 		ImVec4 highlight = ImGui::ColorConvertU32ToFloat4(type.HighlightColor);
-		if (ImGui::ColorEdit4("Highlight Color", (float*)&highlight))
+		Utils::InsertLeftLabelToNextItem(LOCALE["Link Highlight Color"], textWidth);
+		if (ImGui::ColorEdit4("##HighlightColor", (float*)&highlight))
 			type.HighlightColor = ImGui::ColorConvertFloat4ToU32(highlight);
 
-		ImGui::SliderFloat("Thickness", &type.Thickness, 0.5f, 10.0f);
-		ImGui::PopItemWidth();
+		Utils::InsertLeftLabelToNextItem(LOCALE["Link Thickness"], textWidth);
+		ImGui::SliderFloat("##Thickness", &type.Thickness, 0.5f, 10.0f);
 
 		if (type.IsUserDefined) {
-			if (ImGui::Button("Delete")) {
+			if (ImGui::Button(LOCALE["Delete"])) {
 				LinkStyleManager::Get().RemoveCustomType(type.Identifier);
 				selected = -1;
 			}
@@ -101,23 +116,25 @@ void LinkStyleManager::Menu() {
 	ImGui::Separator();
 
 	// 添加新样式
-	static char newId[64] = "";
-	static char newName[64] = "";
+	ImGui::BeginGroup();
+	static std::string newId{};
+	static std::string newName{};
 	static ImVec4 newColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	static ImVec4 newHighlight = ImVec4(0.8f, 0.8f, 1.0f, 1.0f);
 	static float newThickness = 1.0f;
 
-	ImGui::PushItemWidth(455.0f);
-	ImGui::Text("Add New Style:");
-	ImGui::InputText("Identifier", newId, IM_ARRAYSIZE(newId));
-	ImGui::InputText("Display Name", newName, IM_ARRAYSIZE(newName));
-	ImGui::ColorEdit4("Base Color##new", (float*)&newColor);
-	ImGui::ColorEdit4("Highlight Color##new", (float*)&newHighlight);
-	ImGui::SliderFloat("Thickness##new", &newThickness, 0.5f, 10.0f);
-	ImGui::PopItemWidth();
+	ImGui::Text(LOCALE["Add New Style"]);
+	Utils::InputTextWithLeftLabel("##IdentifierNew", LOCALE["Identifier"], textWidth, &newId);
+	Utils::InputTextWithLeftLabel("##DisplayNameNew", LOCALE["Display Name"], textWidth, &newName);
+	Utils::InsertLeftLabelToNextItem(LOCALE["Link Base Color"], textWidth);
+	ImGui::ColorEdit4("##BaseColorNew", (float*)&newColor);
+	Utils::InsertLeftLabelToNextItem(LOCALE["Link Highlight Color"], textWidth);
+	ImGui::ColorEdit4("##HighlightColorNew", (float*)&newHighlight);
+	Utils::InsertLeftLabelToNextItem(LOCALE["Link Thickness"], textWidth);
+	ImGui::SliderFloat("##ThicknessNew", &newThickness, 0.5f, 10.0f);
 
-	if (ImGui::Button("Add")) {
-		if (strlen(newId) > 0 && strlen(newName) > 0 && !LinkStyleManager::Get().FindType(newId)) {
+	if (ImGui::Button(LOCALE["Add"])) {
+		if (!newId.empty() && !newName.empty() && !LinkStyleManager::Get().FindType(newId)) {
 			LinkStyleInfo newType;
 			newType.Identifier = newId;
 			newType.DisplayName = newName;
@@ -127,11 +144,11 @@ void LinkStyleManager::Menu() {
 			newType.IsUserDefined = true;
 
 			LinkStyleManager::Get().AddCustomType(newType);
-			memset(newId, 0, sizeof(newId));
-			memset(newName, 0, sizeof(newName));
+			newId.clear();
+			newName.clear();
 		}
 	}
-
+	ImGui::EndGroup();
 }
 
 const LinkStyleInfo* LinkStyleManager::FindType(const std::string& identifier) const {

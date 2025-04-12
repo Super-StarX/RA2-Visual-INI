@@ -131,9 +131,13 @@ void Utils::InputText(const char* label, std::string* str, bool disable) {
 }
 
 void Utils::InputTextWithLeftLabel(const char* label, const char* text, float textWidth, std::string* string, bool disable) {
+	InsertLeftLabelToNextItem(text, textWidth);
+	Utils::InputText(label, string, disable);
+}
+
+void Utils::InsertLeftLabelToNextItem(const char* text, float textWidth) {
 	ImGui::AlignTextToFramePadding();
 	ImGui::TextUnformatted(text);
 	ImGui::SameLine(textWidth + ImGui::GetStyle().ItemSpacing.x);
 	ImGui::SetNextItemWidth(-FLT_MIN);
-	Utils::InputText(label, string, disable);
 }

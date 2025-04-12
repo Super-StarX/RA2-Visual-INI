@@ -152,7 +152,7 @@ void MainWindow::ShowNodeStyleEditor() {
 	if (!m_ShowNodeStyleEditor) return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin(LOCALE["Node Sytle Manager"], &m_ShowNodeStyleEditor)) {
+	if (ImGui::Begin(LOCALE["Node Style Manager"], &m_ShowNodeStyleEditor)) {
 		NodeStyleManager::Menu();
 	}
 	ImGui::End();
@@ -346,7 +346,7 @@ void MainWindow::ShowPinStyleEditor() {
 	if (!m_ShowPinStyleEditor) return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Pin Sytle Manager", &m_ShowPinStyleEditor)) {
+	if (ImGui::Begin(LOCALE["Pin Style Manager"], &m_ShowPinStyleEditor)) {
 		PinStyleManager::Menu();
 	}
 	ImGui::End();
@@ -458,7 +458,7 @@ void MainWindow::ShowLinkStyleEditor() {
 	if (!m_ShowLinkStyleEditor) return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Link Sytle Manager", &m_ShowLinkStyleEditor)) {
+	if (ImGui::Begin(LOCALE["Link Style Manager"], &m_ShowLinkStyleEditor)) {
 		LinkStyleManager::Menu();
 	}
 	ImGui::End();
