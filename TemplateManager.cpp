@@ -53,7 +53,7 @@ TemplateItem TemplateManager::ParseIniString(std::istringstream& file) {
 		if (line[0] == '[') {
 			auto endPos = line.find(']');
 			if (endPos != std::string::npos) {
-				TemplateSection newSection;
+				TemplateSection newSection{};
 				newSection.Name = line.substr(1, endPos - 1);
 				fileItem.sections.push_back(newSection);
 				currentSection = &fileItem.sections.back();

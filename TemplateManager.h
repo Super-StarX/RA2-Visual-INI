@@ -16,7 +16,7 @@ struct TemplateSection {
 
 	std::string Name{};
 	std::string Type{};
-	std::string Style{};
+	std::string Style{ "default" };
 	bool IsFolded{ false };
 	bool IsComment{ false };
 	std::vector<KeyValue> KeyValues;
