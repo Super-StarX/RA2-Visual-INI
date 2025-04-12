@@ -6,9 +6,12 @@ public:
 	VIInputText(const std::string& name, const void* owner) : Owner(owner), std::string(name) {}
 	
 	void operator=(const std::string& name) { *this = VIInputText(name, Owner); };
+	bool InputText();
+	bool InputTextMultiline();
 	void BeginEditing();
 	bool Render();
 
+	bool Multiline{ false };
 private:
 	const void* Owner{ nullptr };
 	bool Editing{ false };

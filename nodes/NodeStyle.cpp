@@ -9,6 +9,8 @@ NodeStyleManager::NodeStyleManager() {
 	AddCustomType({ "red",LOCALE["Style Red"], ImColor(255, 0, 0), false });
 	AddCustomType({ "green",LOCALE["Style Green"], ImColor(0, 255, 0), false });
 	AddCustomType({ "blue",LOCALE["Style Blue"], ImColor(0, 0, 255), false });
+	AddCustomType({ "white",LOCALE["Style White"], ImColor(255, 255, 255), true });
+	AddCustomType({ "black",LOCALE["Style Black"], ImColor(0, 0, 0), true });
 	AddCustomType({ "dark",LOCALE["Style Dark Blue"], ImColor(30, 30, 80), true });
 }
 void NodeStyleManager::Menu() {

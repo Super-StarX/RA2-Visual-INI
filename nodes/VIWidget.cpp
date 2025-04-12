@@ -2,6 +2,16 @@
 #include "Utils.h"
 #include <misc/cpp/imgui_stdlib.h>
 
+bool VIInputText::InputText() {
+	return ImGui::InputText("##SectionName", Buffer, sizeof(Buffer),
+			ImGuiInputTextFlags_EnterReturnsTrue |
+			ImGuiInputTextFlags_AutoSelectAll);
+}
+
+bool VIInputText::InputTextMultiline() {
+	return ImGui::InputTextMultiline("##SectionName", Buffer, sizeof(Buffer));
+}
+
 void VIInputText::BeginEditing() {
 	Editing = true;
 	NeedFocus = true;
@@ -16,14 +26,14 @@ bool VIInputText::Render() {
 	Utils::SetNextInputWidth(*this, 130.f);
 	if (Editing || this->empty()) {
 		// 编辑模式：显示InputText
-		if (ImGui::InputText("##SectionName", Buffer, sizeof(Buffer),
-			ImGuiInputTextFlags_EnterReturnsTrue |
-			ImGuiInputTextFlags_AutoSelectAll)) {
-			// 按下回车：保存修改
-			*this = Buffer;
-			Editing = false;
-			// 更新关联Pin的值（保持原有逻辑）
-			result = true;
+		if (Multiline)
+			InputTextMultiline();  // 不检测返回值，回车不结束
+		else {
+			if (InputText()) { // 检测回车（仅限单行）
+				*this = Buffer;
+				Editing = false;
+				result = true;
+			}
 		}
 
 		// 失去焦点时保存

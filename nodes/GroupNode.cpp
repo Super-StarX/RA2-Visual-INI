@@ -1,50 +1,33 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "GroupNode.h"
 #include "Utils.h"
+#include "NodeStyle.h"
 #include <imgui_node_editor_internal.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-static std::string NameBuffer;
+GroupNode::GroupNode(const char* name, int id) :
+	Node(name, id) {
+	Style = "white";
+}
+
 void GroupNode::Update() {
 	const float commentAlpha = 0.75f;
 
+	auto* typeInfo = NodeStyleManager::Get().FindType(Style);
+	if (!typeInfo) return;
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
-	ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
-	ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+	auto color = typeInfo->Color;
+	color.Value.w = 64;
+	ed::PushStyleColor(ed::StyleColor_NodeBg, color);
+	ed::PushStyleColor(ed::StyleColor_NodeBorder, color);
 	ed::BeginNode(this->ID);
 	ImGui::PushID(this->ID.AsPointer());
 	ImGui::BeginVertical("content");
 	ImGui::BeginHorizontal("horizontal");
 	ImGui::Spring(1);
-	if (IsEditingName) {
-		// 开始编辑模式
-		ImGui::SetKeyboardFocusHere();
-		float inputWidth = Size.x - 16.0f;
-		ImGui::SetNextItemWidth(inputWidth);
 
-		ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(255, 255, 255, 32));
-		ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, IM_COL32(255, 255, 255, 96));
-		if (ImGui::InputText("##NameEdit", &NameBuffer,
-			ImGuiInputTextFlags_EnterReturnsTrue |
-			ImGuiInputTextFlags_AutoSelectAll)) {
-			// 按下回车保存
-			Name = NameBuffer;
-			IsEditingName = false;
-		}
-		// ESC取消处理
-		if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-			NameBuffer = Name;
-			IsEditingName = false;
-		}
-		// 外部点击保存处理
-		else if (!ImGui::IsItemActive() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			Name = NameBuffer;
-			IsEditingName = false;
-		}
-	}
-	else {
-		ImGui::TextUnformatted(this->Name.c_str());
-	}
+	Name.Render();
+
 	ImGui::Spring(1);
 	ImGui::EndHorizontal();
 	ed::Group(this->Size);
@@ -86,20 +69,10 @@ void GroupNode::Update() {
 		//ImGui::PopStyleVar();
 	}
 	ed::EndGroupHint();
-
-	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-		IsEditingName = true;
-		NameBuffer = Name;
-	}
 }
 
 void GroupNode::Menu() {
 	Node::Menu();
-	// 添加编辑名称的菜单项
-	if (ImGui::MenuItem("Edit Name")) {
-		IsEditingName = true;
-		NameBuffer = Name;
-	}
 }
 
 void GroupNode::SaveToJson(json& j) const {
