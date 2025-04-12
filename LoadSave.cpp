@@ -411,39 +411,91 @@ void MainWindow::ExportINI(const std::string& path) {
 		}
 	};
 
-	// 主逻辑
-	for (auto& node : Array) {
-		if (node->IsComment)
-			continue;
+	// 已导出节点集合
+	std::unordered_set<SectionNode*> exported;
 
+	// 循环注释：node -> "Cycle: A -> B -> A"
+	std::unordered_map<SectionNode*, std::string> cycleAnnotations;
+
+	// 递归导出函数
+	std::function<void(SectionNode*, std::vector<SectionNode*>)> ExportNode;
+	ExportNode = [&](SectionNode* node, std::vector<SectionNode*> callStack) {
+		if (!node || node->IsComment)
+			return;
+
+		// 检测循环
+		if (std::find(callStack.begin(), callStack.end(), node) != callStack.end()) {
+			std::string cycle = "Cycle: ";
+			bool started = false;
+			for (auto* n : callStack) {
+				if (n == node || started) {
+					if (!cycle.empty() && cycle.back() != ' ')
+						cycle += " -> ";
+					cycle += n->Name;
+					started = true;
+				}
+			}
+			cycle += " -> " + node->Name;
+			cycleAnnotations[node] = cycle;
+			return;
+		}
+
+		if (exported.count(node))
+			return;
+
+		callStack.push_back(node);
+
+		// 先导出 OutputPin 指向的父节点（继承来源）
+		if (auto* output = dynamic_cast<SectionNode*>(node->OutputPin.get()->GetLinkedNode())) {
+			ExportNode(output, callStack);
+		}
+
+		exported.insert(node);
+
+		// 写 section 标头
 		file << "[" << replacer.replace(node->Name) << "]";
 
-		if (auto output = node->OutputPin.get()->GetLinkedNode())
-			//if (node->Name != output->GetValue())
-				file << ":[" << replacer.replace(output->GetValue()) << "]";
+		auto* output = dynamic_cast<SectionNode*>(node->OutputPin.get()->GetLinkedNode());
+		if (output) {
+			file << ":[" << replacer.replace(output->GetValue()) << "]";
+
+			// 如果继承目标未被导出，添加提醒
+			if (!exported.count(output)) {
+				file << " ; Warning: [" << replacer.replace(output->GetValue()) << "] not declared before use (possible cycle or invalid order)";
+			}
+		}
+
+		// 如果当前节点存在循环记录，也输出注释
+		if (cycleAnnotations.count(node)) {
+			file << " ; " << cycleAnnotations[node];
+		}
 
 		file << "\n";
-			
+
+
+		// 收集键值
 		std::vector<std::pair<std::string, std::string>> outputEntries;
 		std::unordered_set<SectionNode*> visited;
-
 		Collect(node, outputEntries, visited);
 
-		// 写入文件（保留最后出现的重复键）
+		// 保留最后值的键
 		std::unordered_map<std::string, size_t> finalMap;
-
-		for (size_t i = 0; i < outputEntries.size(); i++)
-			finalMap[outputEntries[i].first] = i; // 自动覆盖重复键
+		for (size_t i = 0; i < outputEntries.size(); ++i)
+			finalMap[outputEntries[i].first] = i;
 
 		std::vector<std::pair<std::string, size_t>> vec(finalMap.begin(), finalMap.end());
-		std::sort(vec.begin(), vec.end(), [](const std::pair<std::string, size_t>& a, const std::pair<std::string, size_t>& b) {
-			return a.second < b.second;
-		});
+		std::sort(vec.begin(), vec.end(), [](auto& a, auto& b) { return a.second < b.second; });
 
-		for (auto& [key, val] : vec)
-			file << key << "=" << replacer.replace(outputEntries[val].second) << "\n";
+		for (auto& [key, idx] : vec)
+			file << key << "=" << replacer.replace(outputEntries[idx].second) << "\n";
 
 		file << "\n";
+	};
+
+	// 遍历所有节点，递归导出
+	for (auto* node : Array) {
+		std::vector<SectionNode*> callStack;
+		ExportNode(node, callStack);
 	}
 
 	MainWindow::SetNextId(id);
