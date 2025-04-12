@@ -9,7 +9,7 @@ bool VIInputText::InputText() {
 }
 
 bool VIInputText::InputTextMultiline() {
-	return ImGui::InputTextMultiline("##SectionName", Buffer, sizeof(Buffer));
+	return ImGui::InputTextMultiline("##SectionName", Buffer, sizeof(Buffer), {-1,-1});
 }
 
 void VIInputText::BeginEditing() {

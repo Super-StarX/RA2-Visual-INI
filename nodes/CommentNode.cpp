@@ -7,7 +7,6 @@
 
 CommentNode::CommentNode(const char* name, int id) :
 	Node(name, id) {
-	Name.Multiline = true;
 }
 
 void CommentNode::Update() {
@@ -19,6 +18,7 @@ void CommentNode::Update() {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
 
+	Name.Multiline = true;
 	Name.Render();
 
 	ImGui::PopStyleVar();
