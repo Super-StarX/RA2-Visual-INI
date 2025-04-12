@@ -25,7 +25,7 @@ void TemplateManager::LoadFolder(const fs::path& path, TemplateItem& parent) {
 	try {
 		for (const auto& entry : fs::directory_iterator(path)) {
 			if (entry.is_directory()) {
-				TemplateItem folderItem{ .name = entry.path().filename().string() };
+				TemplateItem folderItem{ .name = entry.path().filename().u8string() };
 				parent.children.push_back(folderItem);
 				LoadFolder(entry.path(), parent.children.back());
 			}
@@ -104,7 +104,7 @@ void TemplateManager::ParseIniFile(const fs::path& filePath, TemplateItem& paren
 						 std::istreambuf_iterator<char>());
 		std::istringstream iss(content);
 		auto fileItem = ParseIniString(iss);
-		fileItem.name = filePath.stem().string(); // 使用文件名作为显示名称
+		fileItem.name = filePath.stem().u8string(); // 使用文件名作为显示名称
 
 		if (!fileItem.sections.empty()) {
 			parent.children.push_back(fileItem);
@@ -122,7 +122,7 @@ void TemplateManager::ShowCreationMenu(NodeCreator creator) {
 void TemplateManager::ShowMenuRecursive(const TemplateItem& item, NodeCreator creator) {
 	for (const auto& child : item.children) {
 		if (!child.sections.empty()) {
-			if (ImGui::MenuItem(child.name.c_str())) {
+			if (ImGui::MenuItem(reinterpret_cast<const char*>(child.name.c_str()))) {
 				ImVec2 mousePos = ImGui::GetMousePos();
 				for (const auto& section : child.sections) {
 					creator(section, mousePos);
@@ -130,7 +130,7 @@ void TemplateManager::ShowMenuRecursive(const TemplateItem& item, NodeCreator cr
 			}
 		}
 		else {
-			if (ImGui::BeginMenu(child.name.c_str())) {
+			if (ImGui::BeginMenu(reinterpret_cast<const char*>(child.name.c_str()))) {
 				ShowMenuRecursive(child, creator);
 				ImGui::EndMenu();
 			}

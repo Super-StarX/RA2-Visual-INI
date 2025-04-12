@@ -24,7 +24,7 @@ struct TemplateSection {
 
 // 新增模板项结构体
 struct TemplateItem {
-	std::string name;
+	std::u8string name;
 	std::vector<TemplateSection> sections; // 非空表示叶子节点
 	std::vector<TemplateItem> children;    // 非空表示文件夹节点
 };

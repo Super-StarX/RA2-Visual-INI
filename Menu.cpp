@@ -98,18 +98,18 @@ void MainWindow::LayerMenu() {
 void MainWindow::AddModuleMenuItems(const std::string& path) {
 	try {
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
-			std::string filename = entry.path().filename().string();
+			auto filename = entry.path().filename().u8string();
 
 			if (entry.is_directory()) {
 				// 递归处理子目录，创建子菜单
-				if (ImGui::BeginMenu(filename.c_str())) {
+				if (ImGui::BeginMenu(reinterpret_cast<const char*>(filename.c_str()))) {
 					AddModuleMenuItems(entry.path().string());
 					ImGui::EndMenu();
 				}
 			}
 			else if (entry.path().extension() == ".viproj") {
 				// 处理.viproj文件
-				if (ImGui::MenuItem(filename.c_str())) {
+				if (ImGui::MenuItem(reinterpret_cast<const char*>(filename.c_str()))) {
 					auto moduleNode = Node::Create<ModuleNode>();
 					moduleNode->LoadProject(entry.path().string());
 
