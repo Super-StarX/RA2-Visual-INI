@@ -19,6 +19,7 @@ enum class NodeType {
 	Section,
 	Comment,
 	List,
+	Registry,
 	Module,
 	IO,
 

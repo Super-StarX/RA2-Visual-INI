@@ -55,6 +55,14 @@ TypeInfo TypeSystem::GetKeyType(const std::string& sectionType, const std::strin
 void TypeSystem::LoadFromINI(const std::string& path) {
 	IniFile ini(path);
 
+	// 解析[Registries]段
+	if (ini.sections.count("Registries")) {
+		const auto& regSection = ini.sections.at("Registries");
+		for (const auto& [registryName, typeName] : regSection.section) {
+			TypeToRegistryMap[typeName] = registryName;
+		}
+	}
+
 	// 处理[Sections]主段（特殊处理）
 	if (ini.sections.count("Sections")) {
 		auto& regSection = ini.sections.at("Sections");

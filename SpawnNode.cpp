@@ -6,6 +6,7 @@
 #include "Nodes/GroupNode.h"
 #include "Nodes/HoudiniNode.h"
 #include "Nodes/ListNode.h"
+#include "Nodes/RegistryNode.h"
 #include "Nodes/ModuleNode.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/SimpleNode.h"
@@ -51,9 +52,10 @@ Node* MainWindow::CreateNodeByType(NodeType type) {
 	case NodeType::Section:  return Node::Create<SectionNode>();
 	case NodeType::Comment:  return Node::Create<CommentNode>();
 	case NodeType::List:     return Node::Create<ListNode>();
+	case NodeType::Registry: return Node::Create<RegistryNode>();
 	case NodeType::Module:   return Node::Create<ModuleNode>();
-	case NodeType::IO:      return Node::Create<IONode>(PinKind::Input);
-	default:                return nullptr;
+	case NodeType::IO:       return Node::Create<IONode>(PinKind::Input);
+	default:                 return nullptr;
 	}
 }
 
@@ -67,6 +69,11 @@ Node* MainWindow::CreateNodeByName() {
 		return Node::Create<ListNode>();
 	if (ImGui::IsItemHovered())
 		ImGui::SetTooltip(LOCALE["ListNodeTooltip"]);
+	
+	//if (ImGui::MenuItem(LOCALE["RegistryNode"]))
+	//	return Node::Create<RegistryNode>();
+	//if (ImGui::IsItemHovered())
+	//	ImGui::SetTooltip(LOCALE["RegistryNodeTooltip"]);
 
 	if (ImGui::MenuItem(LOCALE["InputTagNode"]))
 		return Node::Create<TagNode>(true);

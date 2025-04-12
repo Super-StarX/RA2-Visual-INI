@@ -68,7 +68,8 @@ public:
 	TypeInfo GetKeyType(const std::string& sectionType, const std::string& key) const;
 	void LoadFromINI(const std::string& path);
 
-	std::unordered_set<std::string> BasicTypes = { "string", "int", "float", "bool" };
+	std::unordered_set<std::string> BasicTypes = { "string", "int", "float", "bool" };// 在 TypeSystem 类中加入：
+	std::unordered_map<std::string, std::string> TypeToRegistryMap;
 	std::unordered_map<std::string, Section> Sections;
 	std::unordered_map<std::string, NumberLimit> NumberLimits;
 	std::unordered_map<std::string, StringLimit> StringLimits;

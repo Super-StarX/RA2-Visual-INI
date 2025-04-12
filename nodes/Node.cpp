@@ -44,6 +44,8 @@ std::string Node::GetNodeTypeName(NodeType type) {
 		return LOCALE["CommentNode"];
 	case NodeType::List:
 		return LOCALE["ListNode"];
+	case NodeType::Registry:
+		return LOCALE["RegistryNode"];
 	case NodeType::Module:
 		return LOCALE["ModuleNode"];
 	case NodeType::IO:

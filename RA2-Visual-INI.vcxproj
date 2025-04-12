@@ -180,6 +180,7 @@
     <ClCompile Include="Nodes\SimpleNode.cpp" />
     <ClCompile Include="Pins\PinStyle.cpp" />
     <ClCompile Include="PlaceholderReplacer.cpp" />
+    <ClCompile Include="Nodes\RegistryNode.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="Nodes\TagNode.cpp" />
     <ClCompile Include="TemplateManager.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="Nodes\SimpleNode.h" />
     <ClInclude Include="Pins\PinStyle.h" />
     <ClInclude Include="Nodes\TagNode.h" />
+    <ClInclude Include="Nodes\RegistryNode.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="PlaceholderReplacer.h" />
     <ClInclude Include="TemplateManager.h" />
