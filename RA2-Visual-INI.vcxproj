@@ -75,12 +75,14 @@
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <TargetName>Visual INI</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExternalIncludePath>$(ProjectDir);$(ProjectDir)imgui-node-editor;$(ProjectDir)imgui-node-editor\include;$(ProjectDir)imgui-node-editor\external\imgui;$(ProjectDir)thirdparty\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
     <LibraryPath>$(ProjectDir)imgui-node-editor\external\DXSDK\lib\x64;$(ProjectDir)imgui-node-editor\libs\$(Configuration);$(ProjectDir)thirdparty\libs\$(Configuration);$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <TargetName>Visual INI</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
