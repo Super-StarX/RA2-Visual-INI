@@ -16,7 +16,7 @@ const char* Localization::operator[](const std::string& key) const {
 }
 
 void Localization::Init() {
-	std::ifstream file("locales.json");
+	std::ifstream file("Locales.json");
 	nlohmann::json data = nlohmann::json::parse(file);
 	m_Localization = data.get<std::unordered_map<std::string, std::string>>();
 	return;

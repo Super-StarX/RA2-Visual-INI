@@ -73,8 +73,8 @@ void MainWindow::UpdateTouch() {
 }
 
 void MainWindow::InitDefaultLayout() {
-	if (std::filesystem::exists("DefaultLayout.ini")) {
-		ImportINI("DefaultLayout.ini");
+	if (std::filesystem::exists("Default Layout.ini")) {
+		ImportINI("Default Layout.ini");
 	}
 	else {
 		auto node1 = Node::Create<SectionNode>("Section A");
@@ -83,8 +83,8 @@ void MainWindow::InitDefaultLayout() {
 		node2->AddKeyValue("Key", "Value");
 		auto back = node1->KeyValues.back().get();
 		back->LinkTo(node2->InputPin.get());
-
-		ExportINI("DefaultLayout.ini");
+		EnableApplyForceDirectedLayout();
+		ExportINI("Default Layout.ini");
 	}
 }
 
@@ -102,7 +102,7 @@ void MainWindow::OnStart() {
 	Log::Init();
 	LOG_INFO("=================================================================");
 	LOG_INFO("正在进行初始化...");
-	LOG_INFO("正在载入语言文件[locales.json]");
+	LOG_INFO("正在载入语言文件[Locales.json]");
 	LOCALE.Init();
 
 	SetTitle(L"Visual INI - 可视化INI编辑器");
@@ -132,7 +132,7 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
-	PinStyleManager::Get().LoadFromFile("custom_types.json");
+	PinStyleManager::Get().LoadFromFile("Custom Types.json");
 	LOG_INFO("载入自定义Pin类型完毕");
 	TypeSystem::Get().LoadFromINI("INICodingCheck.ini");
 	LOG_INFO("载入INI配置完毕");
@@ -152,7 +152,7 @@ void MainWindow::OnStart() {
 
 void MainWindow::OnStop() {
 	LOG_INFO("程序关闭，正在保存自定义数据信息...");
-	PinStyleManager::Get().SaveToFile("custom_types.json");
+	PinStyleManager::Get().SaveToFile("Custom Types.json");
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;
