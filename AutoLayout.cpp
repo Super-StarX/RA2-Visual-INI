@@ -37,37 +37,43 @@ void MainWindow::ApplyForceDirectedLayout() {
 void MainWindow::CreateTagNodesForMultiInputs() {
 	std::unordered_map<SectionNode*, std::vector<Link*>> multiInputSections;
 
-	// 收集都有谁被很多人链接(inputpin有很多link)
+	// 收集被多个链接指向的 SectionNode
 	for (auto& node : Node::Array) {
 		if (auto section = dynamic_cast<SectionNode*>(node.get())) {
 			if (section->InputPin && section->InputPin->Links.size() > 1) {
 				std::vector<Link*> links;
 				for (const auto& linkPair : section->InputPin->Links)
 					links.push_back(linkPair.second);
-				multiInputSections[section] = links;
+				multiInputSections[section] = std::move(links);
 			}
 		}
 	}
 
-	// 创建标签节点对
-	for (auto& pair : multiInputSections) {
-		auto section = pair.first; // 被链接的node
-		auto& links = pair.second; // 该node的所有的inputs
-		std::string tagName = section->Name;
+	// 为每个被多个pin连接的节点创建TagNode
+	for (auto& [section, links] : multiInputSections) {
+		const std::string& tagName = section->Name;
 
-		// 创建input标签节点
-		if (auto inputTag = Node::Create<TagNode>(true, tagName.c_str())) {
-			inputTag->SetPosition(section->GetPosition() - ImVec2(200, 0));
-			section->OutputPin->LinkTo(inputTag->InputPin.get());
-		}
+		// 创建 OutputTagNode（唯一）: 连接到 section->InputPin
+		auto outputTag = Node::Create<TagNode>(false, tagName.c_str());
+		outputTag->SetPosition(section->GetPosition() - ImVec2(200, 0));
 
-		// 创建output标签节点
-		for (auto link : links) {
-			auto pin = Pin::Get(link->StartPinID);
-			if (auto outputTag = Node::Create<TagNode>(false, tagName.c_str())) {
-				outputTag->SetPosition(section->GetPosition() + ImVec2(200, 0));
-				pin->LinkTo(outputTag->InputPin.get());
-			}
+		// 将 outputTag 的输出连接到 section 的输入
+		outputTag->InputPin->LinkTo(section->InputPin.get());
+
+		// 对于每个输入，创建一个 InputTagNode 连接它
+		for (auto* link : links) {
+			auto fromPin = Pin::Get(link->StartPinID);
+			if (!fromPin)
+				continue;
+
+			auto inputTag = Node::Create<TagNode>(true, tagName.c_str());
+			inputTag->SetPosition(section->GetPosition() + ImVec2(200, 0));
+
+			// fromPin → inputTag 的输入
+			fromPin->LinkTo(inputTag->InputPin.get());
+
+			// inputTag → outputTag 的输入
+			inputTag->InputPin->LinkTo(outputTag->InputPin.get());
 		}
 	}
 }
