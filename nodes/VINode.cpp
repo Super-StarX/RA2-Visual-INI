@@ -55,9 +55,8 @@ void VINode<T>::Update() {
 
 	// 渲染键值对
 	size_t i = 0;
-	lastMaxSize = maxSize + 40.f;
+	lastMaxSize = maxSize + 8.f;
 	maxSize = 0;
-
 
 	if (!IsFolded) {
 		while (i < this->KeyValues.size()) {
@@ -72,6 +71,7 @@ void VINode<T>::Update() {
 				ImGui::Dummy(ImVec2(0, 2.4f));
 			}
 		}
+
 		i = 0;
 		while (i < this->KeyValues.size()) {
 			auto kv = this->KeyValues[i].get();
@@ -89,6 +89,8 @@ void VINode<T>::Update() {
 	ImGui::Dummy(ImVec2(0, 1));
 	ImGui::Spring(0);
 	AddKeyValue();
+	ImGui::SameLine();
+	ImGui::Dummy(ImVec2(24, 1));
 	ImGui::PopID();
 
 	builder->End();

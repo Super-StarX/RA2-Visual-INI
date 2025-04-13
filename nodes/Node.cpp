@@ -73,7 +73,7 @@ std::vector<Node*> Node::GetSelectedNodes() {
 }
 
 void Node::Menu() {
-	ImGui::Text("%s: %p", LOCALE["ID"], ID.AsPointer());
+	ImGui::Text("%s: %d", LOCALE["ID"], ID.AsPointer());
 	ImGui::Text("%s: %s", LOCALE["Type"], GetNodeTypeName(GetNodeType()).c_str());
 	ImGui::Separator();
 
@@ -116,7 +116,9 @@ void Node::Menu() {
 
 void Node::Tooltip() {
 	// 类型名称
-	ImGui::Text("%s: %s", LOCALE["Type"], TypeName.c_str());
+	ImGui::Text("%s: %d", LOCALE["ID"], ID);
+	ImGui::Text("%s: %s", LOCALE["Node Type"], GetNodeTypeName(GetNodeType()).c_str());
+	ImGui::Text("%s: %s", LOCALE["Node Type Name"], TypeName.c_str());
 
 	// 类型详细信息
 	auto typeInfo = TypeSystem::Get().GetTypeInfo(TypeName);
