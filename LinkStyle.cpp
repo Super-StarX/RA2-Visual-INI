@@ -218,7 +218,7 @@ bool LinkStyleManager::LoadFromFile(const std::string& path) {
 
 bool LinkStyleManager::SaveToFile(const std::string& path) {
 	using json = nlohmann::json;
-	json j = json::parse(path);
+	json j;
 	for (const auto& type : m_Types) {
 		if (!type.IsUserDefined) continue;
 

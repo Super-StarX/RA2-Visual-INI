@@ -6,8 +6,10 @@
 #include "Nodes/ListNode.h"
 #include "Nodes/BuilderNode.h"
 #include "Nodes/CommentNode.h"
+#include "Nodes/NodeStyle.h"
 #include "Pins/KeyValue.h"
 #include "Pins/PinStyle.h"
+#include "LinkStyle.h"
 #include "Nodes/TagNode.h"
 #include "Log.h"
 
@@ -132,7 +134,9 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
+	NodeStyleManager::Get().LoadFromFile("Custom Types.json");
 	PinStyleManager::Get().LoadFromFile("Custom Types.json");
+	LinkStyleManager::Get().LoadFromFile("Custom Types.json");
 	LOG_INFO("载入自定义Pin类型完毕");
 	TypeSystem::Get().LoadFromINI("INICodingCheck.ini");
 	LOG_INFO("载入INI配置完毕");
@@ -152,7 +156,9 @@ void MainWindow::OnStart() {
 
 void MainWindow::OnStop() {
 	LOG_INFO("程序关闭，正在保存自定义数据信息...");
+	NodeStyleManager::Get().SaveToFile("Custom Types.json");
 	PinStyleManager::Get().SaveToFile("Custom Types.json");
+	LinkStyleManager::Get().SaveToFile("Custom Types.json");
 	if (m_Editor) {
 		ed::DestroyEditor(m_Editor);
 		m_Editor = nullptr;

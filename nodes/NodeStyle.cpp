@@ -1,6 +1,8 @@
 ﻿#include "NodeStyle.h"
 #include "Utils.h"
 #include <imgui.h>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Localization.h"
 
@@ -126,4 +128,84 @@ const NodeStyleInfo* NodeStyleManager::FindType(const std::string& identifier) c
 	if (it != m_Index.end() && it->second < m_Types.size())
 		return &m_Types[it->second];
 	return nullptr;
+}
+
+bool NodeStyleManager::LoadFromFile(const std::string& path) {
+	try {
+		std::ifstream file(path);
+		if (!file.is_open())
+			return false;
+
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		std::string jsonContent = buffer.str();
+
+		using json = nlohmann::json;
+		json j = json::parse(jsonContent);
+
+		if (!j.contains("NodeStyles"))
+			return false;
+
+		for (const auto& type : j["NodeStyles"]) {
+			NodeStyleInfo info;
+			info.Identifier = type["Identifier"].get<std::string>();
+			info.DisplayName = type["DisplayName"].get<std::string>();
+
+			auto& color = type["Color"];
+			info.Color = ImColor(
+				color[0].get<float>(),
+				color[1].get<float>(),
+				color[2].get<float>(),
+				color[3].get<float>());
+
+			info.IsUserDefined = type["IsUserDefined"].get<bool>();
+
+			// 替换或添加用户自定义样式
+			if (info.IsUserDefined) {
+				auto existing = m_Index.find(info.Identifier);
+				if (existing != m_Index.end() &&
+					m_Types[existing->second].IsUserDefined) {
+					m_Types[existing->second] = info;
+				}
+				else {
+					AddCustomType(info);
+				}
+			}
+		}
+		return true;
+	}
+	catch (...) {
+		return false;
+	}
+}
+bool NodeStyleManager::SaveToFile(const std::string& path) {
+	using json = nlohmann::json;
+	json j;
+
+	for (const auto& type : m_Types) {
+		if (!type.IsUserDefined)
+			continue;
+
+		json t;
+		t["Identifier"] = type.Identifier;
+		t["DisplayName"] = type.DisplayName;
+
+		json color;
+		color.push_back(type.Color.Value.x);
+		color.push_back(type.Color.Value.y);
+		color.push_back(type.Color.Value.z);
+		color.push_back(type.Color.Value.w);
+		t["Color"] = color;
+
+		t["IsUserDefined"] = type.IsUserDefined;
+
+		j["NodeStyles"].push_back(t);
+	}
+
+	std::ofstream file(path);
+	if (!file.is_open())
+		return false;
+
+	file << std::setw(4) << j << std::endl;
+	return true;
 }

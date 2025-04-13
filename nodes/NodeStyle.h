@@ -29,7 +29,8 @@ public:
 
 	void AddCustomType(const NodeStyleInfo& type);
 	void RemoveCustomType(const std::string& identifier);
-
+	bool LoadFromFile(const std::string& path);
+	bool SaveToFile(const std::string& path);
 
 private:
 	std::vector<NodeStyleInfo> m_Types;
