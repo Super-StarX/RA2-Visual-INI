@@ -11,12 +11,13 @@ public:
 	static ValuePin* EditPin;
 
 	ValuePin(::Node* node, std::string value = "value", int id = -1);
+	virtual void Menu() override;
 	virtual void SetValue(const std::string& str) override;
 	virtual std::string GetValue() const override;
 
 	float DrawValueWidget(std::string& value, const TypeInfo& type);
-
 	void DrawListInput(std::string& listValue, const ListType& listType);
+	void MenuItems();
 
 	bool IsInherited = false;
 	bool IsComment = false;

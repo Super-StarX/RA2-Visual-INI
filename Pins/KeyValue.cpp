@@ -9,6 +9,11 @@ std::string KeyPin::GetValue() const {
 	return Value->GetValue();
 }
 
+void KeyPin::Menu() {
+	Pin::Menu();
+	Value->MenuItems();
+}
+
 KeyValue::KeyValue(::Node* node, const std::string& key, const std::string& value, const std::string& comment, int id) :
 	ValuePin(node, value, id),
 	Key(key), Comment(comment), InputPin(this, "", PinKind::Input, id == -1 ? -1 : 0) {}

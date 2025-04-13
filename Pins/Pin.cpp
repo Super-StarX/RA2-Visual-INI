@@ -181,26 +181,6 @@ void Pin::Menu() {
 		}
 		ImGui::EndMenu();
 	}
-
-	if (auto sectionNode = dynamic_cast<SectionNode*>(this->Node)) {
-		auto kv = reinterpret_cast<KeyValue*>(this);
-
-		auto it = sectionNode->FindPin(*this);
-		if (ImGui::MenuItem(LOCALE["Add Key Value"]))
-			sectionNode->KeyValues.insert(it, std::make_unique<KeyValue>(sectionNode)); // 需要在中途加入，因此不能使用Add函数
-
-		if (ImGui::MenuItem(LOCALE["Delete"]))
-			sectionNode->KeyValues.erase(it);
-
-		if (ImGui::MenuItem(LOCALE["Fold"]))
-			kv->IsFolded = true;
-
-		if (ImGui::MenuItem(kv->IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"]))
-			kv->IsComment = !kv->IsComment;
-
-		if (ImGui::MenuItem(kv->IsInherited ? LOCALE["Cancel Inherited"] : LOCALE["Set Inherited"]))
-			kv->IsInherited = !kv->IsInherited;
-	}
 }
 
 float Pin::GetAlpha() {

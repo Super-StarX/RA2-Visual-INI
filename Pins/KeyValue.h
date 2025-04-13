@@ -9,6 +9,8 @@ class KeyValue;
 class KeyPin : public Pin {
 public:
 	KeyPin(KeyValue* value, const char* name, PinKind kind = PinKind::Input, int id = 0);
+
+	virtual void Menu() override;
 	virtual std::string GetValue() const override;
 
 	KeyValue* Value;

@@ -1,6 +1,9 @@
 ﻿#include "ValuePin.h"
+#include "KeyValue.h"
 #include "Utils.h"
 #include "MainWindow.h"
+#include "Nodes/SectionNode.h"
+#include "Nodes/ListNode.h"
 #include <misc/cpp/imgui_stdlib.h>
 
 std::string ValuePin::EditBuffer;
@@ -14,6 +17,39 @@ ValuePin::ValuePin(::Node* node, std::string value, int id) :
 
 void ValuePin::SetValue(const std::string& str) { 
 	Value = str; 
+}
+
+void ValuePin::Menu() {
+	Pin::Menu();
+	MenuItems();
+}
+
+void ValuePin::MenuItems() {
+	if (auto sectionNode = dynamic_cast<SectionNode*>(this->Node)) {
+		auto it = sectionNode->FindPin(*this);
+		if (ImGui::MenuItem(LOCALE["Add Key Value"]))
+			sectionNode->KeyValues.insert(it, std::make_unique<KeyValue>(sectionNode)); // 需要在中途加入，因此不能使用Add函数
+
+		if (ImGui::MenuItem(LOCALE["Delete"]))
+			sectionNode->KeyValues.erase(it);
+	}
+	else if (auto listNode = dynamic_cast<ListNode*>(this->Node)) {
+		auto it = std::find_if(listNode->KeyValues.begin(), listNode->KeyValues.end(), [this](const std::unique_ptr<ValuePin>& kv) { return kv->ID == this->ID; });
+		if (ImGui::MenuItem(LOCALE["Add Value"]))
+			listNode->KeyValues.insert(it, std::make_unique<ValuePin>(listNode));      // 需要在中途加入，因此不能使用Add函数
+
+		if (ImGui::MenuItem(LOCALE["Delete"]))
+			listNode->KeyValues.erase(it);
+	}
+
+	if (ImGui::MenuItem(LOCALE["Fold"]))
+		IsFolded = true;
+
+	if (ImGui::MenuItem(IsComment ? LOCALE["Uncomment"] : LOCALE["Set Comment"]))
+		IsComment = !IsComment;
+
+	if (ImGui::MenuItem(IsInherited ? LOCALE["Cancel Inherited"] : LOCALE["Set Inherited"]))
+		IsInherited = !IsInherited;
 }
 
 std::string ValuePin::GetValue() const {

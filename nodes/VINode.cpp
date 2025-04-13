@@ -55,7 +55,7 @@ void VINode<T>::Update() {
 
 	// 渲染键值对
 	size_t i = 0;
-	lastMaxSize = maxSize + 8.f;
+	lastMaxSize = std::max(maxSize + 8.f, 130.f);
 	maxSize = 0;
 
 	if (!IsFolded) {
