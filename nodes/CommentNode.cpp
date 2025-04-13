@@ -37,7 +37,9 @@ void CommentNode::CommentEditorPopup() {
 		return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 250), ImGuiCond_FirstUseEver);
-	ImGui::Begin(("编辑注释##" + std::to_string(ID.Get())).c_str(), &ShowEditPopup,
+	std::string title = LOCALE["Comment Editor"];
+	title += "##" + std::to_string(ID.Get());
+	ImGui::Begin(title.c_str(), &ShowEditPopup,
 		ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
 
 	// 初始化文本一次
@@ -66,12 +68,12 @@ void CommentNode::CommentEditorPopup() {
 	ImGui::InputTextMultiline("##CommentEditBox", &TempText, ImVec2(width, height));
 
 	ImGui::Separator();
-	if (ImGui::Button("确定", ImVec2(120, 0))) {
+	if (ImGui::Button(LOCALE["Apply"], ImVec2(120, 0))) {
 		Name = TempText;
 		MainWindow::Instance->m_ShowCommentEditor = nullptr;
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("取消", ImVec2(120, 0))) {
+	if (ImGui::Button(LOCALE["Cancel"], ImVec2(120, 0))) {
 		MainWindow::Instance->m_ShowCommentEditor = nullptr;
 	}
 

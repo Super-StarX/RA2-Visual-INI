@@ -113,5 +113,8 @@
     "Node Type": "节点类型",
     "Node Type Name": "类型名",
     "Conflict": "冲突",
+    "Comment Editor": "编辑注释",
+    "Apply": "应用",
+    "Cancel": "取消",
     "eof": "结束占位符，请勿删除"
 }
