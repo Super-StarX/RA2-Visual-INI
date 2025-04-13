@@ -55,7 +55,7 @@ void IONode::Update() {
 }
 
 std::string IONode::GetValue(Pin* from) const {
-	if (GetMode() == PinKind::Output) {
+	if (Mode == PinKind::Output) {
 		return GetPin()->GetLinkedNode()->GetValue();
 	}
 	else {

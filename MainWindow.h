@@ -97,6 +97,7 @@ public:
 	bool                                m_ShowListEditor{ false };
 	bool								m_ShouldApplyForceDirectedLayout{ false };
 	bool                                m_ShowTypeEnumPopup{ false };
+	CommentNode*                        m_ShowCommentEditor{ nullptr };
 	TypeInfo							m_TypeEnumPopupType{ };
 	ValuePin*							m_TypeEnumPopupPin{ nullptr };
 };

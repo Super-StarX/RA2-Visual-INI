@@ -5,6 +5,7 @@
 #include "Nodes/SectionNode.h"
 #include "Nodes/ListNode.h"
 #include "Nodes/BuilderNode.h"
+#include "Nodes/CommentNode.h"
 #include "Pins/KeyValue.h"
 #include "Pins/PinStyle.h"
 #include "Nodes/TagNode.h"
@@ -196,6 +197,8 @@ void MainWindow::OnFrame(float deltaTime) {
 	ShowSectionEditor();
 	ShowListEditor();
 	ShowTypeEnumPopup();
+	if (m_ShowCommentEditor)
+		m_ShowCommentEditor->CommentEditorPopup();
 
 	ed::Begin("Node editor");
 	for (auto& node : Node::Array)

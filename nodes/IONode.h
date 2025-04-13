@@ -13,7 +13,6 @@ public:
 	virtual std::string GetValue(Pin* from = nullptr) const override;
 	virtual bool PinNameChangable() const override { return false; }
 
-	PinKind GetMode() const { return Mode; }
 	Pin* GetPin() const { return IOPin.get(); };
 	void Update() override;
 
