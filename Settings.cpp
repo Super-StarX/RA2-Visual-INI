@@ -1,10 +1,8 @@
 ﻿// Settings.cpp
-#include "settings.h"
+#include "IniFile.h"
+#include "Settings.h"
+#include <filesystem>
 #include <fstream>
-#include <filesystem> // 可选，用于文件检查
-#include <limits>     // For numeric_limits
-#include <sstream>    // For std::stringstream
-#include <iomanip>    // For std::fixed and std::setprecision
 
 // --- 内部辅助函数定义 ---
 namespace SettingsDetail {
@@ -21,60 +19,43 @@ namespace SettingsDetail {
 	// 通用模板定义 (数字和字符串)
 	template<typename T>
 	T parseValue(const std::string& valueStr, const std::string& key) {
-		// 注意：bool 和 vector<string> 由特化/特定函数处理
-
 		if constexpr (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>) {
-			// 处理整数和浮点数
 			std::stringstream ss(valueStr);
-			T result{}; // Zero-initialize
+			T result{};
 			ss >> result;
-
-			// 严格检查：转换是否成功，以及是否消耗了所有非空白字符
 			if (ss.fail()) {
 				throw std::invalid_argument("Invalid numeric format for key '" + key + "'");
 			}
-			// 检查是否有剩余的非空白字符
 			std::string remaining;
 			ss >> remaining;
 			if (!trim(remaining).empty()) {
 				throw std::invalid_argument("Extra characters after numeric value for key '" + key + "'");
 			}
-			// (可选) 范围检查
-			// if (result < std::numeric_limits<T>::lowest() || result > std::numeric_limits<T>::max()) {
-			//     throw std::out_of_range("Value out of range for type for key '" + key + "'");
-			// }
 			return result;
-
 		}
 		else if constexpr (std::is_same_v<T, std::string>) {
-			return valueStr; // 字符串直接返回
-
+			return valueStr;
 		}
 		else {
-			// 静态断言捕获编译时不支持的类型
 			static_assert(!std::is_same_v<T, T>, "Unsupported setting type encountered in generic parseValue. Handle with specialization or specific function.");
-			// 或者在运行时抛出异常（如果静态断言不适用）
-			// throw std::logic_error("Unsupported setting type for key '" + key + "' in generic parseValue");
 		}
 	}
 
 	// bool 特化定义
 	template<>
 	bool parseValue<bool>(const std::string& valueStr, const std::string& key) {
-		std::string lowerVal = valueStr;
-		// 转换为小写方便比较
-		std::transform(lowerVal.begin(), lowerVal.end(), lowerVal.begin(),
-						[](unsigned char c) { return std::tolower(c); });
-
-		if (lowerVal == "true" || lowerVal == "1" || lowerVal == "yes" || lowerVal == "on") {
+		if (valueStr.empty()) {
+			return false; // 或者抛出异常，取决于你希望如何处理空字符串
+		}
+		char firstCharLower = std::tolower(valueStr[0]);
+		if (firstCharLower == 't' || firstCharLower == '1' || firstCharLower == 'y') {
 			return true;
 		}
-		else if (lowerVal == "false" || lowerVal == "0" || lowerVal == "no" || lowerVal == "off") {
+		else if (firstCharLower == 'f' || firstCharLower == '0' || firstCharLower == 'n') {
 			return false;
 		}
 		else {
-			// 无法识别的布尔值，抛出异常
-			throw std::invalid_argument("Unrecognized boolean value for key '" + key + "'");
+			throw std::invalid_argument("Unrecognized boolean value for key '" + key + "': " + valueStr);
 		}
 	}
 
@@ -83,19 +64,18 @@ namespace SettingsDetail {
 	// vector<string> 解析函数定义 (具有外部链接)
 	std::vector<std::string> parseStringVector(const std::string& valueStr, const std::string& key, char delimiter) {
 		std::vector<std::string> result;
-		if (valueStr.empty()) { // 处理空字符串输入
+		if (valueStr.empty()) {
 			return result;
 		}
 		std::stringstream ss(valueStr);
 		std::string item;
 		while (std::getline(ss, item, delimiter)) {
-			result.push_back(trim(item)); // 去除每个元素的首尾空白
+			result.push_back(trim(item));
 		}
-		// 检查流状态不是必须的，因为 getline 到达末尾是正常情况
 		return result;
 	}
 
-	// vector<int> 解析函数定义 (如果需要)
+	// vector<int> 解析函数定义 (具有外部链接)
 	std::vector<int> parseIntVector(const std::string& valueStr, const std::string& key, char delimiter) {
 		std::vector<int> result;
 		if (valueStr.empty()) {
@@ -105,13 +85,11 @@ namespace SettingsDetail {
 		std::string itemStr;
 		while (std::getline(ss, itemStr, delimiter)) {
 			std::string trimmedItem = trim(itemStr);
-			if (!trimmedItem.empty()) { // 跳过由连续分隔符产生的空项
+			if (!trimmedItem.empty()) {
 				try {
-					// 复用单值的解析逻辑（或直接转换）
 					result.push_back(parseValue<int>(trimmedItem, key + "[vector item]"));
 				}
 				catch (const std::exception& e) {
-					// 更具体的错误报告
 					throw std::invalid_argument("Invalid integer format within vector for key '" + key + "': " + trimmedItem);
 				}
 			}
@@ -119,14 +97,57 @@ namespace SettingsDetail {
 		return result;
 	}
 
+	// vector<double> 解析函数定义 (具有外部链接)
+	std::vector<double> parseDoubleVector(const std::string& valueStr, const std::string& key, char delimiter) {
+		std::vector<double> result;
+		if (valueStr.empty()) {
+			return result;
+		}
+		std::stringstream ss(valueStr);
+		std::string itemStr;
+		while (std::getline(ss, itemStr, delimiter)) {
+			std::string trimmedItem = trim(itemStr);
+			if (!trimmedItem.empty()) {
+				try {
+					result.push_back(parseValue<double>(trimmedItem, key + "[vector item]"));
+				}
+				catch (const std::exception& e) {
+					throw std::invalid_argument("Invalid double format within vector for key '" + key + "': " + trimmedItem);
+				}
+			}
+		}
+		return result;
+	}
 
-	// --- 显式模板实例化 (如果需要确保某些类型被编译进库) ---
-	// 通常对于头文件中定义的内联模板（如 Registrar 构造函数）不需要显式实例化
-	// 但对于 parseValue，如果希望确保特定类型的代码生成在库中，可以这样做：
-	// template int parseValue<int>(const std::string&, const std::string&);
-	// template double parseValue<double>(const std::string&, const std::string&);
-	// template std::string parseValue<std::string>(const std::string&, const std::string&);
-
+	// vector<bool> 解析函数定义 (具有外部链接)
+	std::vector<bool> parseBoolVector(const std::string& valueStr, const std::string& key, char delimiter) {
+		std::vector<bool> result;
+		if (valueStr.empty()) {
+			return result;
+		}
+		std::stringstream ss(valueStr);
+		std::string itemStr;
+		while (std::getline(ss, itemStr, delimiter)) {
+			std::string trimmedItem = trim(itemStr);
+			if (!trimmedItem.empty()) {
+				if (trimmedItem.empty()) {
+					result.push_back(false); // 或者根据你的需求处理空项
+					continue;
+				}
+				char firstCharLower = std::tolower(trimmedItem[0]);
+				if (firstCharLower == 't' || firstCharLower == '1' || firstCharLower == 'y') {
+					result.push_back(true);
+				}
+				else if (firstCharLower == 'f' || firstCharLower == '0' || firstCharLower == 'n') {
+					result.push_back(false);
+				}
+				else {
+					throw std::invalid_argument("Invalid boolean format within vector for key '" + key + "': " + trimmedItem);
+				}
+			}
+		}
+		return result;
+	}
 
 } // namespace SettingsDetail
 

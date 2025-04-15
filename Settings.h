@@ -78,12 +78,10 @@
 #include <vector>
 #include <map>
 #include <functional>
-#include <stdexcept>
 #include <sstream>
 #include <iostream>
-#include <algorithm>
 #include <type_traits>
-#include "IniFile.h"
+#include <iomanip>
 
 class Settings; // 前向声明 Settings 类
 
@@ -115,90 +113,91 @@ namespace SettingsDetail {
 	// --- 注册辅助类 (定义保留在头文件以便内联实例化) ---
 	template<typename T>
 	struct SettingRegistrar {
+	private:
+		// 保存值的辅助函数
+		static std::string saveValue(const T& variable) {
+			std::stringstream ss;
+			if constexpr (std::is_same_v<T, std::string>) {
+				ss << variable;
+			}
+			else if constexpr (std::is_arithmetic_v<T>) {
+				ss << variable;
+			}
+			else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+				for (size_t i = 0; i < variable.size(); ++i) {
+					ss << variable[i];
+					if (i < variable.size() - 1) {
+						ss << ";";
+					}
+				}
+			}
+			else if constexpr (std::is_same_v<T, std::vector<int>>) {
+				for (size_t i = 0; i < variable.size(); ++i) {
+					ss << variable[i];
+					if (i < variable.size() - 1) {
+						ss << ";";
+					}
+				}
+			}
+			else if constexpr (std::is_same_v<T, std::vector<double>>) {
+				for (size_t i = 0; i < variable.size(); ++i) {
+					ss << std::fixed << std::setprecision(6) << variable[i];
+					if (i < variable.size() - 1) {
+						ss << ";";
+					}
+				}
+			}
+			else if constexpr (std::is_same_v<T, std::vector<bool>>) {
+				for (size_t i = 0; i < variable.size(); ++i) {
+					ss << (variable[i] ? "true" : "false");
+					if (i < variable.size() - 1) {
+						ss << ";";
+					}
+				}
+			}
+			else {
+				static_assert(!std::is_same_v<T, T>, "Unsupported type for saving.");
+			}
+			return ss.str();
+		}
+
+		// 加载值的辅助函数
+		static void loadValue(T& variable, const std::string& key, const std::string& valueStr) {
+			try {
+				if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+					extern std::vector<std::string> parseStringVector(const std::string & valueStr, const std::string & key, char delimiter);
+					variable = parseStringVector(valueStr, key, ',');
+				}
+				else if constexpr (std::is_same_v<T, std::vector<int>>) {
+					extern std::vector<int> parseIntVector(const std::string & valueStr, const std::string & key, char delimiter);
+					variable = parseIntVector(valueStr, key, ',');
+				}
+				else if constexpr (std::is_same_v<T, std::vector<double>>) {
+					extern std::vector<double> parseDoubleVector(const std::string & valueStr, const std::string & key, char delimiter);
+					variable = parseDoubleVector(valueStr, key, ',');
+				}
+				else if constexpr (std::is_same_v<T, std::vector<bool>>) {
+					extern std::vector<bool> parseBoolVector(const std::string & valueStr, const std::string & key, char delimiter);
+					variable = parseBoolVector(valueStr, key, ',');
+				}
+				else {
+					variable = SettingsDetail::parseValue<T>(valueStr, key);
+				}
+			}
+			catch (const std::exception& e) {
+				std::cerr << "Warning: Failed to apply value '" << valueStr
+					<< "' for key '" << key << "'. Reason: " << e.what() << std::endl;
+			}
+		}
+
+	public:
 		// 构造函数：将设置项注册到 RegistryMap
 		// 使用可变参数模板 DefaultValuePack 处理包含逗号的默认值
 		template <typename... DefaultValuePack>
 		SettingRegistrar(const std::string& key, T& variable, DefaultValuePack&&... /*unused_default (value already set by DECLARE_SETTING)*/) {
 			std::cout << "Registering setting: " << key << std::endl; // Debug 输出
-			Settings::registerSetting(key, [&variable]() {
-				std::stringstream ss;
-				if constexpr (std::is_same_v<T, std::string>) {
-					ss << variable;
-				}
-				else if constexpr (std::is_arithmetic_v<T>) {
-					ss << variable;
-				}
-				else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-					for (size_t i = 0; i < variable.size(); ++i) {
-						ss << variable[i];
-						if (i < variable.size() - 1) {
-							ss << ";";
-						}
-					}
-				}
-				else if constexpr (std::is_same_v<T, std::vector<int>>) {
-					for (size_t i = 0; i < variable.size(); ++i) {
-						ss << variable[i];
-						if (i < variable.size() - 1) {
-							ss << ";";
-						}
-					}
-				}
-				else {
-					static_assert(!std::is_same_v<T, T>, "Unsupported type for saving.");
-				}
-				return ss.str();
-			});
-
-			// 使用 if constexpr 根据类型选择不同的解析逻辑
-			// (注意：特殊类型的解析函数声明需要在此处可见)
-			if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-				// 需要 Settings::parseStringVector 的声明
-				// 我们将在 Settings 类中声明它
-				// forward declare class Settings; // Not enough for static member
-				// Requires full Settings class definition before this point OR make parseStringVector a free function in SettingsDetail
-				extern std::vector<std::string> parseStringVector(const std::string & valueStr, const std::string & key, char delimiter); // Declare external linkage
-
-				getRegistry()[key] = [&variable, key](const std::string& valueStr) {
-					try {
-						// 调用外部（或类静态）的特定解析函数
-						variable = parseStringVector(valueStr, key, ','); // Default delimiter ','
-					}
-					catch (const std::exception& e) {
-						std::cerr << "Warning: Failed to apply value '" << valueStr
-							<< "' for key '" << key << "'. Reason: " << e.what() << std::endl;
-					}
-				};
-
-			}
-			else if constexpr (std::is_same_v<T, std::vector<int>>) {
-				// 需要 Settings::parseIntVector 的声明
-				extern std::vector<int> parseIntVector(const std::string & valueStr, const std::string & key, char delimiter); // Declare external linkage
-
-				getRegistry()[key] = [&variable, key](const std::string& valueStr) {
-					try {
-						// 调用外部（或类静态）的特定解析函数
-						variable = parseIntVector(valueStr, key, ','); // Default delimiter ','
-					}
-					catch (const std::exception& e) {
-						std::cerr << "Warning: Failed to apply value '" << valueStr
-							<< "' for key '" << key << "'. Reason: " << e.what() << std::endl;
-					}
-				};
-			}
-			else {
-				// 基本类型的通用逻辑
-				getRegistry()[key] = [&variable, key](const std::string& valueStr) {
-					try {
-						// 调用 SettingsDetail::parseValue 的对应版本
-						variable = SettingsDetail::parseValue<T>(valueStr, key);
-					}
-					catch (const std::exception& e) {
-						std::cerr << "Warning: Failed to apply value '" << valueStr
-							<< "' for key '" << key << "'. Reason: " << e.what() << std::endl;
-					}
-				};
-			}
+			Settings::registerSetting(key, [&variable]() { return saveValue(variable); });
+			getRegistry()[key] = [&](const std::string& valueStr) { loadValue(variable, key, valueStr); };
 		}
 	};
 
@@ -240,12 +239,6 @@ public: // 确保宏展开后成员是 public
 	static bool save(const std::string& filename = "Settings.ini");
 
 private:
-	// --- 特殊类型解析函数的声明 (如果作为类成员) ---
-	// static std::vector<std::string> parseStringVector(const std::string& valueStr, const std::string& key, char delimiter = ',');
-	// static std::vector<int> parseIntVector(const std::string& valueStr, const std::string& key, char delimiter = ',');
-	// 注意: 如果是类静态成员，SettingRegistrar 需要 Settings 的完整定义或通过友元访问
-	// 将其设为 SettingsDetail 中的 extern 自由函数更简单（如上所做）
-
 	using SettingValueGetter = std::function<std::string()>;
 	static std::map<std::string, SettingValueGetter> registeredSettingsForSave;
 
@@ -260,8 +253,8 @@ private:
 // --- 为 vector<int> 添加外部解析函数声明 (如果需要) ---
 namespace SettingsDetail {
 	extern std::vector<int> parseIntVector(const std::string& valueStr, const std::string& key, char delimiter);
-
-	// 如果需要支持 vector<int>，也需要在 SettingRegistrar 的 if constexpr 中添加分支
-	// （为了简洁，下面的代码示例中省略了 vector<int> 的注册器修改，但原理相同）
+	extern std::vector<std::string> parseStringVector(const std::string& valueStr, const std::string& key, char delimiter);
+	extern std::vector<double> parseDoubleVector(const std::string& valueStr, const std::string& key, char delimiter);
+	extern std::vector<bool> parseBoolVector(const std::string& valueStr, const std::string& key, char delimiter);
 
 } // namespace SettingsDetail
