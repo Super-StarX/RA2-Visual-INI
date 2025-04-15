@@ -151,7 +151,8 @@ namespace SettingsDetail {
 
 } // namespace SettingsDetail
 
-std::map<std::string, Settings::SettingValueGetter> Settings::registeredSettingsForSave;
+std::map<std::string, std::map<std::string, Settings::SettingValueGetter>> Settings::registeredSettingsForSave;
+std::string Settings::defaultSectionName = "";
 
 bool Settings::load(const std::string& filename) {
 	IniFile iniFile(filename);
@@ -162,21 +163,24 @@ bool Settings::load(const std::string& filename) {
 	}
 
 	auto& registry = SettingsDetail::getRegistry();
-	for (const auto& pair : registry) {
-		const std::string& key = pair.first;
-		if (iniFile.sections.contains("")) {
-			if (iniFile.sections.at("").contains(key)) {
-				try {
-					pair.second(iniFile.sections.at("").at(key));
-					std::cout << "Applying setting from file: " << key << " = \"" << static_cast<std::string>(iniFile.sections.at("").at(key)) << "\"" << std::endl;
-				}
-				catch (const std::exception& e) {
-					std::cerr << "Warning: Failed to apply value for key '" << key << "'. Reason: " << e.what() << std::endl;
+	for (const auto& sectionPair : registry) {
+		const std::string& sectionName = sectionPair.first;
+		if (iniFile.sections.contains(sectionName)) {
+			for (const auto& keyPair : sectionPair.second) {
+				const std::string& key = keyPair.first;
+				if (iniFile.sections.at(sectionName).contains(key)) {
+					try {
+						keyPair.second(iniFile.sections.at(sectionName).at(key));
+						std::cout << "Applying setting from file: [" << sectionName << "]." << key << " = \"" << static_cast<std::string>(iniFile.sections.at(sectionName).at(key)) << "\"" << std::endl;
+					}
+					catch (const std::exception& e) {
+						std::cerr << "Warning: Failed to apply value for key '" << key << "' in section [" << sectionName << "]. Reason: " << e.what() << std::endl;
+					}
 				}
 			}
 		}
 		else {
-			std::cerr << "Warning: No default section in ini file." << std::endl;
+			std::cerr << "Warning: Section [" << sectionName << "] not found in ini file." << std::endl;
 		}
 	}
 
@@ -186,8 +190,10 @@ bool Settings::load(const std::string& filename) {
 
 bool Settings::save(const std::string& filename) {
 	IniFile iniFile;
-	for (const auto& pair : registeredSettingsForSave) {
-		iniFile.sections[""][pair.first] = Value{ pair.second() }; // 显式创建 Value 对象
+	for (const auto& sectionPair : registeredSettingsForSave) {
+		for (const auto& keyPair : sectionPair.second) {
+			iniFile.sections[sectionPair.first][keyPair.first] = Value{ keyPair.second() }; // 显式创建 Value 对象
+		}
 	}
 
 	std::ofstream file(filename);

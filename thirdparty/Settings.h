@@ -82,8 +82,9 @@
 #include <iostream>
 #include <type_traits>
 #include <iomanip>
+#include <typeinfo>
 
-class Settings; // 前向声明 Settings 类
+class Settings;
 
 // --- 内部实现细节 ---
 namespace SettingsDetail {
@@ -92,10 +93,10 @@ namespace SettingsDetail {
 	using SettingUpdater = std::function<void(const std::string&)>;
 	using RegistryMap = std::map<std::string, SettingUpdater>;
 
-	// 获取注册表的静态函数
-	inline RegistryMap& getRegistry() {
+	// 获取注册表的静态函数 (修改为按节存储)
+	inline std::map<std::string, RegistryMap>& getRegistry() {
 		// Function-local static ensures proper initialization order
-		static RegistryMap registry;
+		static std::map<std::string, RegistryMap> registry;
 		return registry;
 	}
 
@@ -114,6 +115,10 @@ namespace SettingsDetail {
 	template<typename T>
 	struct SettingRegistrar {
 	private:
+		std::string sectionName; // 新增：存储节名称
+		std::string keyName;     // 新增：存储键名称
+		T& variable;
+
 		// 保存值的辅助函数
 		static std::string saveValue(const T& variable) {
 			std::stringstream ss;
@@ -127,7 +132,7 @@ namespace SettingsDetail {
 				for (size_t i = 0; i < variable.size(); ++i) {
 					ss << variable[i];
 					if (i < variable.size() - 1) {
-						ss << ";";
+						ss << ", ";
 					}
 				}
 			}
@@ -135,7 +140,7 @@ namespace SettingsDetail {
 				for (size_t i = 0; i < variable.size(); ++i) {
 					ss << variable[i];
 					if (i < variable.size() - 1) {
-						ss << ";";
+						ss << ", ";
 					}
 				}
 			}
@@ -143,7 +148,7 @@ namespace SettingsDetail {
 				for (size_t i = 0; i < variable.size(); ++i) {
 					ss << std::fixed << std::setprecision(6) << variable[i];
 					if (i < variable.size() - 1) {
-						ss << ";";
+						ss << ", ";
 					}
 				}
 			}
@@ -151,7 +156,7 @@ namespace SettingsDetail {
 				for (size_t i = 0; i < variable.size(); ++i) {
 					ss << (variable[i] ? "true" : "false");
 					if (i < variable.size() - 1) {
-						ss << ";";
+						ss << ", ";
 					}
 				}
 			}
@@ -162,47 +167,41 @@ namespace SettingsDetail {
 		}
 
 		// 加载值的辅助函数
-		static void loadValue(T& variable, const std::string& key, const std::string& valueStr) {
+		void loadValue(const std::string& valueStr) {
 			try {
 				if constexpr (std::is_same_v<T, std::vector<std::string>>) {
 					extern std::vector<std::string> parseStringVector(const std::string & valueStr, const std::string & key, char delimiter);
-					variable = parseStringVector(valueStr, key, ',');
+					variable = parseStringVector(valueStr, keyName, ',');
 				}
 				else if constexpr (std::is_same_v<T, std::vector<int>>) {
 					extern std::vector<int> parseIntVector(const std::string & valueStr, const std::string & key, char delimiter);
-					variable = parseIntVector(valueStr, key, ',');
+					variable = parseIntVector(valueStr, keyName, ',');
 				}
 				else if constexpr (std::is_same_v<T, std::vector<double>>) {
 					extern std::vector<double> parseDoubleVector(const std::string & valueStr, const std::string & key, char delimiter);
-					variable = parseDoubleVector(valueStr, key, ',');
+					variable = parseDoubleVector(valueStr, keyName, ',');
 				}
 				else if constexpr (std::is_same_v<T, std::vector<bool>>) {
 					extern std::vector<bool> parseBoolVector(const std::string & valueStr, const std::string & key, char delimiter);
-					variable = parseBoolVector(valueStr, key, ',');
+					variable = parseBoolVector(valueStr, keyName, ',');
 				}
 				else {
-					variable = SettingsDetail::parseValue<T>(valueStr, key);
+					variable = SettingsDetail::parseValue<T>(valueStr, keyName);
 				}
 			}
 			catch (const std::exception& e) {
 				std::cerr << "Warning: Failed to apply value '" << valueStr
-					<< "' for key '" << key << "'. Reason: " << e.what() << std::endl;
+					<< "' for key '" << keyName << "' in section [" << sectionName << "]. Reason: " << e.what() << std::endl;
 			}
 		}
 
 	public:
-		// 构造函数：使用默认键
-		SettingRegistrar(const std::string& defaultKey, T& variable) {
-			std::cout << "Registering setting (default key): " << defaultKey << std::endl;
-			Settings::registerSetting(defaultKey, [&variable]() { return saveValue(variable); });
-			getRegistry()[defaultKey] = [&](const std::string& valueStr) { loadValue(variable, defaultKey, valueStr); };
-		}
-
-		// 构造函数：使用自定义键
-		SettingRegistrar(const std::string& defaultKey, T& variable, const std::string& customKey) {
-			std::cout << "Registering setting (custom key): " << customKey << std::endl;
-			Settings::registerSetting(customKey, [&variable]() { return saveValue(variable); });
-			getRegistry()[customKey] = [&](const std::string& valueStr) { loadValue(variable, customKey, valueStr); };
+		// 构造函数：使用提供的节名
+		SettingRegistrar(const std::string& section, const std::string& key, T& var) :
+			sectionName(section), keyName(key), variable(var) {
+			std::cout << "Registering setting [" << sectionName << "]." << keyName << std::endl;
+			Settings::registerSetting(sectionName, keyName, [&var]() { return saveValue(var); });
+			getRegistry()[sectionName][keyName] = [&](const std::string& valueStr) { loadValue(valueStr); };
 		}
 	};
 
@@ -210,20 +209,6 @@ namespace SettingsDetail {
 
 
 // --- 主 Settings 类 ---
-
-// 宏定义：处理不带自定义键的情况
-#define DECLARE_SETTING(Type, Name, DefaultValue) \
-	public: \
-		inline static Type Name = DefaultValue; \
-	private: \
-		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ #Name, Name }
-
-// 宏定义：处理带自定义键的情况
-#define DECLARE_SETTING(Type, Name, DefaultValue, CustomKey) \
-	public: \
-		inline static Type Name = DefaultValue; \
-	private: \
-		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ #Name, Name, CustomKey }
 
 class Settings {
 public: // 确保宏展开后成员是 public
@@ -242,17 +227,56 @@ public: // 确保宏展开后成员是 public
 	 */
 	static bool save(const std::string& filename = "Settings.ini");
 
+protected:
+	// 定义一个静态成员来存储当前类的默认节名
+	static std::string defaultSectionName;
+
+public:
+	// 宏定义：设置当前类的默认节名
+#define DECLARE_CLASS_SETTINGS(SectionName) \
+protected: \
+	static inline const char* getDefaultSectionName() { return SectionName; } \
+public: \
+	struct __SectionNameInitializer { \
+		__SectionNameInitializer() { Settings::defaultSectionName = SectionName; } \
+	}; \
+	static __SectionNameInitializer sectionNameInitializer;
+
+	// 宏定义：声明配置项，使用当前类的默认节名或类名
+#define DECLARE_SETTING(Type, Name, DefaultValue) \
+	public: \
+		inline static Type Name = DefaultValue; \
+	private: \
+		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ \
+			([]() -> std::string { \
+				if (defaultSectionName.empty()) { \
+					const char* name = typeid(*static_cast<const Settings*>(nullptr)).name(); \
+					if (strncmp(name, "class ", 6) == 0) { \
+						name += 6; \
+					} \
+					const char* lastColon = strrchr(name, ':'); \
+					return lastColon ? lastColon + 1 : name; \
+				} else { \
+					return defaultSectionName; \
+				} \
+			})(), \
+			#Name, \
+			Name \
+		}
+
 private:
 	using SettingValueGetter = std::function<std::string()>;
-	static std::map<std::string, SettingValueGetter> registeredSettingsForSave;
+	// 修改：存储节名到键名到获取函数的映射
+	static std::map<std::string, std::map<std::string, SettingValueGetter>> registeredSettingsForSave;
 
-	static void registerSetting(const std::string& key, SettingValueGetter getter) {
-		registeredSettingsForSave[key] = getter;
+	static void registerSetting(const std::string& section, const std::string& key, SettingValueGetter getter) {
+		registeredSettingsForSave[section][key] = getter;
 	}
 
 	// 声明 SettingRegistrar 为友元类
 	template <typename T> friend struct SettingsDetail::SettingRegistrar;
 };
+
 
 // --- 为 vector<int> 添加外部解析函数声明 (如果需要) ---
 namespace SettingsDetail {

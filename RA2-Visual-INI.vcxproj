@@ -183,6 +183,7 @@
     <ClCompile Include="Pins\PinStyle.cpp" />
     <ClCompile Include="PlaceholderReplacer.cpp" />
     <ClCompile Include="Nodes\RegistryNode.cpp" />
+    <ClCompile Include="thirdparty\Settings.cpp" />
     <ClCompile Include="SpawnNode.cpp" />
     <ClCompile Include="Nodes\TagNode.cpp" />
     <ClCompile Include="TemplateManager.cpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="Pins\ValuePin.cpp" />
     <ClCompile Include="Nodes\VINode.cpp" />
     <ClCompile Include="Nodes\VIWidget.cpp" />
+    <ClCompile Include="VISettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
@@ -227,6 +229,7 @@
     <ClInclude Include="Nodes\RegistryNode.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="PlaceholderReplacer.h" />
+    <ClInclude Include="thirdparty\Settings.h" />
     <ClInclude Include="TemplateManager.h" />
     <ClInclude Include="thirdparty\include\IniFile.h" />
     <ClInclude Include="Pins\ValuePin.h" />
@@ -239,6 +242,7 @@
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Nodes\VINode.h" />
     <ClInclude Include="Nodes\VIWidget.h" />
+    <ClInclude Include="VISettings.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc" />

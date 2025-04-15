@@ -1,4 +1,5 @@
 ﻿#include "MainWindow.h"
+#include "VISettings.h"
 #include <imgui_node_editor_internal.h>
 #include "Nodes/SectionNode.h"
 #include "Nodes/TagNode.h"
@@ -40,7 +41,7 @@ void MainWindow::CreateTagNodesForMultiInputs() {
 	// 收集被多个链接指向的 SectionNode
 	for (auto& node : Node::Array) {
 		if (auto section = dynamic_cast<SectionNode*>(node.get())) {
-			if (section->InputPin && section->InputPin->Links.size() > 1) {
+			if (section->InputPin && section->InputPin->Links.size() > VISettings::Load_CreateTagThreshold) {
 				std::vector<Link*> links;
 				for (const auto& linkPair : section->InputPin->Links)
 					links.push_back(linkPair.second);
