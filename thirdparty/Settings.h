@@ -191,13 +191,18 @@ namespace SettingsDetail {
 		}
 
 	public:
-		// 构造函数：将设置项注册到 RegistryMap
-		// 使用可变参数模板 DefaultValuePack 处理包含逗号的默认值
-		template <typename... DefaultValuePack>
-		SettingRegistrar(const std::string& key, T& variable, DefaultValuePack&&... /*unused_default (value already set by DECLARE_SETTING)*/) {
-			std::cout << "Registering setting: " << key << std::endl; // Debug 输出
-			Settings::registerSetting(key, [&variable]() { return saveValue(variable); });
-			getRegistry()[key] = [&](const std::string& valueStr) { loadValue(variable, key, valueStr); };
+		// 构造函数：使用默认键
+		SettingRegistrar(const std::string& defaultKey, T& variable) {
+			std::cout << "Registering setting (default key): " << defaultKey << std::endl;
+			Settings::registerSetting(defaultKey, [&variable]() { return saveValue(variable); });
+			getRegistry()[defaultKey] = [&](const std::string& valueStr) { loadValue(variable, defaultKey, valueStr); };
+		}
+
+		// 构造函数：使用自定义键
+		SettingRegistrar(const std::string& defaultKey, T& variable, const std::string& customKey) {
+			std::cout << "Registering setting (custom key): " << customKey << std::endl;
+			Settings::registerSetting(customKey, [&variable]() { return saveValue(variable); });
+			getRegistry()[customKey] = [&](const std::string& valueStr) { loadValue(variable, customKey, valueStr); };
 		}
 	};
 
@@ -206,20 +211,19 @@ namespace SettingsDetail {
 
 // --- 主 Settings 类 ---
 
-// 宏定义：使用 Variadic Macro (__VA_ARGS__) 处理包含逗号的默认值
-// 注意：## 连接符用于创建唯一的注册器变量名
-#define DECLARE_SETTING(Type, Name, ...) \
+// 宏定义：处理不带自定义键的情况
+#define DECLARE_SETTING(Type, Name, DefaultValue) \
 	public: \
-		/* 公开的内联静态成员变量，带默认值 (__VA_ARGS__ 捕获所有默认值参数) */ \
-		inline static Type Name = __VA_ARGS__; \
+		inline static Type Name = DefaultValue; \
 	private: \
-		/* 私有的内联静态注册器实例，在静态初始化时自动注册 */ \
-		/* 使用 #Name 将变量名转换为字符串作为配置文件的键 */ \
-		/* 将默认值也传递给注册器构造函数（虽然当前未使用，但保持一致性）*/ \
-		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ #Name, Name /*, __VA_ARGS__ */ }
+		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ #Name, Name }
 
-// 前向声明特殊解析函数 (如果它们是 Settings 的静态成员)
-// 或者在 SettingsDetail 中声明为 extern 自由函数 (如上)
+// 宏定义：处理带自定义键的情况
+#define DECLARE_SETTING(Type, Name, DefaultValue, CustomKey) \
+	public: \
+		inline static Type Name = DefaultValue; \
+	private: \
+		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ #Name, Name, CustomKey }
 
 class Settings {
 public: // 确保宏展开后成员是 public
