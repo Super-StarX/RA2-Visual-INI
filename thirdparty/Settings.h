@@ -267,10 +267,10 @@ public: \
 private:
 	using SettingValueGetter = std::function<std::string()>;
 	// 修改：存储节名到键名到获取函数的映射
-	static std::map<std::string, std::map<std::string, SettingValueGetter>> registeredSettingsForSave;
+	static std::map<std::string, std::map<std::string, SettingValueGetter>>& getRegisteredSettingsForSave();
 
 	static void registerSetting(const std::string& section, const std::string& key, SettingValueGetter getter) {
-		registeredSettingsForSave[section][key] = getter;
+		getRegisteredSettingsForSave()[section][key] = getter;
 	}
 
 	// 声明 SettingRegistrar 为友元类

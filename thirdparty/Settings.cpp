@@ -151,7 +151,6 @@ namespace SettingsDetail {
 
 } // namespace SettingsDetail
 
-std::map<std::string, std::map<std::string, Settings::SettingValueGetter>> Settings::registeredSettingsForSave;
 std::string Settings::defaultSectionName = "";
 
 bool Settings::load(const std::string& filename) {
@@ -190,7 +189,7 @@ bool Settings::load(const std::string& filename) {
 
 bool Settings::save(const std::string& filename) {
 	IniFile iniFile;
-	for (const auto& sectionPair : registeredSettingsForSave) {
+	for (const auto& sectionPair : getRegisteredSettingsForSave()) {
 		for (const auto& keyPair : sectionPair.second) {
 			iniFile.sections[sectionPair.first][keyPair.first] = Value{ keyPair.second() }; // 显式创建 Value 对象
 		}
@@ -215,4 +214,9 @@ bool Settings::save(const std::string& filename) {
 	file.close();
 	std::cout << "Settings saved to " << filename << std::endl;
 	return true;
+}
+
+std::map<std::string, std::map<std::string, Settings::SettingValueGetter>>& Settings::getRegisteredSettingsForSave() {
+	static std::map<std::string, std::map<std::string, SettingValueGetter>> registeredSettingsForSave;
+	return registeredSettingsForSave;
 }
