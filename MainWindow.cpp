@@ -1,6 +1,7 @@
 ﻿#define IMGUI_DEFINE_MATH_OPERATORS
 #include "MainWindow.h"
 #include "LeftPanelClass.h"
+#include "VISettings.h"
 #include "Utils.h"
 #include "Nodes/SectionNode.h"
 #include "Nodes/ListNode.h"
@@ -134,6 +135,7 @@ void MainWindow::OnStart() {
 
 		return true;
 	};
+	VISettings::load();
 	NodeStyleManager::Get().LoadFromFile("Custom Types.json");
 	PinStyleManager::Get().LoadFromFile("Custom Types.json");
 	LinkStyleManager::Get().LoadFromFile("Custom Types.json");

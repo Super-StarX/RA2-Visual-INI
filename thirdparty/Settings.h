@@ -1,4 +1,4 @@
-﻿
+
 /**
  * @file Settings.h By 小星星
  * @brief 一个简单的头文件配置管理库。
@@ -46,6 +46,8 @@
  * 	class MySettings : public Settings {
  * 	public:
  * 		// --- 使用宏来定义你的设置项 ---
+ * 		// 设置你的类的节名，默认使用类名作为节名
+ *		DECLARE_CLASS_SETTINGS("MySettings")
  * 		// 只需在这里添加/修改/删除行即可
  * 		DECLARE_SETTING(int, windowWidth, 1024);
  * 		DECLARE_SETTING(int, windowHeight, 768);
@@ -240,29 +242,29 @@ public: \
 	struct __SectionNameInitializer { \
 		__SectionNameInitializer() { Settings::defaultSectionName = SectionName; } \
 	}; \
-	static __SectionNameInitializer sectionNameInitializer;
+	static inline __SectionNameInitializer sectionNameInitializer;
 
 	// 宏定义：声明配置项，使用当前类的默认节名或类名
 #define DECLARE_SETTING(Type, Name, DefaultValue) \
-	public: \
-		inline static Type Name = DefaultValue; \
-	private: \
-		inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ \
-			([]() -> std::string { \
-				if (defaultSectionName.empty()) { \
-					const char* name = typeid(*static_cast<const Settings*>(nullptr)).name(); \
-					if (strncmp(name, "class ", 6) == 0) { \
-						name += 6; \
-					} \
-					const char* lastColon = strrchr(name, ':'); \
-					return lastColon ? lastColon + 1 : name; \
-				} else { \
-					return defaultSectionName; \
+public: \
+	inline static Type Name = DefaultValue; \
+private: \
+	inline static ::SettingsDetail::SettingRegistrar<Type> reg_##Name{ \
+		([]() -> std::string { \
+			if (defaultSectionName.empty()) { \
+				const char* name = typeid(*static_cast<const Settings*>(nullptr)).name(); \
+				if (strncmp(name, "class ", 6) == 0) { \
+					name += 6; \
 				} \
-			})(), \
-			#Name, \
-			Name \
-		}
+				const char* lastColon = strrchr(name, ':'); \
+				return lastColon ? lastColon + 1 : name; \
+			} else { \
+				return defaultSectionName; \
+			} \
+		})(), \
+		#Name, \
+		Name \
+	}
 
 private:
 	using SettingValueGetter = std::function<std::string()>;
