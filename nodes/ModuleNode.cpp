@@ -9,6 +9,7 @@
 #include "TagNode.h"
 #include "IONode.h"
 #include "NodeStyle.h"
+#include "PlaceholderReplacer.h"
 
 #include <fstream>
 #include <iostream>
@@ -138,7 +139,7 @@ void ModuleNode::OpenProject() {
 	if (InternalProject.empty())
 		return;
 
-	auto& root = InternalProject;
+	json root = json::parse(PlaceholderReplacer::replaceManually(InternalProject.dump(), "${PROJECT}", Name));
 	MainWindow::SetIdOffset(MainWindow::GetIdOffset() + root["Totals"] + 10);
 
 	// 加载 Nodes

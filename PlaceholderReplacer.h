@@ -21,6 +21,8 @@ public:
 	PlaceholderReplacer(const ReplaceConfig& cfg = {});
 	std::string replace(const std::string& input);
 
+	static std::string replaceManually(const std::string& jsonStr, const std::string& target, const std::string& replacement);
+
 private:
 	using Handler = std::function<std::string(const std::string&)>;
 

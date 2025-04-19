@@ -58,6 +58,22 @@ std::string PlaceholderReplacer::replace(const std::string& input) {
 	return result;
 }
 
+std::string PlaceholderReplacer::replaceManually(const std::string& jsonStr, const std::string& target, const std::string& replacement) {
+	std::string result;
+	size_t start = 0, pos;
+
+	// 单次遍历并直接构建结果（无需记录所有位置）
+	result.reserve(jsonStr.size() + 32); // 基础预分配减少扩容
+	while ((pos = jsonStr.find(target, start)) != std::string::npos) {
+		result.append(jsonStr.data() + start, pos - start);
+		result.append(replacement);
+		start = pos + target.size();
+	}
+	result.append(jsonStr.data() + start, jsonStr.size() - start);
+
+	return result;
+}
+
 void PlaceholderReplacer::registerHandlers() {
 	// 时间相关
 	handlers["TIMESTAMP"] = [this](const std::string&) {
